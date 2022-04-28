@@ -14,6 +14,9 @@ const (
 	baseUrl                = "https://s.amizone.net"
 	attendancePageEndpoint = "/Home"
 	verificationTokenName  = "__RequestVerificationToken"
+
+	ErrFailedAttendanceRetrieval = "failed to retrieve attendance"
+	ErrFailedToVisitPage         = "failed to visit page"
 )
 
 type Credentials struct {
@@ -101,8 +104,8 @@ func (a *amizoneClient) login() error {
 }
 
 // GetAttendance retrieves the attendanceRecord from Amizone
-func (a *amizoneClient) GetAttendance() (attendanceRecord, error) {
-	res := make(attendanceRecord)
+func (a *amizoneClient) GetAttendance() (AttendanceRecord, error) {
+	res := make(AttendanceRecord)
 	var recordListFound bool
 
 	c := getNewColly(a.client, true)
@@ -128,6 +131,7 @@ func (a *amizoneClient) GetAttendance() (attendanceRecord, error) {
 					return nil
 				}
 				return &courseAttendance{
+					course:          course,
 					classesAttended: divided[0],
 					classesHeld:     divided[1],
 				}
@@ -138,18 +142,18 @@ func (a *amizoneClient) GetAttendance() (attendanceRecord, error) {
 				return
 			}
 
-			res[course] = attendance
+			res[course.code] = attendance
 		})
 	})
 
 	if err := c.Visit(baseUrl + attendancePageEndpoint); err != nil {
 		klog.Error("Something went wrong while visiting the attendance page: " + err.Error())
-		return nil, err
+		return nil, errors.New("failed to visit the attendance page: " + err.Error())
 	}
 
 	if !recordListFound {
 		klog.Error("Failed to find the attendance list on the attendance page. Did we login at all?")
-		return nil, errors.New("could not find attendance list")
+		return nil, errors.New(ErrFailedAttendanceRetrieval)
 	}
 
 	return res, nil
