@@ -1,6 +1,7 @@
 package amizone
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/gocolly/colly/v2"
@@ -8,12 +9,16 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"strings"
+	"time"
 )
 
 const (
-	baseUrl                = "https://s.amizone.net"
-	attendancePageEndpoint = "/Home"
-	verificationTokenName  = "__RequestVerificationToken"
+	baseUrl                            = "https://s.amizone.net"
+	attendancePageEndpoint             = "/Home"
+	scheduleEndpointTemplate           = "/Calendar/home/GetDiaryEvents?start=%s&end=%s"
+	scheduleEndpointTemplateTimeFormat = "2006-01-02"
+	amizoneJsonTimeFormat              = "2006/01/02 03:04:05 PM"
+	verificationTokenName              = "__RequestVerificationToken"
 
 	ErrFailedAttendanceRetrieval = "failed to retrieve attendance"
 	ErrFailedToVisitPage         = "failed to visit page"
@@ -161,4 +166,72 @@ func (a *amizoneClient) GetAttendance() (AttendanceRecord, error) {
 	}
 
 	return res, nil
+}
+
+func (a *amizoneClient) GetClassSchedule(date Date) (classSchedule, error) {
+	timeFrom := time.Date(date.Year, time.Month(date.Month), date.Day, 0, 0, 0, 0, time.UTC)
+	timeTo := timeFrom.Add(time.Hour * 24)
+
+	var schedule classSchedule
+	var unmarshalErr error
+
+	// amizoneEntry is the JSON format we expect from the Amizone
+	type amizoneEntry struct {
+		Type       string `json:"sType"` // "C" for course, "E" for event, "H" for holiday
+		CourseName string `json:"title"`
+		CourseCode string `json:"CourseCode"`
+		Faculty    string `json:"FacultyName"`
+		Room       string `json:"RoomNo"`
+		Start      string `json:"start"` // Start and end keys are in the format "YYYY-MM-DD HH:MM:SS"
+		End        string `json:"end"`
+	}
+	var amizoneSchedule []amizoneEntry
+
+	c := getNewColly(a.client, true)
+	c.OnResponse(func(r *colly.Response) {
+		unmarshalErr = json.Unmarshal(r.Body, &amizoneSchedule)
+		if unmarshalErr != nil {
+			klog.Errorf("Failed to unmarshall JSON response from Amizone: %s. Are we logged in?", unmarshalErr.Error())
+			return
+		}
+
+		for _, entry := range amizoneSchedule {
+			// Only add entries that are of type "C" (class)
+			if entry.Type != "C" {
+				continue
+			}
+
+			timeParserFunc := func(timeStr string) time.Time {
+				t, err := time.Parse(amizoneJsonTimeFormat, timeStr)
+				if err != nil {
+					klog.Warning("Failed to parse time for course %s: %s", entry.CourseCode, err.Error())
+					return time.Unix(0, 0)
+				}
+				return t
+			}
+
+			class := &scheduledClass{
+				course: &course{
+					code: entry.CourseCode,
+					name: entry.CourseName,
+				},
+				startTime: timeParserFunc(entry.Start),
+				endTime:   timeParserFunc(entry.End),
+				faculty:   entry.Faculty,
+				room:      entry.Room,
+			}
+
+			schedule = append(schedule, class)
+		}
+	})
+
+	err := c.Visit(baseUrl + fmt.Sprintf(scheduleEndpointTemplate, timeFrom.Format(scheduleEndpointTemplateTimeFormat), timeTo.Format(scheduleEndpointTemplateTimeFormat)))
+	if err != nil {
+		klog.Error("Something went wrong while visiting the schedule endpoint: " + err.Error())
+		return nil, errors.New(fmt.Sprintf("%s: %s", ErrFailedToVisitPage, err.Error()))
+	}
+
+	// @todo: We might want to sort the schedule here to ensure that the classes are in the right order
+
+	return schedule, nil
 }
