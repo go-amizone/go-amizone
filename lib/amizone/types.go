@@ -6,8 +6,10 @@ type course struct {
 }
 
 type courseAttendance struct {
+	course          *course
 	classesHeld     string
 	classesAttended string
 }
 
-type attendanceRecord map[*course]*courseAttendance
+// AttendanceRecord maps course codes to courseAttendance structs
+type AttendanceRecord map[string]*courseAttendance
