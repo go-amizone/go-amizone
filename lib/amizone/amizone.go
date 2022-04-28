@@ -115,7 +115,11 @@ func (a *amizoneClient) GetAttendance() (AttendanceRecord, error) {
 		e.ForEach("li", func(_ int, el *colly.HTMLElement) {
 			course := &course{
 				code: el.ChildText("span.sub-code"),
-				name: el.ChildText("span.lbl"),
+				name: func() string {
+					rawInner := el.ChildText("span.lbl")
+					spaceIndex := strings.IndexRune(rawInner, ' ')
+					return strings.TrimSpace(rawInner[spaceIndex:])
+				}(),
 			}
 
 			if course.code == "" {
