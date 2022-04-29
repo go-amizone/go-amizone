@@ -30,9 +30,9 @@ func GockRegisterLoginRequest(validUsername string, validPassword string) error 
 		MatchType("application/x-www-form-urlencoded").
 		BodyString(fmt.Sprintf("_Password=%s&_QString=&_UserName=%s&__RequestVerificationToken=.*", url.QueryEscape(validPassword), validUsername)).
 		Reply(http.StatusOK).
-		AddHeader("Set-Cookie", fmt.Sprintf("ASP.NET_SessionId=%s; path=/; HttpOnly", FakeSessionId)).
-		AddHeader("Set-Cookie", fmt.Sprintf("__RequestVerificationToken=%s; path=/; HttpOnly", FakeRequestVerificationToken)).
-		AddHeader("Set-Cookie", fmt.Sprintf(".ASPXAUTH=%s; path=/; HttpOnly", FakeAuthCookie))
+		AddHeader("Set-Cookie", fmt.Sprintf("ASP.NET_SessionId=%s; path=/; HttpOnly", SessionID)).
+		AddHeader("Set-Cookie", fmt.Sprintf("__RequestVerificationToken=%s; path=/; HttpOnly", VerificationToken)).
+		AddHeader("Set-Cookie", fmt.Sprintf(".ASPXAUTH=%s; path=/; HttpOnly", AuthCookie))
 	return nil
 }
 
@@ -46,9 +46,9 @@ func GockRegisterHomePageLoggedIn() error {
 		Get("/Home").
 		MatchHeader("User-Agent", ".*").
 		MatchHeader("Referer", "https://s.amizone.net").
-		MatchHeader("Cookie", fmt.Sprintf("ASP.NET_SessionId=%s", FakeSessionId)).
-		MatchHeader("Cookie", fmt.Sprintf(".ASPXAUTH=%s", FakeAuthCookie)).
-		MatchHeader("Cookie", fmt.Sprintf("__RequestVerificationToken=%s", FakeRequestVerificationToken)).
+		MatchHeader("Cookie", fmt.Sprintf("ASP.NET_SessionId=%s", SessionID)).
+		MatchHeader("Cookie", fmt.Sprintf(".ASPXAUTH=%s", AuthCookie)).
+		MatchHeader("Cookie", fmt.Sprintf("__RequestVerificationToken=%s", VerificationToken)).
 		Reply(http.StatusOK).
 		Type("text/html").
 		Body(mockHome)

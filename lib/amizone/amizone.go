@@ -13,12 +13,14 @@ import (
 )
 
 const (
-	baseUrl                            = "https://s.amizone.net"
-	attendancePageEndpoint             = "/Home"
-	scheduleEndpointTemplate           = "/Calendar/home/GetDiaryEvents?start=%s&end=%s"
+	BaseUrl                  = "https://s.amizone.net"
+	attendancePageEndpoint   = "/Home"
+	scheduleEndpointTemplate = "/Calendar/home/GetDiaryEvents?start=%s&end=%s"
+
 	scheduleEndpointTemplateTimeFormat = "2006-01-02"
 	amizoneJsonTimeFormat              = "2006/01/02 03:04:05 PM"
-	verificationTokenName              = "__RequestVerificationToken"
+
+	verificationTokenName = "__RequestVerificationToken"
 
 	ErrFailedAttendanceRetrieval = "failed to retrieve attendance"
 	ErrFailedToVisitPage         = "failed to visit page"
@@ -78,7 +80,7 @@ func (a *amizoneClient) login() error {
 		klog.Infof("Receiving response from amizone with status: %d", r.StatusCode)
 	})
 
-	if err := c.Visit(baseUrl); err != nil {
+	if err := c.Visit(BaseUrl); err != nil {
 		klog.Error("Something went wrong while visiting the login page: " + err.Error())
 		return errors.New("failed to visit login page: " + err.Error())
 	}
@@ -95,7 +97,7 @@ func (a *amizoneClient) login() error {
 		"_QString":                   "",
 	}
 
-	if err := c.Post(baseUrl, loginRequestData); err != nil {
+	if err := c.Post(BaseUrl, loginRequestData); err != nil {
 		klog.Error("Something went wrong while posting login data: ", err.Error())
 		return errors.New("could not post login data: " + err.Error())
 	}
@@ -155,7 +157,7 @@ func (a *amizoneClient) GetAttendance() (AttendanceRecord, error) {
 		})
 	})
 
-	if err := c.Visit(baseUrl + attendancePageEndpoint); err != nil {
+	if err := c.Visit(BaseUrl + attendancePageEndpoint); err != nil {
 		klog.Error("Something went wrong while visiting the attendance page: " + err.Error())
 		return nil, errors.New("failed to visit the attendance page: " + err.Error())
 	}
@@ -225,7 +227,7 @@ func (a *amizoneClient) GetClassSchedule(date Date) (classSchedule, error) {
 		}
 	})
 
-	err := c.Visit(baseUrl + fmt.Sprintf(scheduleEndpointTemplate, timeFrom.Format(scheduleEndpointTemplateTimeFormat), timeTo.Format(scheduleEndpointTemplateTimeFormat)))
+	err := c.Visit(BaseUrl + fmt.Sprintf(scheduleEndpointTemplate, timeFrom.Format(scheduleEndpointTemplateTimeFormat), timeTo.Format(scheduleEndpointTemplateTimeFormat)))
 	if err != nil {
 		klog.Error("Something went wrong while visiting the schedule endpoint: " + err.Error())
 		return nil, errors.New(fmt.Sprintf("%s: %s", ErrFailedToVisitPage, err.Error()))
