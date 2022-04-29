@@ -38,6 +38,9 @@ type amizoneClient struct {
 	credentials *Credentials
 }
 
+// Interface compliance constraint for amizoneClient
+var _ ClientInterface = &amizoneClient{}
+
 // NewClient create a new amizoneClient instance with Credentials passed, then attempts to log in to the website.
 // The *http.Client parameter can be nil, in which case a default client
 // will be created in its place.
