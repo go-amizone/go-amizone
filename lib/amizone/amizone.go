@@ -42,8 +42,8 @@ type amizoneClient struct {
 var _ ClientInterface = &amizoneClient{}
 
 // NewClient create a new amizoneClient instance with Credentials passed, then attempts to log in to the website.
-// The *http.Client parameter can be nil, in which case a default client
-// will be created in its place.
+// The *http.Client parameter can be nil, in which case a default client will be created in its place.
+// To get a non-logged in client, pass empty credentials, ala Credentials{}.
 func NewClient(creds Credentials, httpClient *http.Client) (*amizoneClient, error) {
 	if httpClient == nil {
 		jar, err := cookiejar.New(nil)
@@ -62,9 +62,12 @@ func NewClient(creds Credentials, httpClient *http.Client) (*amizoneClient, erro
 		client:      httpClient,
 		credentials: &creds,
 	}
-	err := client.login()
 
-	return client, err
+	if creds == (Credentials{}) {
+		return client, nil
+	}
+
+	return client, client.login()
 }
 
 // login attempts to log in to Amizone with the credentials passed to the amizoneClient and a scrapped
