@@ -22,7 +22,7 @@ func isLoggedIn(client *http.Client) bool {
 		return false
 	}
 
-	amizoneUrl, _ := url.Parse(baseUrl)
+	amizoneUrl, _ := url.Parse(BaseUrl)
 
 	amizoneCookies := func() cookieMap {
 		cookieMap := make(cookieMap)
@@ -55,7 +55,7 @@ func getNewColly(httpClient *http.Client, loggedIn bool) *colly.Collector {
 		c.OnRequest(func(request *colly.Request) {
 			klog.Infof("Sending request to amizone: %s, setting referer...", request.URL.String())
 			if loggedIn == true {
-				request.Headers.Set("Referer", baseUrl)
+				request.Headers.Set("Referer", BaseUrl)
 			}
 		})
 	})

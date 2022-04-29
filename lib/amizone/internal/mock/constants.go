@@ -1,10 +1,10 @@
 package mock
 
 const (
-	FakeAmizoneUsername = "fakeUsername"
-	FakeAmizonePassword = "fakePassword"
+	AmizoneUsername = "fakeUsername"
+	AmizonePassword = "fakePassword"
 
-	FakeAuthCookie               = "fakeAuthCookie"
-	FakeRequestVerificationToken = "fakeRequestVerificationToken"
-	FakeSessionId                = "fakeSessionId"
+	AuthCookie        = "fakeAuthCookie"
+	VerificationToken = "fakeRequestVerificationToken"
+	SessionID         = "fakeSessionId"
 )
