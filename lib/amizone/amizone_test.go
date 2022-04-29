@@ -2,24 +2,12 @@ package amizone_test
 
 import (
 	"GoFriday/lib/amizone"
-	"errors"
-	"fmt"
+	"GoFriday/lib/amizone/internal/mock"
 	. "github.com/onsi/gomega"
 	"gopkg.in/h2non/gock.v1"
 	"net/http"
 	"net/http/cookiejar"
-	"net/url"
-	"os"
 	"testing"
-)
-
-const (
-	fakeAmizoneUsername = "fakeUsername"
-	fakeAmizonePassword = "fakePassword"
-
-	fakeAuthCookie               = "fakeAuthCookie"
-	fakeRequestVerificationToken = "fakeRequestVerificationToken"
-	fakeSessionId                = "fakeSessionId"
 )
 
 type amizoneClientInterface interface {
@@ -32,12 +20,14 @@ type amizoneClientInterface interface {
 func TestNewClient(t *testing.T) {
 	g := NewGomegaWithT(t)
 
+	gock.DisableNetworking()
 	defer gock.Off()
+	defer gock.EnableNetworking()
 
-	err := gockRegisterLoginPage()
-	gockRegisterLoginRequest(fakeAmizoneUsername, fakeAmizonePassword)
-
-	g.Expect(err).ToNot(HaveOccurred(), "Failed to open mock login page")
+	err := mock.GockRegisterLoginPage()
+	g.Expect(err).ToNot(HaveOccurred(), "failed to register login page mock")
+	err = mock.GockRegisterLoginRequest(mock.FakeAmizoneUsername, mock.FakeAmizonePassword)
+	g.Expect(err).ToNot(HaveOccurred(), "failed to register login request mock")
 
 	jar, err := cookiejar.New(nil)
 	g.Expect(err).ToNot(HaveOccurred(), "Failed to create cookie jar")
@@ -46,8 +36,8 @@ func TestNewClient(t *testing.T) {
 	gock.InterceptClient(httpClient)
 
 	c := amizone.Credentials{
-		Username: fakeAmizoneUsername,
-		Password: fakeAmizonePassword,
+		Username: mock.FakeAmizoneUsername,
+		Password: mock.FakeAmizonePassword,
 	}
 
 	client, err := amizone.NewClient(c, httpClient)
@@ -76,12 +66,14 @@ func TestAmizoneClient_GetAttendance(t *testing.T) {
 	// Setup the logged-in and non logged-in amizone clients.
 	func() {
 		defer gock.Off()
-		err := gockRegisterLoginPage()
+		err := mock.GockRegisterLoginPage()
 		g.Expect(err).ToNot(HaveOccurred(), "Failed to register mock login page")
-		gockRegisterLoginRequest(fakeAmizoneUsername, fakeAmizonePassword)
+		err = mock.GockRegisterLoginRequest(mock.FakeAmizoneUsername, mock.FakeAmizonePassword)
+		g.Expect(err).ToNot(HaveOccurred(), "Failed to register mock login request")
+
 		loggedInClient, err = amizone.NewClient(amizone.Credentials{
-			Username: fakeAmizoneUsername,
-			Password: fakeAmizonePassword,
+			Username: mock.FakeAmizoneUsername,
+			Password: mock.FakeAmizonePassword,
 		}, nil)
 		g.Expect(err).ToNot(HaveOccurred(), "set up mocked logged-in amizone client")
 	}()
@@ -97,7 +89,7 @@ func TestAmizoneClient_GetAttendance(t *testing.T) {
 			name:          "Logged in, expecting retrieval",
 			amizoneClient: loggedInClient,
 			setup: func(g *WithT) {
-				err := gockRegisterHomePageLoggedIn()
+				err := mock.GockRegisterHomePageLoggedIn()
 				g.Expect(err).ToNot(HaveOccurred())
 			},
 			attendanceMatcher: func(g *WithT, attendance amizone.AttendanceRecord) {
@@ -111,7 +103,7 @@ func TestAmizoneClient_GetAttendance(t *testing.T) {
 			name:          "Not logged in, expecting no retrieval",
 			amizoneClient: nonLoggedInClient,
 			setup: func(g *WithT) {
-				err := gockRegisterHomePageLoggedIn()
+				err := mock.GockRegisterHomePageLoggedIn()
 				g.Expect(err).ToNot(HaveOccurred())
 				gock.New("https://s.amizone.net").
 					Get("/Home").
@@ -140,49 +132,4 @@ func TestAmizoneClient_GetAttendance(t *testing.T) {
 			c.errorMatcher(g, err)
 		})
 	}
-}
-
-func gockRegisterLoginPage() error {
-	mockLogin, err := os.Open("testdata/login_page.html")
-	if err != nil {
-		return errors.New("Failed to open mock login page: " + err.Error())
-	}
-
-	gock.New("https://s.amizone.net").
-		Get("/").
-		Reply(http.StatusOK).
-		Type("text/html").
-		Body(mockLogin)
-
-	return nil
-}
-
-func gockRegisterLoginRequest(validUsername string, validPassword string) {
-	gock.New("https://s.amizone.net").
-		Post("/").
-		MatchType("application/x-www-form-urlencoded").
-		BodyString(fmt.Sprintf("_Password=%s&_QString=&_UserName=%s&__RequestVerificationToken=.*", url.QueryEscape(validPassword), validUsername)).
-		Reply(http.StatusOK).
-		AddHeader("Set-Cookie", fmt.Sprintf("ASP.NET_SessionId=%s; path=/; HttpOnly", fakeSessionId)).
-		AddHeader("Set-Cookie", fmt.Sprintf("__RequestVerificationToken=%s; path=/; HttpOnly", fakeRequestVerificationToken)).
-		AddHeader("Set-Cookie", fmt.Sprintf(".ASPXAUTH=%s; path=/; HttpOnly", fakeAuthCookie))
-}
-
-func gockRegisterHomePageLoggedIn() error {
-	mockHome, err := os.Open("testdata/home_page_logged_in.html")
-	if err != nil {
-		return errors.New("Failed to open mock home page: " + err.Error())
-	}
-
-	gock.New("https://s.amizone.net").
-		Get("/Home").
-		MatchHeader("User-Agent", ".*").
-		MatchHeader("Referer", "https://s.amizone.net").
-		MatchHeader("Cookie", fmt.Sprintf("ASP.NET_SessionId=%s", fakeSessionId)).
-		MatchHeader("Cookie", fmt.Sprintf(".ASPXAUTH=%s", fakeAuthCookie)).
-		MatchHeader("Cookie", fmt.Sprintf("__RequestVerificationToken=%s", fakeRequestVerificationToken)).
-		Reply(http.StatusOK).
-		Type("text/html").
-		Body(mockHome)
-	return nil
 }
