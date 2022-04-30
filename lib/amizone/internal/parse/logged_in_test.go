@@ -7,12 +7,6 @@ import (
 	"testing"
 )
 
-const (
-	LoginPageFile        = "../../testdata/login_page.html"
-	LoggedInHomePageFile = "../../testdata/home_page_logged_in.html"
-	ScheduleJsonNonEmpty = "../../testdata/diary_events.json"
-)
-
 func TestLoggedIn(t *testing.T) {
 	testcases := []struct {
 		name     string
