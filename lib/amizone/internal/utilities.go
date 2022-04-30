@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"GoFriday/lib/amizone"
+	"fmt"
 	"github.com/gocolly/colly/v2"
 	"k8s.io/klog/v2"
 	"net/http"
@@ -25,7 +25,7 @@ func IsLoggedIn(client *http.Client) bool {
 		return false
 	}
 
-	amizoneUrl, _ := url.Parse(amizone.BaseUrl)
+	amizoneUrl, _ := url.Parse("https://" + AmizoneDomain)
 
 	amizoneCookies := func() cookieMap {
 		cookieMap := make(cookieMap)
@@ -60,7 +60,7 @@ func GetNewColly(httpClient *http.Client, loggedIn bool) *colly.Collector {
 		c.OnRequest(func(request *colly.Request) {
 			klog.Infof("Sending request to amizone: %s, setting referer...", request.URL.String())
 			if loggedIn == true {
-				request.Headers.Set("Referer", amizone.BaseUrl)
+				request.Headers.Set("Referer", fmt.Sprintf("https://%s/", AmizoneDomain))
 			}
 		})
 	})
