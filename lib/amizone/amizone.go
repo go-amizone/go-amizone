@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly/v2"
 	"k8s.io/klog/v2"
 	"net/http"
@@ -92,13 +91,10 @@ func (a *amizoneClient) login() error {
 	verToken := func() string {
 		response, err := client.Get(BaseUrl)
 		if err != nil {
+			klog.Errorf("%s (login): %s", ErrFailedToVisitPage, err.Error())
 			return ""
 		}
-		dom, err := goquery.NewDocumentFromReader(response.Body)
-		if err != nil {
-			klog.Errorf("failed to parse login page: %s", err.Error())
-		}
-		return dom.Find(fmt.Sprintf("input[name='%s']", verificationTokenName)).AttrOr("value", "")
+		return parse.VerificationToken(response.Body)
 	}()
 
 	if verToken == "" {
