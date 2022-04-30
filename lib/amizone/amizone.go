@@ -2,6 +2,7 @@ package amizone
 
 import (
 	"GoFriday/lib/amizone/internal"
+	"GoFriday/lib/amizone/internal/models"
 	"GoFriday/lib/amizone/internal/parse"
 	"encoding/json"
 	"errors"
@@ -134,8 +135,8 @@ func (a *amizoneClient) login() error {
 }
 
 // GetAttendance retrieves the attendanceRecord from Amizone
-func (a *amizoneClient) GetAttendance() (AttendanceRecord, error) {
-	res := make(AttendanceRecord)
+func (a *amizoneClient) GetAttendance() (models.AttendanceRecord, error) {
+	res := make(models.AttendanceRecord)
 	var recordListFound bool
 
 	c := internal.GetNewColly(a.client, true)
@@ -143,40 +144,40 @@ func (a *amizoneClient) GetAttendance() (AttendanceRecord, error) {
 	c.OnHTML("#tasks", func(e *colly.HTMLElement) {
 		recordListFound = true
 		e.ForEach("li", func(_ int, el *colly.HTMLElement) {
-			course := &course{
-				code: el.ChildText("span.sub-code"),
-				name: func() string {
+			course := &models.Course{
+				Code: el.ChildText("span.sub-code"),
+				Name: func() string {
 					rawInner := el.ChildText("span.lbl")
 					spaceIndex := strings.IndexRune(rawInner, ' ')
 					return strings.TrimSpace(rawInner[spaceIndex:])
 				}(),
 			}
 
-			if course.code == "" {
+			if course.Code == "" {
 				klog.Warning("Failed to parse course code for an attendance list item")
 				return
 			}
 
-			attendance := func() *courseAttendance {
+			attendance := func() *models.CourseAttendance {
 				raw := el.ChildText("div.class-count span")
 				divided := strings.Split(raw, "/")
 				if len(divided) != 2 {
-					klog.Warning("Attendance string has unexpected format!", course.code)
+					klog.Warning("Attendance string has unexpected format!", course.Code)
 					return nil
 				}
-				return &courseAttendance{
-					course:          course,
-					classesAttended: divided[0],
-					classesHeld:     divided[1],
+				return &models.CourseAttendance{
+					Course:          course,
+					ClassesAttended: divided[0],
+					ClassesHeld:     divided[1],
 				}
 			}()
 
 			if attendance == nil {
-				klog.Warningf("Failed to parse attendance for course: %s", course.code)
+				klog.Warningf("Failed to parse attendance for course: %s", course.Code)
 				return
 			}
 
-			res[course.code] = attendance
+			res[course.Code] = attendance
 		})
 	})
 
@@ -193,11 +194,11 @@ func (a *amizoneClient) GetAttendance() (AttendanceRecord, error) {
 	return res, nil
 }
 
-func (a *amizoneClient) GetClassSchedule(date Date) (classSchedule, error) {
+func (a *amizoneClient) GetClassSchedule(date Date) (models.ClassSchedule, error) {
 	timeFrom := time.Date(date.Year, time.Month(date.Month), date.Day, 0, 0, 0, 0, time.UTC)
 	timeTo := timeFrom.Add(time.Hour * 24)
 
-	var schedule classSchedule
+	var schedule models.ClassSchedule
 	var unmarshalErr error
 
 	// amizoneEntry is the JSON format we expect from the Amizone
@@ -235,15 +236,15 @@ func (a *amizoneClient) GetClassSchedule(date Date) (classSchedule, error) {
 				return t
 			}
 
-			class := &scheduledClass{
-				course: &course{
-					code: entry.CourseCode,
-					name: entry.CourseName,
+			class := &models.ScheduledClass{
+				Course: &models.Course{
+					Code: entry.CourseCode,
+					Name: entry.CourseName,
 				},
-				startTime: timeParserFunc(entry.Start),
-				endTime:   timeParserFunc(entry.End),
-				faculty:   entry.Faculty,
-				room:      entry.Room,
+				StartTime: timeParserFunc(entry.Start),
+				EndTime:   timeParserFunc(entry.End),
+				Faculty:   entry.Faculty,
+				Room:      entry.Room,
 			}
 
 			schedule = append(schedule, class)
