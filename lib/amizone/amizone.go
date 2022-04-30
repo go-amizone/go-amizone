@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	BaseUrl                  = "https://s.amizone.net"
+	BaseUrl                  = "https://" + internal.AmizoneDomain
 	attendancePageEndpoint   = "/Home"
 	scheduleEndpointTemplate = "/Calendar/home/GetDiaryEvents?start=%s&end=%s"
 
