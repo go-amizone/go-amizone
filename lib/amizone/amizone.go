@@ -257,7 +257,8 @@ func (a *amizoneClient) GetClassSchedule(date Date) (models.ClassSchedule, error
 		return nil, errors.New(fmt.Sprintf("%s: %s", ErrFailedToVisitPage, err.Error()))
 	}
 
-	// @todo: We might want to sort the schedule here to ensure that the classes are in the right order
+	// We sort the parsed schedule by start time -- because the Amizone events endpoint does not guarantee order.
+	schedule.Sort()
 
 	return schedule, nil
 }
