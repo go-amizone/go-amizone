@@ -3,6 +3,7 @@ package amizone_test
 import (
 	"GoFriday/lib/amizone"
 	"GoFriday/lib/amizone/internal/mock"
+	"GoFriday/lib/amizone/internal/models"
 	. "github.com/onsi/gomega"
 	"gopkg.in/h2non/gock.v1"
 	"net/http"
@@ -11,7 +12,7 @@ import (
 )
 
 type amizoneClientInterface interface {
-	GetAttendance() (amizone.AttendanceRecord, error)
+	GetAttendance() (models.AttendanceRecord, error)
 }
 
 // @todo: implement test cases to test behavior when:
@@ -82,7 +83,7 @@ func TestAmizoneClient_GetAttendance(t *testing.T) {
 		name              string
 		amizoneClient     amizoneClientInterface
 		setup             func(g *WithT)
-		attendanceMatcher func(g *WithT, attendance amizone.AttendanceRecord)
+		attendanceMatcher func(g *WithT, attendance models.AttendanceRecord)
 		errorMatcher      func(g *WithT, err error)
 	}{
 		{
@@ -92,7 +93,7 @@ func TestAmizoneClient_GetAttendance(t *testing.T) {
 				err := mock.GockRegisterHomePageLoggedIn()
 				g.Expect(err).ToNot(HaveOccurred())
 			},
-			attendanceMatcher: func(g *WithT, attendance amizone.AttendanceRecord) {
+			attendanceMatcher: func(g *WithT, attendance models.AttendanceRecord) {
 				g.Expect(len(attendance)).To(Equal(8))
 			},
 			errorMatcher: func(g *WithT, err error) {
@@ -110,7 +111,7 @@ func TestAmizoneClient_GetAttendance(t *testing.T) {
 					Reply(http.StatusOK).
 					BodyString("<html><body>Forbidden -- No Records for you</body></html>")
 			},
-			attendanceMatcher: func(g *WithT, attendance amizone.AttendanceRecord) {
+			attendanceMatcher: func(g *WithT, attendance models.AttendanceRecord) {
 				g.Expect(attendance).To(BeEmpty())
 			},
 			errorMatcher: func(g *WithT, err error) {
