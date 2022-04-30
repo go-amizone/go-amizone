@@ -1,6 +1,7 @@
 package amizone
 
 import (
+	"GoFriday/lib/amizone/internal"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -17,8 +18,8 @@ const (
 	attendancePageEndpoint   = "/Home"
 	scheduleEndpointTemplate = "/Calendar/home/GetDiaryEvents?start=%s&end=%s"
 
-	scheduleEndpointTemplateTimeFormat = "2006-01-02"
-	amizoneJsonTimeFormat              = "2006/01/02 03:04:05 PM"
+	scheduleEndpointTimeFormat = "2006-01-02"
+	scheduleJsonTimeFormat     = "2006/01/02 03:04:05 PM"
 
 	verificationTokenName = "__RequestVerificationToken"
 
@@ -73,7 +74,7 @@ func NewClient(creds Credentials, httpClient *http.Client) (*amizoneClient, erro
 // login attempts to log in to Amizone with the credentials passed to the amizoneClient and a scrapped
 // "__RequestVerificationToken" value.
 func (a *amizoneClient) login() error {
-	c := getNewColly(a.client, false)
+	c := internal.GetNewColly(a.client, false)
 
 	// Amizone uses a "verification" token for logins -- we try to retrieve this from the login form page
 	var verToken string
@@ -109,7 +110,7 @@ func (a *amizoneClient) login() error {
 	}
 
 	// We need to check if the right tokens are here in the cookie jar to make sure we're logged in
-	if !isLoggedIn(a.client) {
+	if !internal.IsLoggedIn(a.client) {
 		klog.Error("Failed to login. Are your credentials correct?")
 		return errors.New("failed to login")
 	}
@@ -121,7 +122,7 @@ func (a *amizoneClient) GetAttendance() (AttendanceRecord, error) {
 	res := make(AttendanceRecord)
 	var recordListFound bool
 
-	c := getNewColly(a.client, true)
+	c := internal.GetNewColly(a.client, true)
 
 	c.OnHTML("#tasks", func(e *colly.HTMLElement) {
 		recordListFound = true
@@ -195,7 +196,7 @@ func (a *amizoneClient) GetClassSchedule(date Date) (classSchedule, error) {
 	}
 	var amizoneSchedule []amizoneEntry
 
-	c := getNewColly(a.client, true)
+	c := internal.GetNewColly(a.client, true)
 	c.OnResponse(func(r *colly.Response) {
 		unmarshalErr = json.Unmarshal(r.Body, &amizoneSchedule)
 		if unmarshalErr != nil {
@@ -210,7 +211,7 @@ func (a *amizoneClient) GetClassSchedule(date Date) (classSchedule, error) {
 			}
 
 			timeParserFunc := func(timeStr string) time.Time {
-				t, err := time.Parse(amizoneJsonTimeFormat, timeStr)
+				t, err := time.Parse(scheduleJsonTimeFormat, timeStr)
 				if err != nil {
 					klog.Warning("Failed to parse time for course %s: %s", entry.CourseCode, err.Error())
 					return time.Unix(0, 0)
@@ -233,7 +234,7 @@ func (a *amizoneClient) GetClassSchedule(date Date) (classSchedule, error) {
 		}
 	})
 
-	err := c.Visit(BaseUrl + fmt.Sprintf(scheduleEndpointTemplate, timeFrom.Format(scheduleEndpointTemplateTimeFormat), timeTo.Format(scheduleEndpointTemplateTimeFormat)))
+	err := c.Visit(BaseUrl + fmt.Sprintf(scheduleEndpointTemplate, timeFrom.Format(scheduleEndpointTimeFormat), timeTo.Format(scheduleEndpointTimeFormat)))
 	if err != nil {
 		klog.Error("Something went wrong while visiting the schedule endpoint: " + err.Error())
 		return nil, errors.New(fmt.Sprintf("%s: %s", ErrFailedToVisitPage, err.Error()))
