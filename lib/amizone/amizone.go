@@ -2,19 +2,25 @@ package amizone
 
 import (
 	"GoFriday/lib/amizone/internal"
+	"GoFriday/lib/amizone/internal/parse"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly/v2"
+	"io/ioutil"
 	"k8s.io/klog/v2"
 	"net/http"
 	"net/http/cookiejar"
+	"net/url"
 	"strings"
 	"time"
 )
 
 const (
-	BaseUrl                  = "https://" + internal.AmizoneDomain
+	BaseUrl = "https://" + internal.AmizoneDomain
+
+	loginRequestEndpoint     = "/"
 	attendancePageEndpoint   = "/Home"
 	scheduleEndpointTemplate = "/Calendar/home/GetDiaryEvents?start=%s&end=%s"
 
@@ -25,6 +31,8 @@ const (
 
 	ErrFailedAttendanceRetrieval = "failed to retrieve attendance"
 	ErrFailedToVisitPage         = "failed to visit page"
+	ErrFailedToRetrieveToken     = "failed to retrieve verification token"
+	ErrFailedLogin               = "failed to login"
 )
 
 type Credentials struct {
@@ -37,6 +45,11 @@ type Credentials struct {
 type amizoneClient struct {
 	client      *http.Client
 	credentials *Credentials
+	loggedIn    bool
+}
+
+func (a *amizoneClient) DidLogin() bool {
+	return a.loggedIn
 }
 
 // Interface compliance constraint for amizoneClient
@@ -74,46 +87,60 @@ func NewClient(creds Credentials, httpClient *http.Client) (*amizoneClient, erro
 // login attempts to log in to Amizone with the credentials passed to the amizoneClient and a scrapped
 // "__RequestVerificationToken" value.
 func (a *amizoneClient) login() error {
-	c := internal.GetNewColly(a.client, false)
+	client := a.client
 
 	// Amizone uses a "verification" token for logins -- we try to retrieve this from the login form page
-	var verToken string
-
-	c.OnHTML(fmt.Sprintf("input[name='%s']", verificationTokenName), func(e *colly.HTMLElement) {
-		verToken = e.Attr("value")
-	})
-
-	c.OnResponse(func(r *colly.Response) {
-		klog.Infof("Receiving response from amizone with status: %d", r.StatusCode)
-	})
-
-	if err := c.Visit(BaseUrl); err != nil {
-		klog.Error("Something went wrong while visiting the login page: " + err.Error())
-		return errors.New("failed to visit login page: " + err.Error())
-	}
+	verToken := func() string {
+		response, err := client.Get(BaseUrl)
+		if err != nil {
+			return ""
+		}
+		dom, err := goquery.NewDocumentFromReader(response.Body)
+		if err != nil {
+			klog.Errorf("failed to parse login page: %s", err.Error())
+		}
+		return dom.Find(fmt.Sprintf("input[name='%s']", verificationTokenName)).AttrOr("value", "")
+	}()
 
 	if verToken == "" {
 		klog.Error("Failed to retrieve verification token from login page. What's up?")
-		return errors.New("could not find verification token")
+		return errors.New(ErrFailedToRetrieveToken)
 	}
 
-	loginRequestData := map[string]string{
-		"__RequestVerificationToken": verToken,
-		"_UserName":                  a.credentials.Username,
-		"_Password":                  a.credentials.Password,
-		"_QString":                   "",
-	}
+	loginRequestData := func() (v url.Values) {
+		v = url.Values{}
+		v.Set(verificationTokenName, verToken)
+		v.Set("_UserName", a.credentials.Username)
+		v.Set("_Password", a.credentials.Password)
+		v.Set("_QString", "")
+		return
+	}()
 
-	if err := c.Post(BaseUrl, loginRequestData); err != nil {
+	loginResponse, err := client.PostForm(BaseUrl+loginRequestEndpoint, loginRequestData)
+	if err != nil {
 		klog.Error("Something went wrong while posting login data: ", err.Error())
-		return errors.New("could not post login data: " + err.Error())
+		return errors.New(fmt.Sprintf("%s: %s", ErrFailedLogin, err.Error()))
+	}
+
+	responseBody, err := ioutil.ReadAll(loginResponse.Body)
+	if err != nil {
+		klog.Error("Something went wrong while reading login response: ", err.Error())
+		return errors.New(fmt.Sprintf("%s: %s", ErrFailedLogin, err.Error()))
+	}
+
+	if loggedIn := parse.LoggedIn(responseBody); !loggedIn {
+		klog.Error("Login failed. Check your credentials.")
+		return errors.New(ErrFailedLogin)
 	}
 
 	// We need to check if the right tokens are here in the cookie jar to make sure we're logged in
 	if !internal.IsLoggedIn(a.client) {
 		klog.Error("Failed to login. Are your credentials correct?")
-		return errors.New("failed to login")
+		return errors.New(ErrFailedLogin)
 	}
+
+	a.loggedIn = true
+
 	return nil
 }
 
