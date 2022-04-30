@@ -3,7 +3,7 @@ package parse_test
 import (
 	"GoFriday/lib/amizone/internal/parse"
 	. "github.com/onsi/gomega"
-	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -40,10 +40,10 @@ func TestLoggedIn(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			g := NewGomegaWithT(t)
 
-			fileContents, err := ioutil.ReadFile(tc.bodyFile)
-			g.Expect(err).ToNot(HaveOccurred())
+			fileReader, err := os.Open(tc.bodyFile)
 
-			g.Expect(parse.LoggedIn(fileContents)).To(Equal(tc.expected))
+			g.Expect(err).ToNot(HaveOccurred())
+			g.Expect(parse.LoggedIn(fileReader)).To(Equal(tc.expected))
 		})
 	}
 }

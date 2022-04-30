@@ -1,9 +1,9 @@
 package parse
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
+	"io"
 )
 
 const loginFormHtmlId = "loginform"
@@ -14,9 +14,9 @@ const loginFormHtmlId = "loginform"
 // from all endpoints to the login page.
 // If the body is parsed into a HTMl document, this function will attempt to find the login form; failing to find
 // the login form is assumed to indicate an authenticated session.
-func LoggedIn(body []byte) bool {
+func LoggedIn(body io.Reader) bool {
 	// Try to find the login form
-	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(body))
+	doc, err := goquery.NewDocumentFromReader(body)
 	if err != nil { // Failure to parse an HTML document ~ logged-in
 		return true
 	}

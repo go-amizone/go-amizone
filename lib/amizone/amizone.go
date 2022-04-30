@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly/v2"
-	"io/ioutil"
 	"k8s.io/klog/v2"
 	"net/http"
 	"net/http/cookiejar"
@@ -122,13 +121,7 @@ func (a *amizoneClient) login() error {
 		return errors.New(fmt.Sprintf("%s: %s", ErrFailedLogin, err.Error()))
 	}
 
-	responseBody, err := ioutil.ReadAll(loginResponse.Body)
-	if err != nil {
-		klog.Error("Something went wrong while reading login response: ", err.Error())
-		return errors.New(fmt.Sprintf("%s: %s", ErrFailedLogin, err.Error()))
-	}
-
-	if loggedIn := parse.LoggedIn(responseBody); !loggedIn {
+	if loggedIn := parse.LoggedIn(loginResponse.Body); !loggedIn {
 		klog.Error("Login failed. Check your credentials.")
 		return errors.New(ErrFailedLogin)
 	}
