@@ -1,9 +1,9 @@
-package GoFriday
+package amizone
 
 import (
-	"GoFriday/internal"
-	"GoFriday/internal/models"
-	"GoFriday/internal/parse"
+	"amizone/internal"
+	"amizone/internal/models"
+	"amizone/internal/parse"
 	"encoding/json"
 	"errors"
 	"fmt"

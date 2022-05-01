@@ -1,7 +1,7 @@
 package parse
 
 import (
-	"GoFriday/internal/models"
+	"amizone/internal/models"
 	"errors"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"

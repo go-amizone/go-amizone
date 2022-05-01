@@ -1,7 +1,7 @@
 package models_test
 
 import (
-	"GoFriday/internal/models"
+	"amizone/internal/models"
 	. "github.com/onsi/gomega"
 	"testing"
 	"time"
