@@ -1,10 +1,10 @@
 package parse_test
 
 import (
+	"amizone/internal/mock"
 	"amizone/internal/models"
 	"amizone/internal/parse"
 	. "github.com/onsi/gomega"
-	"os"
 	"testing"
 )
 
@@ -17,7 +17,7 @@ func TestExaminationSchedule(t *testing.T) {
 	}{
 		{
 			name:     "valid examination schedule page",
-			bodyFile: ExaminationSchedulePage,
+			bodyFile: mock.ExaminationSchedule,
 			scheduleMatcher: func(g *GomegaWithT, schedule models.ExaminationSchedule) {
 				g.Expect(len(schedule)).To(Equal(8))
 			},
@@ -27,7 +27,7 @@ func TestExaminationSchedule(t *testing.T) {
 		},
 		{
 			name:     "invalid examination schedule page",
-			bodyFile: LoggedInHomePageFile,
+			bodyFile: mock.HomePageLoggedIn,
 			scheduleMatcher: func(g *GomegaWithT, schedule models.ExaminationSchedule) {
 				g.Expect(schedule).To(BeEmpty())
 			},
@@ -41,7 +41,7 @@ func TestExaminationSchedule(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			g := NewGomegaWithT(t)
 
-			fileReader, err := os.Open(testCase.bodyFile)
+			fileReader, err := mock.FS.Open(testCase.bodyFile)
 			g.Expect(err).ToNot(HaveOccurred())
 
 			schedule, err := parse.ExaminationSchedule(fileReader)

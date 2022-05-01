@@ -1,9 +1,9 @@
 package parse_test
 
 import (
+	"amizone/internal/mock"
 	"amizone/internal/parse"
 	. "github.com/onsi/gomega"
-	"os"
 	"testing"
 )
 
@@ -15,17 +15,17 @@ func TestLoggedIn(t *testing.T) {
 	}{
 		{
 			name:     "logged in",
-			bodyFile: LoggedInHomePageFile,
+			bodyFile: mock.HomePageLoggedIn,
 			expected: true,
 		},
 		{
 			name:     "not logged in",
-			bodyFile: LoginPageFile,
+			bodyFile: mock.LoginPage,
 			expected: false,
 		},
 		{
 			name:     "json schedule",
-			bodyFile: ScheduleJsonNonEmpty,
+			bodyFile: mock.DiaryEventsJSON,
 			expected: true,
 		},
 	}
@@ -34,7 +34,7 @@ func TestLoggedIn(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			g := NewGomegaWithT(t)
 
-			fileReader, err := os.Open(tc.bodyFile)
+			fileReader, err := mock.FS.Open(tc.bodyFile)
 
 			g.Expect(err).ToNot(HaveOccurred())
 			g.Expect(parse.LoggedIn(fileReader)).To(Equal(tc.expected))

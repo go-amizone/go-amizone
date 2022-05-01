@@ -6,11 +6,10 @@ import (
 	"gopkg.in/h2non/gock.v1"
 	"net/http"
 	"net/url"
-	"os"
 )
 
 func GockRegisterLoginPage() error {
-	mockLogin, err := os.Open("testdata/login_page.html")
+	mockLogin, err := FS.Open(LoginPage)
 	if err != nil {
 		return errors.New("Failed to open mock login page: " + err.Error())
 	}
@@ -37,7 +36,7 @@ func GockRegisterLoginRequest(validUsername string, validPassword string) error 
 }
 
 func GockRegisterHomePageLoggedIn() error {
-	mockHome, err := os.Open("testdata/home_page_logged_in.html")
+	mockHome, err := FS.Open(HomePageLoggedIn)
 	if err != nil {
 		return errors.New("Failed to open mock home page: " + err.Error())
 	}

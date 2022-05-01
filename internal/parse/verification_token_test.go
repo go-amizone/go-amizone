@@ -1,9 +1,9 @@
 package parse_test
 
 import (
+	"amizone/internal/mock"
 	"amizone/internal/parse"
 	. "github.com/onsi/gomega"
-	"os"
 	"testing"
 )
 
@@ -15,12 +15,12 @@ func TestVerificationToken(t *testing.T) {
 	}{
 		{
 			name:          "login page, verification token exists",
-			bodyFile:      LoginPageFile,
+			bodyFile:      mock.LoginPage,
 			expectedToken: "LV571ePb0TV-evRywWVGfbpe5PE71EpyM2U_9MGu69GA8-tlD4TaVd265sXZPoPyA2Xh2qV7D2t-8yKJWYzK17wyEMKuPseFtRk25WAqeC81",
 		},
 		{
 			name:          "home page, verification token does not exist",
-			bodyFile:      LoggedInHomePageFile,
+			bodyFile:      mock.HomePageLoggedIn,
 			expectedToken: "",
 		},
 	}
@@ -29,7 +29,7 @@ func TestVerificationToken(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			g := NewGomegaWithT(t)
 
-			body, err := os.Open(tc.bodyFile)
+			body, err := mock.FS.Open(tc.bodyFile)
 			g.Expect(err).ToNot(HaveOccurred())
 
 			token := parse.VerificationToken(body)
