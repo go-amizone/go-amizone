@@ -1,9 +1,9 @@
-package amizone_test
+package GoFriday_test
 
 import (
-	"GoFriday/lib/amizone"
-	"GoFriday/lib/amizone/internal/mock"
-	"GoFriday/lib/amizone/internal/models"
+	"GoFriday"
+	"GoFriday/internal/mock"
+	"GoFriday/internal/models"
 	. "github.com/onsi/gomega"
 	"gopkg.in/h2non/gock.v1"
 	"net/http"
@@ -36,12 +36,12 @@ func TestNewClient(t *testing.T) {
 	httpClient := &http.Client{Jar: jar}
 	gock.InterceptClient(httpClient)
 
-	c := amizone.Credentials{
+	c := GoFriday.Credentials{
 		Username: mock.AmizoneUsername,
 		Password: mock.AmizonePassword,
 	}
 
-	client, err := amizone.NewClient(c, httpClient)
+	client, err := GoFriday.NewClient(c, httpClient)
 	g.Expect(err).ToNot(HaveOccurred())
 	g.Expect(client).ToNot(BeNil())
 }
@@ -60,7 +60,7 @@ func TestAmizoneClient_GetAttendance(t *testing.T) {
 	defer gock.Off()
 
 	//Hacky initialization of the clients because we cannot refer to unexported types directly.
-	nonLoggedInClient, err := amizone.NewClient(amizone.Credentials{}, nil)
+	nonLoggedInClient, err := GoFriday.NewClient(GoFriday.Credentials{}, nil)
 	loggedInClient := nonLoggedInClient
 	g.Expect(err).To(HaveOccurred(), "The amizone client shouldn't be logged in.")
 
@@ -72,7 +72,7 @@ func TestAmizoneClient_GetAttendance(t *testing.T) {
 		err = mock.GockRegisterLoginRequest(mock.AmizoneUsername, mock.AmizonePassword)
 		g.Expect(err).ToNot(HaveOccurred(), "Failed to register mock login request")
 
-		loggedInClient, err = amizone.NewClient(amizone.Credentials{
+		loggedInClient, err = GoFriday.NewClient(GoFriday.Credentials{
 			Username: mock.AmizoneUsername,
 			Password: mock.AmizonePassword,
 		}, nil)
@@ -116,7 +116,7 @@ func TestAmizoneClient_GetAttendance(t *testing.T) {
 			},
 			errorMatcher: func(g *WithT, err error) {
 				g.Expect(err).To(HaveOccurred())
-				g.Expect(err.Error()).To(Equal(amizone.ErrFailedAttendanceRetrieval))
+				g.Expect(err.Error()).To(Equal(GoFriday.ErrFailedAttendanceRetrieval))
 			},
 		},
 	}

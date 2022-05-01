@@ -1,9 +1,9 @@
 //go:build integration
 
-package amizone_test
+package GoFriday_test
 
 import (
-	"GoFriday/lib/amizone"
+	"GoFriday"
 	. "github.com/onsi/gomega"
 	"os"
 	"testing"
@@ -20,29 +20,29 @@ func TestIntegrateNewClient(t *testing.T) {
 
 	testCases := []struct {
 		name          string
-		credentials   amizone.Credentials
+		credentials   GoFriday.Credentials
 		errorMatcher  func(g *GomegaWithT, err error)
-		clientMatcher func(g *GomegaWithT, client amizone.ClientInterface)
+		clientMatcher func(g *GomegaWithT, client GoFriday.ClientInterface)
 	}{
 		{
 			name:        "valid credentials",
-			credentials: amizone.Credentials{Username: validUser, Password: validPassword},
+			credentials: GoFriday.Credentials{Username: validUser, Password: validPassword},
 			errorMatcher: func(g *GomegaWithT, err error) {
 				g.Expect(err).To(BeNil())
 			},
-			clientMatcher: func(g *GomegaWithT, client amizone.ClientInterface) {
+			clientMatcher: func(g *GomegaWithT, client GoFriday.ClientInterface) {
 				g.Expect(client).ToNot(BeNil())
 				g.Expect(client.DidLogin()).To(BeTrue())
 			},
 		},
 		{
 			name:        "invalid credentials",
-			credentials: amizone.Credentials{Username: "this-user-does-not-exist", Password: "neither-does-this-password"},
+			credentials: GoFriday.Credentials{Username: "this-user-does-not-exist", Password: "neither-does-this-password"},
 			errorMatcher: func(g *GomegaWithT, err error) {
 				g.Expect(err).To(HaveOccurred())
-				g.Expect(err.Error()).To(ContainSubstring(amizone.ErrFailedLogin))
+				g.Expect(err.Error()).To(ContainSubstring(GoFriday.ErrFailedLogin))
 			},
-			clientMatcher: func(g *GomegaWithT, client amizone.ClientInterface) {
+			clientMatcher: func(g *GomegaWithT, client GoFriday.ClientInterface) {
 				g.Expect(client).ToNot(BeNil())
 				g.Expect(client.DidLogin()).To(BeFalse())
 			},
@@ -52,7 +52,7 @@ func TestIntegrateNewClient(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			g := NewGomegaWithT(t)
-			client, err := amizone.NewClient(tc.credentials, nil)
+			client, err := GoFriday.NewClient(tc.credentials, nil)
 			tc.errorMatcher(g, err)
 			tc.clientMatcher(g, client)
 		})
