@@ -27,7 +27,7 @@ func TestNewClient(t *testing.T) {
 
 	err := mock.GockRegisterLoginPage()
 	g.Expect(err).ToNot(HaveOccurred(), "failed to register login page mock")
-	err = mock.GockRegisterLoginRequest(mock.AmizoneUsername, mock.AmizonePassword)
+	err = mock.GockRegisterLoginRequest()
 	g.Expect(err).ToNot(HaveOccurred(), "failed to register login request mock")
 
 	jar, err := cookiejar.New(nil)
@@ -37,8 +37,8 @@ func TestNewClient(t *testing.T) {
 	gock.InterceptClient(httpClient)
 
 	c := amizone.Credentials{
-		Username: mock.AmizoneUsername,
-		Password: mock.AmizonePassword,
+		Username: mock.ValidUser,
+		Password: mock.ValidPass,
 	}
 
 	client, err := amizone.NewClient(c, httpClient)
@@ -70,12 +70,12 @@ func TestAmizoneClient_GetAttendance(t *testing.T) {
 		defer gock.Off()
 		err := mock.GockRegisterLoginPage()
 		g.Expect(err).ToNot(HaveOccurred(), "Failed to register mock login page")
-		err = mock.GockRegisterLoginRequest(mock.AmizoneUsername, mock.AmizonePassword)
+		err = mock.GockRegisterLoginRequest()
 		g.Expect(err).ToNot(HaveOccurred(), "Failed to register mock login request")
 
 		loggedInClient, err = amizone.NewClient(amizone.Credentials{
-			Username: mock.AmizoneUsername,
-			Password: mock.AmizonePassword,
+			Username: mock.ValidUser,
+			Password: mock.ValidPass,
 		}, nil)
 		g.Expect(err).ToNot(HaveOccurred(), "set up mocked logged-in amizone client")
 	}()
@@ -106,6 +106,8 @@ func TestAmizoneClient_GetAttendance(t *testing.T) {
 			amizoneClient: nonLoggedInClient,
 			setup: func(g *WithT) {
 				err := mock.GockRegisterHomePageLoggedIn()
+				g.Expect(err).ToNot(HaveOccurred())
+				err = mock.GockRegisterLoginRequest()
 				g.Expect(err).ToNot(HaveOccurred())
 				gock.New("https://s.amizone.net").
 					Get("/Home").

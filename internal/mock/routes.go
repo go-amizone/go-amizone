@@ -23,15 +23,27 @@ func GockRegisterLoginPage() error {
 	return nil
 }
 
-func GockRegisterLoginRequest(validUsername string, validPassword string) error {
+// GockRegisterLoginRequest registers 2 gock routes - one for valid credentials and one for invalid credentials.
+// Valid credentials: ValidUser, ValidPass
+// Invalid credentials: InvalidUser, InvalidPass
+func GockRegisterLoginRequest() error {
+	// Valid credentials
 	gock.New("https://s.amizone.net").
 		Post("/").
 		MatchType("application/x-www-form-urlencoded").
-		BodyString(fmt.Sprintf("_Password=%s&_QString=&_UserName=%s&__RequestVerificationToken=.*", url.QueryEscape(validPassword), validUsername)).
+		BodyString(fmt.Sprintf("_Password=%s&_QString=&_UserName=%s&__RequestVerificationToken=.*", url.QueryEscape(ValidPass), ValidUser)).
 		Reply(http.StatusOK).
 		AddHeader("Set-Cookie", fmt.Sprintf("ASP.NET_SessionId=%s; path=/; HttpOnly", SessionID)).
 		AddHeader("Set-Cookie", fmt.Sprintf("__RequestVerificationToken=%s; path=/; HttpOnly", VerificationToken)).
 		AddHeader("Set-Cookie", fmt.Sprintf(".ASPXAUTH=%s; path=/; HttpOnly", AuthCookie))
+
+	// Invalid credentials
+	gock.New("https://s.amizone.net").
+		Post("/").
+		MatchType("application/x-www-form-urlencoded").
+		BodyString(fmt.Sprintf("_Password=%s&_QString=&_UserName=%s&__RequestVerificationToken=.*", url.QueryEscape(InvalidPass), InvalidUser)).
+		Reply(http.StatusOK)
+
 	return nil
 }
 

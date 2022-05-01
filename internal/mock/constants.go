@@ -1,8 +1,11 @@
 package mock
 
 const (
-	AmizoneUsername = "fakeUsername"
-	AmizonePassword = "fakePassword"
+	ValidUser = "fakeUsername"
+	ValidPass = "fakePassword"
+
+	InvalidUser = "this-user-does-not-exist"
+	InvalidPass = "this-password-does-not-either"
 
 	AuthCookie        = "fakeAuthCookie"
 	VerificationToken = "fakeRequestVerificationToken"
