@@ -4,16 +4,19 @@ import (
 	"amizone/internal"
 	"amizone/internal/models"
 	"amizone/internal/parse"
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/gocolly/colly/v2"
 	"io"
+	"io/ioutil"
 	"k8s.io/klog/v2"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -29,13 +32,11 @@ const (
 
 	verificationTokenName = "__RequestVerificationToken"
 
-	ErrFailedAttendanceRetrieval = "failed to retrieve attendance"
-	ErrFailedToVisitPage         = "failed to visit page"
-	ErrFailedToParsePage         = "failed to parse page"
-	ErrFailedToRetrieveToken     = "failed to retrieve verification token"
-	ErrFailedLogin               = "failed to login"
-
-	ErrNotLoggedIn = "not logged in"
+	ErrFailedToVisitPage     = "failed to visit page"
+	ErrFailedToReadResponse  = "failed to read response body"
+	ErrFailedToParsePage     = "failed to parse page"
+	ErrFailedToRetrieveToken = "failed to retrieve verification token"
+	ErrFailedLogin           = "failed to login"
 
 	errFailedToComposeRequest = "failed to compose request"
 )
@@ -50,29 +51,69 @@ type Credentials struct {
 type amizoneClient struct {
 	client      *http.Client
 	credentials *Credentials
-	loggedIn    bool
+	didLogin    bool
+	muLogin     struct {
+		sync.Mutex
+		lastAttempt time.Time
+	}
 }
 
 // DidLogin returns true if the client ever successfully logged in.
 func (a *amizoneClient) DidLogin() bool {
-	return a.loggedIn
+	return a.didLogin
 }
 
-// doRequest is an internal proxy method to http.Client.Do which simplifies making requests and handles
-// setting custom headers and such. The `method` parameter is the http method to use; endpoint must be relative to
-// BaseUrl.
-func (a *amizoneClient) doRequest(method string, endpoint string, body io.Reader) (*http.Response, error) {
+// doRequest is an internal http request helper to simplify making requests.
+// This method takes care of both composing requests, setting custom headers and such as needed.
+// If tryLogin is true, the client will attempt to log in if it is not already logged in.
+// method must be a valid http request method.
+// endpoint must be relative to BaseUrl.
+func (a *amizoneClient) doRequest(tryLogin bool, method string, endpoint string, body io.Reader) (*http.Response, error) {
+	// Login now if we didn't log in at instantiation.
+	if tryLogin && !a.didLogin && *a.credentials != (Credentials{}) {
+		if err := a.login(); err != nil {
+			return nil, errors.New(ErrFailedLogin)
+		}
+		tryLogin = false // We don't want to attempt another login.
+	}
+
 	req, err := http.NewRequest(method, BaseUrl+endpoint, body)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("%s: %s", errFailedToComposeRequest, err))
+		klog.Errorf("%s: %s", errFailedToComposeRequest, err)
+		return nil, errors.New(errFailedToComposeRequest)
 	}
+
 	req.Header.Set("User-Agent", internal.Firefox99UserAgent)
+	// Amizone uses the referrer to authenticate requests on top of the actual AUTH/session cookies.
 	req.Header.Set("Referer", BaseUrl+"/")
-	if method == http.MethodPost {
+	if method == http.MethodPost { // We assume a POST request means submitting a form.
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	}
 
-	return a.client.Do(req)
+	response, err := a.client.Do(req)
+	if err != nil {
+		klog.Errorf(fmt.Sprintf("%s: %s", ErrFailedToVisitPage, err))
+		return nil, errors.New(ErrFailedToVisitPage)
+	}
+
+	// Read the response into a byte array, so we can reuse it.
+	responseBody, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return response, errors.New(ErrFailedToReadResponse)
+	}
+	_ = response.Body.Close()
+
+	response.Body = ioutil.NopCloser(bytes.NewReader(responseBody))
+
+	// If we're directed to try log-ins and the parser determines we're not logged in, we retry.
+	if tryLogin && *a.credentials != (Credentials{}) && !parse.LoggedIn(bytes.NewReader(responseBody)) {
+		if err := a.login(); err != nil {
+			return nil, errors.New(ErrFailedLogin)
+		}
+		return a.doRequest(false, method, endpoint, body)
+	}
+
+	return response, nil
 }
 
 // Interface compliance constraint for amizoneClient
@@ -110,11 +151,21 @@ func NewClient(creds Credentials, httpClient *http.Client) (*amizoneClient, erro
 // login attempts to log in to Amizone with the credentials passed to the amizoneClient and a scrapped
 // "__RequestVerificationToken" value.
 func (a *amizoneClient) login() error {
+	a.muLogin.Lock()
+	defer a.muLogin.Unlock()
+
+	if time.Now().Sub(a.muLogin.lastAttempt) < time.Minute*2 {
+		return nil
+	}
+
+	// Our last attempt is NOW
+	a.muLogin.lastAttempt = time.Now()
+
 	// Amizone uses a "verification" token for logins -- we try to retrieve this from the login form page
 	verToken := func() string {
-		response, err := a.doRequest(http.MethodGet, "/", nil)
+		response, err := a.doRequest(false, http.MethodGet, "/", nil)
 		if err != nil {
-			klog.Errorf("%s (login): %s", ErrFailedToVisitPage, err.Error())
+			klog.Errorf("login: %s", err)
 			return ""
 		}
 		return parse.VerificationToken(response.Body)
@@ -134,33 +185,33 @@ func (a *amizoneClient) login() error {
 		return
 	}()
 
-	loginResponse, err := a.doRequest(http.MethodPost, loginRequestEndpoint, strings.NewReader(loginRequestData.Encode()))
+	loginResponse, err := a.doRequest(false, http.MethodPost, loginRequestEndpoint, strings.NewReader(loginRequestData.Encode()))
 	if err != nil {
 		klog.Error("Something went wrong while posting login data: ", err.Error())
 		return errors.New(fmt.Sprintf("%s: %s", ErrFailedLogin, err.Error()))
 	}
 
 	if loggedIn := parse.LoggedIn(loginResponse.Body); !loggedIn {
-		klog.Error("Login failed. Check your credentials.")
+		klog.Error("Login failed. Are these credentials valid?")
 		return errors.New(ErrFailedLogin)
 	}
 
 	// We need to check if the right tokens are here in the cookie jar to make sure we're logged in
 	if !internal.IsLoggedIn(a.client) {
-		klog.Error("Failed to login. Are your credentials correct?")
+		klog.Error("Login failed. Are these credentials valid?")
 		return errors.New(ErrFailedLogin)
 	}
 
-	a.loggedIn = true
+	a.didLogin = true
 
 	return nil
 }
 
 // GetAttendance retrieves, parses and returns attendance data from Amizone
 func (a *amizoneClient) GetAttendance() (models.AttendanceRecord, error) {
-	response, err := a.doRequest(http.MethodGet, attendancePageEndpoint, nil)
+	response, err := a.doRequest(true, http.MethodGet, attendancePageEndpoint, nil)
 	if err != nil {
-		klog.Errorf("%s (attendance): %s", ErrFailedToVisitPage, err.Error())
+		klog.Errorf("get_attendance: %s", err.Error())
 		return nil, errors.New(ErrFailedToVisitPage)
 	}
 
