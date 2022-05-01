@@ -1,4 +1,4 @@
-package GoFriday
+package amizone
 
 type Date struct {
 	Year  int

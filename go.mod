@@ -1,4 +1,4 @@
-module GoFriday
+module amizone
 
 go 1.17
 
