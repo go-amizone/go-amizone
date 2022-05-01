@@ -62,7 +62,8 @@ func TestAmizoneClient_GetAttendance(t *testing.T) {
 	//Hacky initialization of the clients because we cannot refer to unexported types directly.
 	nonLoggedInClient, err := amizone.NewClient(amizone.Credentials{}, nil)
 	loggedInClient := nonLoggedInClient
-	g.Expect(err).To(HaveOccurred(), "The amizone client shouldn't be logged in.")
+	g.Expect(err).ToNot(HaveOccurred())
+	g.Expect(nonLoggedInClient.DidLogin()).To(BeFalse(), "The amizone client shouldn't be logged in.")
 
 	// Setup the logged-in and non logged-in amizone clients.
 	func() {
