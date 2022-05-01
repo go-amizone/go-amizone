@@ -117,7 +117,7 @@ func TestAmizoneClient_GetAttendance(t *testing.T) {
 			},
 			errorMatcher: func(g *WithT, err error) {
 				g.Expect(err).To(HaveOccurred())
-				g.Expect(err.Error()).To(Equal(amizone.ErrFailedAttendanceRetrieval))
+				g.Expect(err.Error()).To(Equal(amizone.ErrFailedToParsePage))
 			},
 		},
 	}

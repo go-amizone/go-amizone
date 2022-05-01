@@ -8,11 +8,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gocolly/colly/v2"
+	"io"
 	"k8s.io/klog/v2"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
-	"strings"
 	"time"
 )
 
@@ -30,8 +30,13 @@ const (
 
 	ErrFailedAttendanceRetrieval = "failed to retrieve attendance"
 	ErrFailedToVisitPage         = "failed to visit page"
+	ErrFailedToParsePage         = "failed to parse page"
 	ErrFailedToRetrieveToken     = "failed to retrieve verification token"
 	ErrFailedLogin               = "failed to login"
+
+	ErrNotLoggedIn = "not logged in"
+
+	errFailedToComposeRequest = "failed to compose request"
 )
 
 type Credentials struct {
@@ -47,6 +52,7 @@ type amizoneClient struct {
 	loggedIn    bool
 }
 
+// DidLogin returns true if the client ever successfully logged in.
 func (a *amizoneClient) DidLogin() bool {
 	return a.loggedIn
 }
@@ -134,64 +140,26 @@ func (a *amizoneClient) login() error {
 	return nil
 }
 
-// GetAttendance retrieves the attendanceRecord from Amizone
+// GetAttendance retrieves, parses and returns attendance data from Amizone
 func (a *amizoneClient) GetAttendance() (models.AttendanceRecord, error) {
-	res := make(models.AttendanceRecord)
-	var recordListFound bool
+	client := a.client
 
-	c := internal.GetNewColly(a.client, true)
-
-	c.OnHTML("#tasks", func(e *colly.HTMLElement) {
-		recordListFound = true
-		e.ForEach("li", func(_ int, el *colly.HTMLElement) {
-			course := &models.Course{
-				Code: el.ChildText("span.sub-code"),
-				Name: func() string {
-					rawInner := el.ChildText("span.lbl")
-					spaceIndex := strings.IndexRune(rawInner, ' ')
-					return strings.TrimSpace(rawInner[spaceIndex:])
-				}(),
-			}
-
-			if course.Code == "" {
-				klog.Warning("Failed to parse course code for an attendance list item")
-				return
-			}
-
-			attendance := func() *models.CourseAttendance {
-				raw := el.ChildText("div.class-count span")
-				divided := strings.Split(raw, "/")
-				if len(divided) != 2 {
-					klog.Warning("Attendance string has unexpected format!", course.Code)
-					return nil
-				}
-				return &models.CourseAttendance{
-					Course:          course,
-					ClassesAttended: divided[0],
-					ClassesHeld:     divided[1],
-				}
-			}()
-
-			if attendance == nil {
-				klog.Warningf("Failed to parse attendance for course: %s", course.Code)
-				return
-			}
-
-			res[course.Code] = attendance
-		})
-	})
-
-	if err := c.Visit(BaseUrl + attendancePageEndpoint); err != nil {
-		klog.Error("Something went wrong while visiting the attendance page: " + err.Error())
-		return nil, errors.New("failed to visit the attendance page: " + err.Error())
+	request, _ := http.NewRequest(http.MethodGet, BaseUrl+attendancePageEndpoint, nil)
+	request.Header.Set("Referer", BaseUrl+"/")
+	request.Header.Set("User-Agent", internal.Firefox99UserAgent)
+	response, err := client.Do(request)
+	if err != nil {
+		klog.Errorf("%s (attendance): %s", ErrFailedToVisitPage, err.Error())
+		return nil, errors.New(ErrFailedToVisitPage)
 	}
 
-	if !recordListFound {
-		klog.Error("Failed to find the attendance list on the attendance page. Did we login at all?")
-		return nil, errors.New(ErrFailedAttendanceRetrieval)
+	attendanceRecord, err := parse.Attendance(response.Body)
+	if err != nil {
+		klog.Errorf("%s (attendance): %s", ErrFailedToParsePage, err.Error())
+		return nil, errors.New(ErrFailedToParsePage)
 	}
 
-	return res, nil
+	return attendanceRecord, nil
 }
 
 func (a *amizoneClient) GetClassSchedule(date Date) (models.ClassSchedule, error) {

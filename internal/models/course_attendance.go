@@ -2,8 +2,8 @@ package models
 
 type CourseAttendance struct {
 	Course          *Course
-	ClassesHeld     string
-	ClassesAttended string
+	ClassesHeld     int
+	ClassesAttended int
 }
 
 // AttendanceRecord maps course codes to courseAttendance structs
