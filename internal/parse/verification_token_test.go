@@ -1,7 +1,7 @@
 package parse_test
 
 import (
-	"GoFriday/lib/amizone/internal/parse"
+	"GoFriday/internal/parse"
 	. "github.com/onsi/gomega"
 	"os"
 	"testing"

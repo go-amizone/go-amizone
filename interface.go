@@ -1,6 +1,8 @@
-package amizone
+package GoFriday
 
-import "GoFriday/lib/amizone/internal/models"
+import (
+	"GoFriday/internal/models"
+)
 
 // ClientInterface is an exported interface for amizoneClient to make mocking and testing more convenient.
 type ClientInterface interface {
