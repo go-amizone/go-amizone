@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -57,6 +58,23 @@ func (a *amizoneClient) DidLogin() bool {
 	return a.loggedIn
 }
 
+// doRequest is an internal proxy method to http.Client.Do which simplifies making requests and handles
+// setting custom headers and such. The `method` parameter is the http method to use; endpoint must be relative to
+// BaseUrl.
+func (a *amizoneClient) doRequest(method string, endpoint string, body io.Reader) (*http.Response, error) {
+	req, err := http.NewRequest(method, BaseUrl+endpoint, body)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("%s: %s", errFailedToComposeRequest, err))
+	}
+	req.Header.Set("User-Agent", internal.Firefox99UserAgent)
+	req.Header.Set("Referer", BaseUrl+"/")
+	if method == http.MethodPost {
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	}
+
+	return a.client.Do(req)
+}
+
 // Interface compliance constraint for amizoneClient
 var _ ClientInterface = &amizoneClient{}
 
@@ -92,11 +110,9 @@ func NewClient(creds Credentials, httpClient *http.Client) (*amizoneClient, erro
 // login attempts to log in to Amizone with the credentials passed to the amizoneClient and a scrapped
 // "__RequestVerificationToken" value.
 func (a *amizoneClient) login() error {
-	client := a.client
-
 	// Amizone uses a "verification" token for logins -- we try to retrieve this from the login form page
 	verToken := func() string {
-		response, err := client.Get(BaseUrl)
+		response, err := a.doRequest(http.MethodGet, "/", nil)
 		if err != nil {
 			klog.Errorf("%s (login): %s", ErrFailedToVisitPage, err.Error())
 			return ""
@@ -118,7 +134,7 @@ func (a *amizoneClient) login() error {
 		return
 	}()
 
-	loginResponse, err := client.PostForm(BaseUrl+loginRequestEndpoint, loginRequestData)
+	loginResponse, err := a.doRequest(http.MethodPost, loginRequestEndpoint, strings.NewReader(loginRequestData.Encode()))
 	if err != nil {
 		klog.Error("Something went wrong while posting login data: ", err.Error())
 		return errors.New(fmt.Sprintf("%s: %s", ErrFailedLogin, err.Error()))
@@ -142,12 +158,7 @@ func (a *amizoneClient) login() error {
 
 // GetAttendance retrieves, parses and returns attendance data from Amizone
 func (a *amizoneClient) GetAttendance() (models.AttendanceRecord, error) {
-	client := a.client
-
-	request, _ := http.NewRequest(http.MethodGet, BaseUrl+attendancePageEndpoint, nil)
-	request.Header.Set("Referer", BaseUrl+"/")
-	request.Header.Set("User-Agent", internal.Firefox99UserAgent)
-	response, err := client.Do(request)
+	response, err := a.doRequest(http.MethodGet, attendancePageEndpoint, nil)
 	if err != nil {
 		klog.Errorf("%s (attendance): %s", ErrFailedToVisitPage, err.Error())
 		return nil, errors.New(ErrFailedToVisitPage)
