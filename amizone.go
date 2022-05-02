@@ -48,16 +48,18 @@ type Credentials struct {
 type amizoneClient struct {
 	client      *http.Client
 	credentials *Credentials
-	didLogin    bool
 	muLogin     struct {
 		sync.Mutex
 		lastAttempt time.Time
+		didLogin    bool
 	}
 }
 
 // DidLogin returns true if the client ever successfully logged in.
 func (a *amizoneClient) DidLogin() bool {
-	return a.didLogin
+	a.muLogin.Lock()
+	defer a.muLogin.Unlock()
+	return a.muLogin.didLogin
 }
 
 // Interface compliance constraint for amizoneClient
@@ -146,7 +148,7 @@ func (a *amizoneClient) login() error {
 		return errors.New(ErrFailedLogin)
 	}
 
-	a.didLogin = true
+	a.muLogin.didLogin = true
 
 	return nil
 }

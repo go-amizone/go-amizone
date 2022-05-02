@@ -19,7 +19,7 @@ import (
 // endpoint must be relative to BaseUrl.
 func (a *amizoneClient) doRequest(tryLogin bool, method string, endpoint string, body io.Reader) (*http.Response, error) {
 	// Login now if we didn't log in at instantiation.
-	if tryLogin && !a.didLogin && *a.credentials != (Credentials{}) {
+	if tryLogin && !a.DidLogin() && *a.credentials != (Credentials{}) {
 		if err := a.login(); err != nil {
 			return nil, errors.New(ErrFailedLogin)
 		}
