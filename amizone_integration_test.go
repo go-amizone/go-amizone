@@ -41,6 +41,7 @@ func TestIntegrateNewClient(t *testing.T) {
 			errorMatcher: func(g *GomegaWithT, err error) {
 				g.Expect(err).To(HaveOccurred())
 				g.Expect(err.Error()).To(ContainSubstring(amizone.ErrFailedLogin))
+				g.Expect(err.Error()).To(ContainSubstring(amizone.ErrInvalidCredentials))
 			},
 			clientMatcher: func(g *GomegaWithT, client amizone.ClientInterface) {
 				g.Expect(client).ToNot(BeNil())
