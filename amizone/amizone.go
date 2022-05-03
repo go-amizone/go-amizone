@@ -1,9 +1,9 @@
 package amizone
 
 import (
-	"amizone/internal"
-	"amizone/internal/models"
-	"amizone/internal/parse"
+	"amizone/amizone/internal"
+	"amizone/amizone/internal/models"
+	"amizone/amizone/internal/parse"
 	"encoding/json"
 	"errors"
 	"fmt"

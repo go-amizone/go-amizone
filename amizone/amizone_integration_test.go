@@ -3,7 +3,7 @@
 package amizone_test
 
 import (
-	"amizone"
+	"amizone/amizone"
 	. "github.com/onsi/gomega"
 	"os"
 	"testing"

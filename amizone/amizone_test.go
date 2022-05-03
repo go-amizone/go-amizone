@@ -1,9 +1,9 @@
 package amizone_test
 
 import (
-	"amizone"
-	"amizone/internal/mock"
-	"amizone/internal/models"
+	"amizone/amizone"
+	"amizone/amizone/internal/mock"
+	"amizone/amizone/internal/models"
 	. "github.com/onsi/gomega"
 	"gopkg.in/h2non/gock.v1"
 	"net/http"

@@ -1,8 +1,8 @@
 package amizone
 
 import (
-	"amizone/internal"
-	"amizone/internal/parse"
+	"amizone/amizone/internal"
+	"amizone/amizone/internal/parse"
 	"bytes"
 	"errors"
 	"fmt"

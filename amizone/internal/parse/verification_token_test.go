@@ -1,8 +1,8 @@
 package parse_test
 
 import (
-	"amizone/internal/mock"
-	"amizone/internal/parse"
+	"amizone/amizone/internal/mock"
+	"amizone/amizone/internal/parse"
 	. "github.com/onsi/gomega"
 	"testing"
 )
