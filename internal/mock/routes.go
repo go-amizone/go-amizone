@@ -32,17 +32,37 @@ func GockRegisterLoginRequest() error {
 		Post("/").
 		MatchType("application/x-www-form-urlencoded").
 		BodyString(fmt.Sprintf("_Password=%s&_QString=&_UserName=%s&__RequestVerificationToken=.*", url.QueryEscape(ValidPass), ValidUser)).
-		Reply(http.StatusOK).
+		Reply(http.StatusFound).
+		AddHeader("Location", "/Home").
 		AddHeader("Set-Cookie", fmt.Sprintf("ASP.NET_SessionId=%s; path=/; HttpOnly", SessionID)).
 		AddHeader("Set-Cookie", fmt.Sprintf("__RequestVerificationToken=%s; path=/; HttpOnly", VerificationToken)).
 		AddHeader("Set-Cookie", fmt.Sprintf(".ASPXAUTH=%s; path=/; HttpOnly", AuthCookie))
+
+	// 302 redirect to home page on valid credentials
+	err := GockRegisterHomePageLoggedIn()
+	if err != nil {
+		return err
+	}
 
 	// Invalid credentials
 	gock.New("https://s.amizone.net").
 		Post("/").
 		MatchType("application/x-www-form-urlencoded").
 		BodyString(fmt.Sprintf("_Password=%s&_QString=&_UserName=%s&__RequestVerificationToken=.*", url.QueryEscape(InvalidPass), InvalidUser)).
-		Reply(http.StatusOK)
+		Reply(http.StatusFound).
+		AddHeader("Location", "/")
+
+	// 302 redirect to login page on invalid credentials
+	mockLoginPage, err := FS.Open(LoginPage)
+	if err != nil {
+		return errors.New("Failed to open mock login page: " + err.Error())
+	}
+	gock.New("https://s.amizone.net").
+		Get("/").
+		MatchHeader("Referer", "https://s.amizone.net/").
+		Reply(http.StatusOK).
+		Type("text/html").
+		Body(mockLoginPage)
 
 	return nil
 }
