@@ -20,16 +20,17 @@ import (
 func (a *amizoneClient) doRequest(tryLogin bool, method string, endpoint string, body io.Reader) (*http.Response, error) {
 	// Login now if we didn't log in at instantiation.
 	if tryLogin && !a.DidLogin() && *a.credentials != (Credentials{}) {
+		klog.Infof("doRequest: Attempting to login since we haven't logged in yet.")
 		if err := a.login(); err != nil {
-			return nil, errors.New(ErrFailedLogin)
+			return nil, err
 		}
 		tryLogin = false // We don't want to attempt another login.
 	}
 
 	req, err := http.NewRequest(method, BaseUrl+endpoint, body)
 	if err != nil {
-		klog.Errorf("%s: %s", errFailedToComposeRequest, err)
-		return nil, errors.New(errFailedToComposeRequest)
+		klog.Errorf("%s: %s", ErrFailedToComposeRequest, err)
+		return nil, errors.New(ErrFailedToComposeRequest)
 	}
 
 	req.Header.Set("User-Agent", internal.Firefox99UserAgent)
@@ -41,8 +42,8 @@ func (a *amizoneClient) doRequest(tryLogin bool, method string, endpoint string,
 
 	response, err := a.client.Do(req)
 	if err != nil {
-		klog.Errorf(fmt.Sprintf("%s: %s", ErrFailedToVisitPage, err))
-		return nil, errors.New(ErrFailedToVisitPage)
+		klog.Errorf("Failed to visit endpoint '%s': %s", endpoint, err)
+		return nil, errors.New(fmt.Sprintf("%s: %s", ErrFailedToVisitPage, err))
 	}
 
 	// Read the response into a byte array, so we can reuse it.
@@ -56,6 +57,7 @@ func (a *amizoneClient) doRequest(tryLogin bool, method string, endpoint string,
 
 	// If we're directed to try log-ins and the parser determines we're not logged in, we retry.
 	if tryLogin && *a.credentials != (Credentials{}) && !parse.LoggedIn(bytes.NewReader(responseBody)) {
+		klog.Infof("doRequest: Attempting to login since we're not logged in (likely: session expired).")
 		if err := a.login(); err != nil {
 			return nil, errors.New(ErrFailedLogin)
 		}

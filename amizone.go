@@ -29,14 +29,14 @@ const (
 
 	verificationTokenName = "__RequestVerificationToken"
 
-	ErrFailedToVisitPage     = "failed to visit page"
-	ErrFailedToReadResponse  = "failed to read response body"
-	ErrFailedToParsePage     = "failed to parse page"
-	ErrFailedToRetrieveToken = "failed to retrieve verification token"
-	ErrFailedLogin           = "failed to login"
-	ErrInvalidCredentials    = ErrFailedLogin + ": invalid credentials"
-
-	errFailedToComposeRequest = "failed to compose request"
+	ErrBadClient              = "the http client passed must have a cookie jar, or be nil"
+	ErrFailedToVisitPage      = "failed to visit page"
+	ErrFailedToReadResponse   = "failed to read response body"
+	ErrFailedLogin            = "failed to login"
+	ErrInvalidCredentials     = ErrFailedLogin + ": invalid credentials"
+	ErrInternalFailure        = "internal failure"
+	ErrFailedToComposeRequest = ErrInternalFailure + ": failed to compose request"
+	ErrFailedToParsePage      = ErrInternalFailure + ": failed to parse page"
 )
 
 type Credentials struct {
@@ -69,26 +69,28 @@ var _ ClientInterface = &amizoneClient{}
 // NewClient create a new amizoneClient instance with Credentials passed, then attempts to log in to the website.
 // The *http.Client parameter can be nil, in which case a default client will be created in its place.
 // To get a non-logged in client, pass empty credentials, ala Credentials{}.
-func NewClient(creds Credentials, httpClient *http.Client) (*amizoneClient, error) {
+func NewClient(cred Credentials, httpClient *http.Client) (*amizoneClient, error) {
 	if httpClient == nil {
 		jar, err := cookiejar.New(nil)
 		if err != nil {
-			return nil, errors.New("failed to create cookie jar for httpClient: " + err.Error())
+			klog.Error("failed to create cookiejar for the amizone client. this is a bug, please report it.")
+			return nil, errors.New(ErrInternalFailure)
 		}
 		httpClient = &http.Client{Jar: jar}
 	}
 
 	if jar := httpClient.Jar; jar == nil {
-		klog.Error("Credentials.NewClient called with a Jarless client.")
-		return nil, errors.New("must pass a http.Client with a cookie jar or pass a nil client")
+		klog.Error("amizone.NewClient called with a jar-less http client")
+		return nil, errors.New(ErrBadClient)
 	}
 
 	client := &amizoneClient{
 		client:      httpClient,
-		credentials: &creds,
+		credentials: &cred,
 	}
 
-	if creds == (Credentials{}) {
+	// We don't try to log in if empty credentials were passed
+	if cred == (Credentials{}) {
 		return client, nil
 	}
 
@@ -112,15 +114,15 @@ func (a *amizoneClient) login() error {
 	verToken := func() string {
 		response, err := a.doRequest(false, http.MethodGet, "/", nil)
 		if err != nil {
-			klog.Errorf("login: %s", err)
+			klog.Errorf("login: %s", err.Error())
 			return ""
 		}
 		return parse.VerificationToken(response.Body)
 	}()
 
 	if verToken == "" {
-		klog.Error("Failed to retrieve verification token from login page. What's up?")
-		return errors.New(ErrFailedToRetrieveToken)
+		klog.Error("login: failed to retrieve verification token from the login page")
+		return errors.New(fmt.Sprintf("%s: %s", ErrFailedLogin, ErrFailedToParsePage))
 	}
 
 	loginRequestData := func() (v url.Values) {
@@ -134,7 +136,7 @@ func (a *amizoneClient) login() error {
 
 	loginResponse, err := a.doRequest(false, http.MethodPost, loginRequestEndpoint, strings.NewReader(loginRequestData.Encode()))
 	if err != nil {
-		klog.Error("Something went wrong while posting login data: ", err.Error())
+		klog.Warningf("Something went wrong while making the login request: ", err.Error())
 		return errors.New(fmt.Sprintf("%s: %s", ErrFailedLogin, err.Error()))
 	}
 
@@ -145,13 +147,13 @@ func (a *amizoneClient) login() error {
 	}
 
 	if loggedIn := parse.LoggedIn(loginResponse.Body); !loggedIn {
-		klog.Error("Login failed. Are these credentials valid?")
+		klog.Error("Login failed. Possible reasons: something broke.")
 		return errors.New(ErrFailedLogin)
 	}
 
 	// We need to check if the right tokens are here in the cookie jar to make sure we're logged in
 	if !internal.IsLoggedIn(a.client) {
-		klog.Error("Login failed. Are these credentials valid?")
+		klog.Error("Login failed. Possible reasons: something broke.")
 		return errors.New(ErrFailedLogin)
 	}
 
@@ -164,13 +166,13 @@ func (a *amizoneClient) login() error {
 func (a *amizoneClient) GetAttendance() (models.AttendanceRecord, error) {
 	response, err := a.doRequest(true, http.MethodGet, attendancePageEndpoint, nil)
 	if err != nil {
-		klog.Errorf("get_attendance: %s", err.Error())
+		klog.Warningf("request (attendance): %s", err.Error())
 		return nil, errors.New(ErrFailedToVisitPage)
 	}
 
 	attendanceRecord, err := parse.Attendance(response.Body)
 	if err != nil {
-		klog.Errorf("%s (attendance): %s", ErrFailedToParsePage, err.Error())
+		klog.Errorf("parse (attendance): %s", err.Error())
 		return nil, errors.New(ErrFailedToParsePage)
 	}
 
