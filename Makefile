@@ -23,7 +23,7 @@ test-unit: ## Run unit tests
 .PHONY: test-integration
 test-integration: ## Run integration tests
 ifneq (true,$(ENV_LOADED))
-	@echo "Integration tests require a variables from a .env file. Please create one by copying and populating the dev.env file."
+	@echo "Integration tests require a variables from a .env file. Please create one by copying and populating the .env.sample file."
 endif
 	@echo "Running integration tests..."
 	go test -v ./... -tags=integration -run '^\QTestIntegrate'
