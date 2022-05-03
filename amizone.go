@@ -34,6 +34,7 @@ const (
 	ErrFailedToParsePage     = "failed to parse page"
 	ErrFailedToRetrieveToken = "failed to retrieve verification token"
 	ErrFailedLogin           = "failed to login"
+	ErrInvalidCredentials    = ErrFailedLogin + ": invalid credentials"
 
 	errFailedToComposeRequest = "failed to compose request"
 )
@@ -135,6 +136,12 @@ func (a *amizoneClient) login() error {
 	if err != nil {
 		klog.Error("Something went wrong while posting login data: ", err.Error())
 		return errors.New(fmt.Sprintf("%s: %s", ErrFailedLogin, err.Error()))
+	}
+
+	// The login request should redirect our request to the home page with a 302 "found" status code.
+	// If we're instead redirected to the login page, we've failed to log in because of invalid credentials
+	if loginResponse.Request.URL.Path == loginRequestEndpoint {
+		return errors.New(ErrInvalidCredentials)
 	}
 
 	if loggedIn := parse.LoggedIn(loginResponse.Body); !loggedIn {
