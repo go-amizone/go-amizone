@@ -25,6 +25,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/attendance", a.AttendanceHandler)
 	mux.HandleFunc("/schedule", a.ClassScheduleHandler)
+	mux.HandleFunc("/exam_schedule", a.ExamScheduleHandler)
 
 	server := http.Server{
 		Addr:    address,

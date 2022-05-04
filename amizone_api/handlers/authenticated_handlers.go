@@ -42,10 +42,28 @@ func (a *handlerCfg) authenticatedClassScheduleHandler(rw http.ResponseWriter, r
 	}
 }
 
+func (a *handlerCfg) authenticatedExamScheduleHandler(rw http.ResponseWriter, r *http.Request, c amizone.ClientInterface) {
+	if r.Method == http.MethodGet {
+		schedule, err := c.GetExamSchedule()
+		if err != nil {
+			rw.WriteHeader(http.StatusInternalServerError)
+		}
+		err = WriteJsonResponse(schedule, rw)
+		if err != nil {
+			a.l.Error(err, "Failed to write exam schedule to the response writer", "client", c)
+			rw.WriteHeader(http.StatusInternalServerError)
+		}
+	}
+}
+
 func (a *handlerCfg) AttendanceHandler(rw http.ResponseWriter, r *http.Request) {
 	authenticatedHandlerWrapper(a, a.authenticatedAttendanceHandler)(rw, r)
 }
 
 func (a *handlerCfg) ClassScheduleHandler(rw http.ResponseWriter, r *http.Request) {
 	authenticatedHandlerWrapper(a, a.authenticatedClassScheduleHandler)(rw, r)
+}
+
+func (a *handlerCfg) ExamScheduleHandler(rw http.ResponseWriter, r *http.Request) {
+	authenticatedHandlerWrapper(a, a.authenticatedExamScheduleHandler)(rw, r)
 }
