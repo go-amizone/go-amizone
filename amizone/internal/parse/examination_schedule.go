@@ -1,10 +1,10 @@
 package parse
 
 import (
-	"amizone/amizone/internal/models"
 	"errors"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
+	"github.com/ditsuke/go-amizone/amizone/internal/models"
 	"io"
 	"k8s.io/klog/v2"
 	"strings"

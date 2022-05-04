@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"amizone/amizone"
+	"github.com/ditsuke/go-amizone/amizone"
 	"net/http"
 )
 

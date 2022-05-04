@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"amizone/amizone"
-	"amizone/amizone_api/response_models"
+	"github.com/ditsuke/go-amizone/amizone"
+	"github.com/ditsuke/go-amizone/amizone_api/response_models"
 	"net/http"
 	"time"
 )

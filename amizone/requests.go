@@ -1,11 +1,11 @@
 package amizone
 
 import (
-	"amizone/amizone/internal"
-	"amizone/amizone/internal/parse"
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/ditsuke/go-amizone/amizone/internal"
+	"github.com/ditsuke/go-amizone/amizone/internal/parse"
 	"io"
 	"io/ioutil"
 	"k8s.io/klog/v2"

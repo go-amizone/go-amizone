@@ -1,7 +1,7 @@
 package amizone
 
 import (
-	"amizone/amizone/internal/models"
+	"github.com/ditsuke/go-amizone/amizone/internal/models"
 )
 
 // ClientInterface is an exported interface for amizoneClient to make mocking and testing more convenient.

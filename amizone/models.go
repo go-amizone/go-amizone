@@ -1,6 +1,6 @@
 package amizone
 
-import "amizone/amizone/internal/models"
+import "github.com/ditsuke/go-amizone/amizone/internal/models"
 
 // Attendance is a model for representing attendance from the portal.
 type Attendance models.AttendanceRecord

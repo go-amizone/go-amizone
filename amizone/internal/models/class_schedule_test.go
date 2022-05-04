@@ -1,7 +1,7 @@
 package models_test
 
 import (
-	"amizone/amizone/internal/models"
+	"github.com/ditsuke/go-amizone/amizone/internal/models"
 	. "github.com/onsi/gomega"
 	"testing"
 	"time"

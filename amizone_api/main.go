@@ -1,8 +1,8 @@
 package main
 
 import (
-	"amizone/amizone_api/handlers"
 	"context"
+	"github.com/ditsuke/go-amizone/amizone_api/handlers"
 	"github.com/joho/godotenv"
 	"k8s.io/klog/v2"
 	"net/http"

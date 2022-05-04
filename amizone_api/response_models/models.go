@@ -1,6 +1,6 @@
 package response_models
 
-import "amizone/amizone"
+import "github.com/ditsuke/go-amizone/amizone"
 
 // Attendance is the response model for the attendance endpoint
 type Attendance amizone.Attendance

@@ -1,11 +1,11 @@
 package amizone
 
 import (
-	"amizone/amizone/internal"
-	"amizone/amizone/internal/models"
-	"amizone/amizone/internal/parse"
 	"errors"
 	"fmt"
+	"github.com/ditsuke/go-amizone/amizone/internal"
+	"github.com/ditsuke/go-amizone/amizone/internal/models"
+	"github.com/ditsuke/go-amizone/amizone/internal/parse"
 	"k8s.io/klog/v2"
 	"net/http"
 	"net/http/cookiejar"
