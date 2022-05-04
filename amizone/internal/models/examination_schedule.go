@@ -8,4 +8,7 @@ type ScheduledExam struct {
 	Mode   string
 }
 
-type ExaminationSchedule []*ScheduledExam
+type ExaminationSchedule struct {
+	Title string
+	Exams []ScheduledExam
+}

@@ -12,14 +12,14 @@ func TestExaminationSchedule(t *testing.T) {
 	testCases := []struct {
 		name            string
 		bodyFile        string
-		scheduleMatcher func(g *GomegaWithT, schedule models.ExaminationSchedule)
+		scheduleMatcher func(g *GomegaWithT, schedule *models.ExaminationSchedule)
 		errorMatcher    func(g *GomegaWithT, err error)
 	}{
 		{
 			name:     "valid examination schedule page",
 			bodyFile: mock.ExaminationSchedule,
-			scheduleMatcher: func(g *GomegaWithT, schedule models.ExaminationSchedule) {
-				g.Expect(len(schedule)).To(Equal(8))
+			scheduleMatcher: func(g *GomegaWithT, schedule *models.ExaminationSchedule) {
+				g.Expect(len(schedule.Exams)).To(Equal(8))
 			},
 			errorMatcher: func(g *GomegaWithT, err error) {
 				g.Expect(err).ToNot(HaveOccurred())
@@ -28,8 +28,8 @@ func TestExaminationSchedule(t *testing.T) {
 		{
 			name:     "invalid examination schedule page",
 			bodyFile: mock.HomePageLoggedIn,
-			scheduleMatcher: func(g *GomegaWithT, schedule models.ExaminationSchedule) {
-				g.Expect(schedule).To(BeEmpty())
+			scheduleMatcher: func(g *GomegaWithT, schedule *models.ExaminationSchedule) {
+				g.Expect(schedule).To(BeNil())
 			},
 			errorMatcher: func(g *GomegaWithT, err error) {
 				g.Expect(err).To(HaveOccurred())

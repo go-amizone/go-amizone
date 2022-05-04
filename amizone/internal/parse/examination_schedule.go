@@ -11,16 +11,20 @@ import (
 	"time"
 )
 
+const ExamTitleUnknown = "Unknown Exam"
+
 // ExaminationSchedule attempts to parse a page into a models.ExaminationSchedule model.
 // This function expects the Amizone "Examination Schedule" page, parsable into an HTML document.
-func ExaminationSchedule(body io.Reader) (models.ExaminationSchedule, error) {
+func ExaminationSchedule(body io.Reader) (*models.ExaminationSchedule, error) {
 	const (
 		breadcrumbsSelector    = "#breadcrumbs > ul.breadcrumb > li.active"
 		scheduleBreadcrumbText = "Examination Schedule"
 	)
 
-	// "data-title" attributes for schedule table entry cells
+	// "data-title" attributes for exams table entry cells
 	const (
+		dataCellSelectorTpl = "td[data-title='%s']"
+
 		dTitleCode = "Course Code"
 		dTitleName = "Course Title"
 		dTitleDate = "Exam Date"
@@ -29,7 +33,6 @@ func ExaminationSchedule(body io.Reader) (models.ExaminationSchedule, error) {
 	)
 
 	const (
-		dataCellSelectorTpl = "td[data-title='%s']"
 		// format for time.Parse() after appending date and time from the table
 		tableTimeFormat = "02/01/2006 15:04"
 	)
@@ -47,18 +50,18 @@ func ExaminationSchedule(body io.Reader) (models.ExaminationSchedule, error) {
 	}
 
 	// Attempt to get the examination table.
-	// @todo: Need tests with valid page that doesn't have schedule information.
+	// @todo: Need tests with valid page that doesn't have exams information.
 	scheduleTable := dom.Find("table.table")
 	if scheduleTable.Length() == 0 {
-		klog.Warning("Failed to find the examination schedule table. What's up?")
+		klog.Warning("Failed to find the examination exams table. What's up?")
 		return nil, errors.New(ErrFailedToParse)
 	}
 
-	// Attempt to get the examination schedule rows.
+	// Attempt to get the examination exams rows.
 	scheduleEntries := scheduleTable.Find("tbody > tr")
-	schedule := make(models.ExaminationSchedule, scheduleEntries.Length())
+	exams := make([]models.ScheduledExam, scheduleEntries.Length())
 
-	// Iterate through schedule rows to parse entries
+	// Iterate through exams rows to parse entries
 	scheduleEntries.Each(func(i int, row *goquery.Selection) {
 		exam := models.ScheduledExam{
 			Course: &models.Course{
@@ -80,8 +83,24 @@ func ExaminationSchedule(body io.Reader) (models.ExaminationSchedule, error) {
 			}(),
 		}
 
-		schedule[i] = &exam
+		exams[i] = exam
 	})
 
-	return schedule, nil
+	// Attempt to get the examination title.
+	title := func() string {
+		raw := dom.Find("div.page-header h1").Text()
+		if raw != "" {
+			sanitised := strings.TrimSpace(raw)
+			// The title is usually like "EXAM TITLE ALL CAPS"
+			title := strings.Title(strings.ToLower(sanitised))
+			return title
+		}
+		klog.Warning("Failed to find the exam title. What's up?")
+		return ExamTitleUnknown
+	}()
+
+	return &models.ExaminationSchedule{
+		Title: title,
+		Exams: exams,
+	}, nil
 }
