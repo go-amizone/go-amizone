@@ -19,3 +19,8 @@ go.work
 
 # .env file
 /.env
+
+# Coverage reports
+/covprofile
+/coverage.html
+
