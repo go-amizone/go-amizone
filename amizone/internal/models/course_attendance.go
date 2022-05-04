@@ -7,4 +7,4 @@ type CourseAttendance struct {
 }
 
 // AttendanceRecord maps course codes to courseAttendance structs
-type AttendanceRecord map[string]*CourseAttendance
+type AttendanceRecord []CourseAttendance

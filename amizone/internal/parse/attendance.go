@@ -27,7 +27,7 @@ func Attendance(body io.Reader) (models.AttendanceRecord, error) {
 	// so we search this widget by title.
 	attendanceWidgetHeader := dom.Find(".widget-header").
 		Filter(fmt.Sprintf(":containsOwn('%s')", AttendanceTableTitle))
-	attendanceList := attendanceWidgetHeader.Parent().Find("ul#tasks")
+	attendanceList := attendanceWidgetHeader.Parent().Find("ul#tasks li")
 
 	if attendanceWidgetHeader.Length() == 0 || attendanceList.Length() == 0 {
 		klog.Warning("Failed to find the attendance widget header. Are we logged in and on the right page?")
@@ -35,7 +35,7 @@ func Attendance(body io.Reader) (models.AttendanceRecord, error) {
 	}
 
 	attendance := make(models.AttendanceRecord, attendanceList.Length())
-	attendanceList.Find("li").Each(func(i int, record *goquery.Selection) {
+	attendanceList.Each(func(i int, record *goquery.Selection) {
 		attended, held := func() (int, int) {
 			raw := record.Find("div.class-count span").Text()
 			sanitized := strings.Trim(raw, " \"")
@@ -63,7 +63,7 @@ func Attendance(body io.Reader) (models.AttendanceRecord, error) {
 			ClassesHeld:     held,
 		}
 
-		attendance[courseAttendance.Course.Code] = &courseAttendance
+		attendance[i] = courseAttendance
 	})
 
 	return attendance, nil
