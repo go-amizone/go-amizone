@@ -20,11 +20,14 @@ test-unit: ## Run unit tests
 	@echo "Running tests..."
 	go test -v ./...
 
+.PHONY: coverage
+coverage: ## Generate coverage report
+	@echo "Generating coverage report..."
+	go test -coverprofile=covprofile ./...
+	go tool cover -html=covprofile -o coverage.html
+
 .PHONY: test-integration
 test-integration: ## Run integration tests
-ifneq (true,$(ENV_LOADED))
-	@echo "Integration tests require a variables from a .env file. Please create one by copying and populating the .env.sample file."
-endif
 	@echo "Running integration tests..."
 	go test -v ./... -tags=integration -run '^\QTestIntegrate'
 
