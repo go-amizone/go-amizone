@@ -35,9 +35,12 @@ go install github.com/ditsuke/amizone-go/amizone_api@latest
 A docker image will be made available soon to make deployments easier.
 
 ## Contributing
-
+I welcome contributions to the library. If you have a bug or feature request, please open an issue on the
+[GitHub repo][github]. Contributing to project should be a great way to get started with Go development and learning
+about the language, reverse-engineering, and other cool stuff.
 
 [monday-api]: https://github.com/0xSaurabh/monday-api
+
 [0xSaurabh]: https://github.com/0xSaurabh/
 
 [github]: https://github.com/ditsuke/amizone-go
