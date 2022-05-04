@@ -18,7 +18,7 @@ func main() {
 	if err != nil {
 		logger.Error(err, "Failed to load .env file")
 	}
-	address := os.Getenv("AMIZONE_API_PORT")
+	address := os.Getenv("AMIZONE_API_ADDRESS")
 
 	a := handlers.NewHandlerCfg(logger)
 
