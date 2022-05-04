@@ -1,0 +1,56 @@
+name: test
+
+on:
+  push:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '^1.17.5'
+
+      - name: Install dependencies
+        run: |
+          go mod download
+
+      - name: Run unit tests
+        run: |
+          make test-unit
+          make coverage
+
+      - name: Send coverage report
+        uses: shogo82148/actions-goveralls@v1
+        with:
+          path-to-profile: covprofile
+
+
+  integration-tests:
+    needs: [ unit-tests ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '^1.17.5'
+
+      - name: Install dependencies
+        run: |
+          go mod download
+
+      - name: Run integration tests
+        env:
+          AMIZONE_USERNAME: ${{ secrets.AMIZONE_USERNAME }}
+          AMIZONE_PASSWORD: ${{ secrets.AMIZONE_PASSWORD }}
+        run: |
+          make test-integration
