@@ -21,6 +21,7 @@ const (
 	loginRequestEndpoint     = "/"
 	attendancePageEndpoint   = "/Home"
 	scheduleEndpointTemplate = "/Calendar/home/GetDiaryEvents?start=%s&end=%s"
+	examScheduleEndpoint     = "/Examination/ExamSchedule"
 
 	scheduleEndpointTimeFormat = "2006-01-02"
 
@@ -159,7 +160,8 @@ func (a *amizoneClient) login() error {
 	return nil
 }
 
-// GetAttendance retrieves, parses and returns attendance data from Amizone
+// GetAttendance retrieves, parses and returns attendance data from Amizone for courses the client user is enrolled in
+// for their latest semester.
 func (a *amizoneClient) GetAttendance() (models.AttendanceRecord, error) {
 	response, err := a.doRequest(true, http.MethodGet, attendancePageEndpoint, nil)
 	if err != nil {
@@ -176,6 +178,9 @@ func (a *amizoneClient) GetAttendance() (models.AttendanceRecord, error) {
 	return attendanceRecord, nil
 }
 
+// GetClassSchedule retrieves, parses and returns class schedule data from Amizone.
+// The date parameter is used to determine which schedule to retrieve, but Amizone imposes arbitrary limits on the
+// date range, so we have no way of knowing if a request will succeed.
 func (a *amizoneClient) GetClassSchedule(date Date) (models.ClassSchedule, error) {
 	timeFrom := time.Date(date.Year, time.Month(date.Month), date.Day, 0, 0, 0, 0, time.UTC)
 	timeTo := timeFrom.Add(time.Hour * 24)
@@ -195,4 +200,23 @@ func (a *amizoneClient) GetClassSchedule(date Date) (models.ClassSchedule, error
 	}
 
 	return classSchedule, nil
+}
+
+// GetExamSchedule retrieves, parses and returns exam schedule data from Amizone.
+// Amizone only allows to retrieve the exam schedule for the current semester, and only close to the exam
+// dates once the date sheets are out, so we don't take a parameter here.
+func (a *amizoneClient) GetExamSchedule() (*models.ExaminationSchedule, error) {
+	response, err := a.doRequest(true, http.MethodGet, examScheduleEndpoint, nil)
+	if err != nil {
+		klog.Warningf("request (exam schedule): %s", err.Error())
+		return nil, errors.New(ErrFailedToVisitPage)
+	}
+
+	examSchedule, err := parse.ExaminationSchedule(response.Body)
+	if err != nil {
+		klog.Errorf("parse (exam schedule): %s", err.Error())
+		return nil, errors.New(ErrFailedToParsePage)
+	}
+
+	return examSchedule, nil
 }
