@@ -1,4 +1,8 @@
 # go-amizone
+![Unit Tests](https://img.shields.io/github/workflow/status/ditsuke/go-amizone/test?label=tests&logo=github)
+[![Coverage Status](https://img.shields.io/coveralls/github/ditsuke/go-amizone?logo=coveralls)](https://coveralls.io/github/ditsuke/go-amizone?branch=main)
+![Issues](https://img.shields.io/github/issues/ditsuke/go-amizone?logo=github)
+![License](https://img.shields.io/github/license/ditsuke/go-amizone)
 
 **go-amizone** is a simple Go library and API client for the [Amizone](https://s.amizone.net) student portal. This
 library is intended to be used as a self-hosted Go API or as an SDK in your Go application.
