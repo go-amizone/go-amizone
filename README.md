@@ -28,12 +28,13 @@ binary. With the latter, you would be able to use Swagger to generate SDKs for o
 Install the library using `go get github.com/ditsuke/amizone-go`. Usage is well documented go docs, and docs
 are due to be published soon.
 
-### Server API
-The server API is a RESTful API supported by a single go binary. It is intended to be used as a self-hosted API,
+### API Server
+
+The API Server offers a RESTful API through a single Go binary. It is intended to be used as a self-hosted,
 but I'll host a central deployment to make it easy to try out. To install locally, run:
 
 ```shell
-go install github.com/ditsuke/amizone-go/amizone_api@latest
+go install github.com/ditsuke/amizone-go/cmd/amizone-api-server@latest
 ```
 
 A docker image will be made available soon to make deployments easier.
