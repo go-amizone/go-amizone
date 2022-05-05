@@ -1,5 +1,5 @@
 # go-amizone
-![Unit Tests](https://img.shields.io/github/workflow/status/ditsuke/go-amizone/test?label=tests&logo=github)
+![Unit Tests](https://img.shields.io/github/workflow/status/ditsuke/go-amizone/tests?label=tests&logo=github)
 [![Coverage Status](https://img.shields.io/coveralls/github/ditsuke/go-amizone?logo=coveralls)](https://coveralls.io/github/ditsuke/go-amizone?branch=main)
 ![Issues](https://img.shields.io/github/issues/ditsuke/go-amizone?logo=github)
 ![License](https://img.shields.io/github/license/ditsuke/go-amizone)
