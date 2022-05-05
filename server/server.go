@@ -53,9 +53,11 @@ func (s *ApiServer) Stop(ctx context.Context) error {
 }
 
 func (s *ApiServer) configureRouter() {
-	handlerCfg := handlers.NewCfg(s.Config.Logger, func(cred amizone.Credentials, httpClient *http.Client) (amizone.ClientInterface, error) {
-		return amizone.NewClient(cred, httpClient)
-	})
+	handlerCfg := handlers.Cfg{
+		L: s.Config.Logger,
+		A: func(cred amizone.Credentials, httpClient *http.Client) (amizone.ClientInterface, error) {
+			return amizone.NewClient(cred, httpClient)
+		}}
 
 	s.Router.HandleFunc("/attendance", handlerCfg.AttendanceHandler)
 	s.Router.HandleFunc("/class_schedule", handlerCfg.ClassScheduleHandler)

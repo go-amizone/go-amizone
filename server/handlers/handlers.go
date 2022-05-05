@@ -13,10 +13,6 @@ type Cfg struct {
 	A amizone.ClientFactoryInterface
 }
 
-func NewCfg(l logr.Logger, a amizone.ClientFactoryInterface) *Cfg {
-	return &Cfg{L: l, A: a}
-}
-
 func (a *Cfg) AttendanceHandler(rw http.ResponseWriter, r *http.Request) {
 	authenticatedHandlerWrapper(a, a.authenticatedAttendanceHandler)(rw, r)
 }
