@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"github.com/ditsuke/go-amizone/amizone_api/handlers"
+	"github.com/ditsuke/go-amizone/server"
 	"github.com/joho/godotenv"
 	"k8s.io/klog/v2"
 	"net/http"
@@ -20,22 +20,18 @@ func main() {
 	}
 	address := os.Getenv("AMIZONE_API_ADDRESS")
 
-	a := handlers.NewHandlerCfg(logger)
-
-	mux := http.NewServeMux()
-	mux.HandleFunc("/attendance", a.AttendanceHandler)
-	mux.HandleFunc("/schedule", a.ClassScheduleHandler)
-	mux.HandleFunc("/exam_schedule", a.ExamScheduleHandler)
-
-	server := http.Server{
-		Addr:    address,
-		Handler: mux,
+	s := server.ApiServer{
+		Config: &server.Config{
+			Logger:   logger,
+			BindAddr: address,
+		},
+		Router: http.NewServeMux(),
 	}
 
 	// Start the server on a new go-thread
 	go func() {
 		logger.Info("Starting server", "address", address)
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := s.Run(); err != nil && err != http.ErrServerClosed {
 			panic(err)
 		}
 	}()
@@ -54,7 +50,7 @@ func main() {
 	ctx, cancelFunc := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancelFunc()
 
-	err = server.Shutdown(ctx)
+	err = s.Stop(ctx)
 	if err != nil {
 		logger.Error(err, "failed to gracefully shut down serer", err)
 	}
