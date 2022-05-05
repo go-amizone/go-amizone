@@ -4,7 +4,7 @@ import (
 	"net/http"
 )
 
-// ClientInterface is an exported interface for amizoneClient to make mocking and testing more convenient.
+// ClientInterface is an exported interface for client to make mocking and testing more convenient.
 type ClientInterface interface {
 	DidLogin() bool
 	GetAttendance() (Attendance, error)
@@ -12,8 +12,8 @@ type ClientInterface interface {
 	GetExamSchedule() (*ExamSchedule, error)
 }
 
-// Interface compliance constraint for amizoneClient
-var _ ClientInterface = &amizoneClient{}
+// Interface compliance constraint for Client
+var _ ClientInterface = &Client{}
 
 // ClientFactoryInterface is a type for functions that return ClientInterface
 // instances. Functions returning concrete types need to be wrapped by functions

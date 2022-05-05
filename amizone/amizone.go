@@ -41,9 +41,10 @@ type Credentials struct {
 	Password string
 }
 
-// amizoneClient is the main struct for the amizone package, exposing
-// the entire API surface for the website as implemented here.
-type amizoneClient struct {
+// Client is the main struct for the amizone package, exposing the entire API surface
+// for the portal as implemented here. The struct must always be initialised through a public
+// constructor like NewClient()
+type Client struct {
 	client      *http.Client
 	credentials *Credentials
 	muLogin     struct {
@@ -54,16 +55,16 @@ type amizoneClient struct {
 }
 
 // DidLogin returns true if the client ever successfully logged in.
-func (a *amizoneClient) DidLogin() bool {
+func (a *Client) DidLogin() bool {
 	a.muLogin.Lock()
 	defer a.muLogin.Unlock()
 	return a.muLogin.didLogin
 }
 
-// NewClient create a new amizoneClient instance with Credentials passed, then attempts to log in to the website.
+// NewClient create a new client instance with Credentials passed, then attempts to log in to the website.
 // The *http.Client parameter can be nil, in which case a default client will be created in its place.
 // To get a non-logged in client, pass empty credentials, ala Credentials{}.
-func NewClient(cred Credentials, httpClient *http.Client) (*amizoneClient, error) {
+func NewClient(cred Credentials, httpClient *http.Client) (*Client, error) {
 	if httpClient == nil {
 		jar, err := cookiejar.New(nil)
 		if err != nil {
@@ -78,7 +79,7 @@ func NewClient(cred Credentials, httpClient *http.Client) (*amizoneClient, error
 		return nil, errors.New(ErrBadClient)
 	}
 
-	client := &amizoneClient{
+	client := &Client{
 		client:      httpClient,
 		credentials: &cred,
 	}
@@ -91,9 +92,9 @@ func NewClient(cred Credentials, httpClient *http.Client) (*amizoneClient, error
 	return client, client.login()
 }
 
-// login attempts to log in to Amizone with the credentials passed to the amizoneClient and a scrapped
+// login attempts to log in to Amizone with the credentials passed to the Client and a scrapped
 // "__RequestVerificationToken" value.
-func (a *amizoneClient) login() error {
+func (a *Client) login() error {
 	a.muLogin.Lock()
 	defer a.muLogin.Unlock()
 
@@ -158,7 +159,7 @@ func (a *amizoneClient) login() error {
 
 // GetAttendance retrieves, parses and returns attendance data from Amizone for courses the client user is enrolled in
 // for their latest semester.
-func (a *amizoneClient) GetAttendance() (Attendance, error) {
+func (a *Client) GetAttendance() (Attendance, error) {
 	response, err := a.doRequest(true, http.MethodGet, attendancePageEndpoint, nil)
 	if err != nil {
 		klog.Warningf("request (attendance): %s", err.Error())
@@ -177,7 +178,7 @@ func (a *amizoneClient) GetAttendance() (Attendance, error) {
 // GetClassSchedule retrieves, parses and returns class schedule data from Amizone.
 // The date parameter is used to determine which schedule to retrieve, but Amizone imposes arbitrary limits on the
 // date range, so we have no way of knowing if a request will succeed.
-func (a *amizoneClient) GetClassSchedule(date Date) (ClassSchedule, error) {
+func (a *Client) GetClassSchedule(date Date) (ClassSchedule, error) {
 	timeFrom := time.Date(date.Year, time.Month(date.Month), date.Day, 0, 0, 0, 0, time.UTC)
 	timeTo := timeFrom.Add(time.Hour * 24)
 
@@ -201,7 +202,7 @@ func (a *amizoneClient) GetClassSchedule(date Date) (ClassSchedule, error) {
 // GetExamSchedule retrieves, parses and returns exam schedule data from Amizone.
 // Amizone only allows to retrieve the exam schedule for the current semester, and only close to the exam
 // dates once the date sheets are out, so we don't take a parameter here.
-func (a *amizoneClient) GetExamSchedule() (*ExamSchedule, error) {
+func (a *Client) GetExamSchedule() (*ExamSchedule, error) {
 	response, err := a.doRequest(true, http.MethodGet, examScheduleEndpoint, nil)
 	if err != nil {
 		klog.Warningf("request (exam schedule): %s", err.Error())

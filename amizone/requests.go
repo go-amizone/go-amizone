@@ -14,10 +14,10 @@ import (
 
 // doRequest is an internal http request helper to simplify making requests.
 // This method takes care of both composing requests, setting custom headers and such as needed.
-// If tryLogin is true, the client will attempt to log in if it is not already logged in.
+// If tryLogin is true, the Client will attempt to log in if it is not already logged in.
 // method must be a valid http request method.
 // endpoint must be relative to BaseUrl.
-func (a *amizoneClient) doRequest(tryLogin bool, method string, endpoint string, body io.Reader) (*http.Response, error) {
+func (a *Client) doRequest(tryLogin bool, method string, endpoint string, body io.Reader) (*http.Response, error) {
 	// Login now if we didn't log in at instantiation.
 	if tryLogin && !a.DidLogin() && *a.credentials != (Credentials{}) {
 		klog.Infof("doRequest: Attempting to login since we haven't logged in yet.")
