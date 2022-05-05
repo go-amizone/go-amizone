@@ -38,8 +38,8 @@ func ClassSchedule(body io.Reader) (models.ClassSchedule, error) {
 			return t
 		}
 
-		class := &models.ScheduledClass{
-			Course: &models.Course{
+		class := models.ScheduledClass{
+			Course: models.Course{
 				Code: entry.CourseCode,
 				Name: entry.CourseName,
 			},

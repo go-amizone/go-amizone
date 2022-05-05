@@ -1,7 +1,7 @@
 package models
 
 type CourseAttendance struct {
-	Course          *Course
+	Course          Course
 	ClassesHeld     int
 	ClassesAttended int
 }

@@ -48,7 +48,7 @@ func Attendance(body io.Reader) (models.AttendanceRecord, error) {
 		}()
 
 		courseAttendance := models.CourseAttendance{
-			Course: &models.Course{
+			Course: models.Course{
 				Code: func() string {
 					raw := record.Find("span.sub-code").Text()
 					return strings.TrimSpace(raw)

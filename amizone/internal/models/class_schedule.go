@@ -6,7 +6,7 @@ import (
 )
 
 type ScheduledClass struct {
-	Course    *Course
+	Course    Course
 	StartTime time.Time
 	EndTime   time.Time
 	Faculty   string
@@ -14,7 +14,7 @@ type ScheduledClass struct {
 }
 
 // ClassSchedule is an array of ScheduledClass, typically for a single day
-type ClassSchedule []*ScheduledClass
+type ClassSchedule []ScheduledClass
 
 // Sort sorts the ClassSchedule by ScheduledClass.StartTime
 func (s *ClassSchedule) Sort() {

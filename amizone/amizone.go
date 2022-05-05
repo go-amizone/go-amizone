@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ditsuke/go-amizone/amizone/internal"
-	"github.com/ditsuke/go-amizone/amizone/internal/models"
 	"github.com/ditsuke/go-amizone/amizone/internal/parse"
 	"k8s.io/klog/v2"
 	"net/http"
@@ -159,7 +158,7 @@ func (a *amizoneClient) login() error {
 
 // GetAttendance retrieves, parses and returns attendance data from Amizone for courses the client user is enrolled in
 // for their latest semester.
-func (a *amizoneClient) GetAttendance() (models.AttendanceRecord, error) {
+func (a *amizoneClient) GetAttendance() (Attendance, error) {
 	response, err := a.doRequest(true, http.MethodGet, attendancePageEndpoint, nil)
 	if err != nil {
 		klog.Warningf("request (attendance): %s", err.Error())
@@ -172,13 +171,13 @@ func (a *amizoneClient) GetAttendance() (models.AttendanceRecord, error) {
 		return nil, errors.New(ErrFailedToParsePage)
 	}
 
-	return attendanceRecord, nil
+	return Attendance(attendanceRecord), nil
 }
 
 // GetClassSchedule retrieves, parses and returns class schedule data from Amizone.
 // The date parameter is used to determine which schedule to retrieve, but Amizone imposes arbitrary limits on the
 // date range, so we have no way of knowing if a request will succeed.
-func (a *amizoneClient) GetClassSchedule(date Date) (models.ClassSchedule, error) {
+func (a *amizoneClient) GetClassSchedule(date Date) (ClassSchedule, error) {
 	timeFrom := time.Date(date.Year, time.Month(date.Month), date.Day, 0, 0, 0, 0, time.UTC)
 	timeTo := timeFrom.Add(time.Hour * 24)
 
@@ -196,13 +195,13 @@ func (a *amizoneClient) GetClassSchedule(date Date) (models.ClassSchedule, error
 		return nil, errors.New(ErrFailedToParsePage)
 	}
 
-	return classSchedule, nil
+	return ClassSchedule(classSchedule), nil
 }
 
 // GetExamSchedule retrieves, parses and returns exam schedule data from Amizone.
 // Amizone only allows to retrieve the exam schedule for the current semester, and only close to the exam
 // dates once the date sheets are out, so we don't take a parameter here.
-func (a *amizoneClient) GetExamSchedule() (*models.ExaminationSchedule, error) {
+func (a *amizoneClient) GetExamSchedule() (*ExamSchedule, error) {
 	response, err := a.doRequest(true, http.MethodGet, examScheduleEndpoint, nil)
 	if err != nil {
 		klog.Warningf("request (exam schedule): %s", err.Error())
@@ -215,5 +214,5 @@ func (a *amizoneClient) GetExamSchedule() (*models.ExaminationSchedule, error) {
 		return nil, errors.New(ErrFailedToParsePage)
 	}
 
-	return examSchedule, nil
+	return (*ExamSchedule)(examSchedule), nil
 }
