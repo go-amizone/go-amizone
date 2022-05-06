@@ -3,17 +3,12 @@ package amizone_test
 import (
 	"github.com/ditsuke/go-amizone/amizone"
 	"github.com/ditsuke/go-amizone/amizone/internal/mock"
-	"github.com/ditsuke/go-amizone/amizone/internal/models"
 	. "github.com/onsi/gomega"
 	"gopkg.in/h2non/gock.v1"
 	"net/http"
 	"net/http/cookiejar"
 	"testing"
 )
-
-type amizoneClientInterface interface {
-	GetAttendance() (models.AttendanceRecord, error)
-}
 
 // @todo: implement test cases to test behavior when:
 // - Amizone is not reachable
@@ -82,9 +77,9 @@ func TestAmizoneClient_GetAttendance(t *testing.T) {
 
 	testCases := []struct {
 		name              string
-		amizoneClient     amizoneClientInterface
+		amizoneClient     amizone.ClientInterface
 		setup             func(g *WithT)
-		attendanceMatcher func(g *WithT, attendance models.AttendanceRecord)
+		attendanceMatcher func(g *WithT, attendance amizone.Attendance)
 		errorMatcher      func(g *WithT, err error)
 	}{
 		{
@@ -94,7 +89,7 @@ func TestAmizoneClient_GetAttendance(t *testing.T) {
 				err := mock.GockRegisterHomePageLoggedIn()
 				g.Expect(err).ToNot(HaveOccurred())
 			},
-			attendanceMatcher: func(g *WithT, attendance models.AttendanceRecord) {
+			attendanceMatcher: func(g *WithT, attendance amizone.Attendance) {
 				g.Expect(len(attendance)).To(Equal(8))
 			},
 			errorMatcher: func(g *WithT, err error) {
@@ -114,7 +109,7 @@ func TestAmizoneClient_GetAttendance(t *testing.T) {
 					Reply(http.StatusOK).
 					BodyString("<html><body>Forbidden -- No Records for you</body></html>")
 			},
-			attendanceMatcher: func(g *WithT, attendance models.AttendanceRecord) {
+			attendanceMatcher: func(g *WithT, attendance amizone.Attendance) {
 				g.Expect(attendance).To(BeEmpty())
 			},
 			errorMatcher: func(g *WithT, err error) {
