@@ -1,6 +1,9 @@
 package handlers
 
 import (
+	"bytes"
+	"encoding/base64"
+	"errors"
 	"github.com/ditsuke/go-amizone/amizone"
 	"net/http"
 )
@@ -11,9 +14,24 @@ import (
 // This function also handles authentication errors if the auth information is invalid.
 func authenticatedHandlerWrapper(c *Cfg, handler AuthenticatedHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Get query parameters for auth
-		username := r.FormValue("username")
-		password := r.FormValue("password")
+		// We accept credentials through a single custom header, where they're encoded in base64 as "username:password"
+		encodedCredentials := r.Header.Get("X-Amizone-Credentials")
+		if encodedCredentials == "" {
+			w.WriteHeader(http.StatusBadRequest)
+		}
+
+		// Here, we attempt to decode the credentials first => then extract the parts
+		username, password, err := func() (string, string, error) {
+			decoded, err := base64.StdEncoding.DecodeString(encodedCredentials)
+			if err != nil {
+				return "", "", err
+			}
+			sepIndex := bytes.IndexRune(decoded, ':')
+			if sepIndex == -1 {
+				return "", "", errors.New("invalid format")
+			}
+			return string(decoded[:sepIndex]), string(decoded[sepIndex+1:]), nil
+		}()
 
 		if username == "" || password == "" {
 			w.WriteHeader(http.StatusBadRequest)
