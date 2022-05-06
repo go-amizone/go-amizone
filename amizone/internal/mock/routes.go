@@ -8,6 +8,8 @@ import (
 	"net/url"
 )
 
+// GockRegisterLoginPage registers a gock route for the amizone login page serving the login page from the
+// mock FS.
 func GockRegisterLoginPage() error {
 	mockLogin, err := FS.Open(LoginPage)
 	if err != nil {
@@ -67,6 +69,8 @@ func GockRegisterLoginRequest() error {
 	return nil
 }
 
+// GockRegisterHomePageLoggedIn registers a gock route for the amizone home page, serving the home page for a logged-in
+// user from the mock FS. The request must have the referrers and cookies expected by the home page.
 func GockRegisterHomePageLoggedIn() error {
 	mockHome, err := FS.Open(HomePageLoggedIn)
 	if err != nil {
