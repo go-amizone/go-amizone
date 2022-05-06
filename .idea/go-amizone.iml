@@ -11,8 +11,7 @@
   </component>
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
-      <excludeFolder url="file://$MODULE_DIR$/lib/amizone/testdata" />
-      <excludeFolder url="file://$MODULE_DIR$/internal/mock/testdata" />
+      <excludeFolder url="file://$MODULE_DIR$/amizone/internal/mock/testdata" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
