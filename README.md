@@ -37,8 +37,8 @@ binary. With the latter, you would be able to use Swagger to generate SDKs for o
 
 ### SDK
 
-Install the library using `go get github.com/ditsuke/amizone-go`. Usage is well documented go docs, and docs
-are due to be published soon.
+Install the library using `go get github.com/ditsuke/amizone-go`. The public API is well documented through godocs,
+easily accessed on [pkg.go.dev][go-reference] or [godocs.io][godocs.io].
 
 ### API Server
 
@@ -74,3 +74,6 @@ library in your own project! If you're working or planning to work on one, I wou
 [go-report-card]: https://goreportcard.com/report/github.com/ditsuke/go-amizone
 
 [heroku]: https://www.heroku.com/
+
+[godocs.io]: https://godocs.io/github.com/ditsuke/go-amizone
+
