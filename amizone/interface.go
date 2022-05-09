@@ -2,13 +2,14 @@ package amizone
 
 import (
 	"net/http"
+	"time"
 )
 
 // ClientInterface is an exported interface for client to make mocking and testing more convenient.
 type ClientInterface interface {
 	DidLogin() bool
 	GetAttendance() (Attendance, error)
-	GetClassSchedule(date Date) (ClassSchedule, error)
+	GetClassSchedule(year int, month time.Month, date int) (ClassSchedule, error)
 	GetExamSchedule() (*ExamSchedule, error)
 }
 

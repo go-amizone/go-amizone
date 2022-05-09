@@ -42,7 +42,7 @@ func (a *Cfg) authenticatedClassScheduleHandler(rw http.ResponseWriter, r *http.
 				return
 			}
 		}
-		schedule, err := c.GetClassSchedule(amizone.DateFromTime(t))
+		schedule, err := c.GetClassSchedule(t.Date())
 		if err != nil {
 			rw.WriteHeader(http.StatusInternalServerError)
 		}

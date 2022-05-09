@@ -178,8 +178,8 @@ func (a *Client) GetAttendance() (Attendance, error) {
 // GetClassSchedule retrieves, parses and returns class schedule data from Amizone.
 // The date parameter is used to determine which schedule to retrieve, but Amizone imposes arbitrary limits on the
 // date range, so we have no way of knowing if a request will succeed.
-func (a *Client) GetClassSchedule(date Date) (ClassSchedule, error) {
-	timeFrom := time.Date(date.Year, time.Month(date.Month), date.Day, 0, 0, 0, 0, time.UTC)
+func (a *Client) GetClassSchedule(year int, month time.Month, date int) (ClassSchedule, error) {
+	timeFrom := time.Date(year, month, date, 0, 0, 0, 0, time.UTC)
 	timeTo := timeFrom.Add(time.Hour * 24)
 
 	endpoint := fmt.Sprintf(scheduleEndpointTemplate, timeFrom.Format(scheduleEndpointTimeFormat), timeTo.Format(scheduleEndpointTimeFormat))
