@@ -195,6 +195,7 @@ func (a *Client) GetClassSchedule(year int, month time.Month, date int) (ClassSc
 		klog.Errorf("parse (schedule): %s", err.Error())
 		return nil, errors.New(ErrFailedToParsePage)
 	}
+	classSchedule.FilterByDate(timeFrom)
 
 	return ClassSchedule(classSchedule), nil
 }

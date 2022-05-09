@@ -22,3 +22,16 @@ func (s *ClassSchedule) Sort() {
 		return (*s)[i].StartTime.Before((*s)[j].StartTime)
 	})
 }
+
+func (s *ClassSchedule) FilterByDate(t time.Time) ClassSchedule {
+	var filtered ClassSchedule
+	for _, class := range *s {
+		// Truncate the time to a day.
+		tDate := t.Truncate(time.Hour * 24)
+
+		if difference := class.StartTime.Sub(tDate).Hours(); difference > 0 && difference < 24 {
+			filtered = append(filtered, class)
+		}
+	}
+	return filtered
+}
