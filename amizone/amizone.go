@@ -21,6 +21,8 @@ const (
 	attendancePageEndpoint   = "/Home"
 	scheduleEndpointTemplate = "/Calendar/home/GetDiaryEvents?start=%s&end=%s"
 	examScheduleEndpoint     = "/Examination/ExamSchedule"
+	currentCoursesEndpoint   = "/Academics/MyCourses"
+	coursesEndpoint          = "/CourseListSemWise"
 
 	scheduleEndpointTimeFormat = "2006-01-02"
 
@@ -217,4 +219,62 @@ func (a *Client) GetExamSchedule() (*ExamSchedule, error) {
 	}
 
 	return (*ExamSchedule)(examSchedule), nil
+}
+
+// GetSemesters retrieves, parses and returns a SemesterList from Amizone. This list includes all semesters for which
+// information can be retrieved through other semester-specific methods like GetCourses.
+func (a *Client) GetSemesters() (SemesterList, error) {
+	response, err := a.doRequest(true, http.MethodGet, currentCoursesEndpoint, nil)
+	if err != nil {
+		klog.Warningf("request (get semesters): %s", err.Error())
+		return nil, errors.New(ErrFailedToVisitPage)
+	}
+
+	semesters, err := parse.Semesters(response.Body)
+	if err != nil {
+		klog.Errorf("parse (semesters): %s", err.Error())
+		return nil, errors.New(ErrFailedToParsePage)
+	}
+
+	return (SemesterList)(semesters), nil
+}
+
+// GetCourses retrieves, parses and returns a SemesterList from Amizone for the semester referred by
+// semesterRef. Semester references should be retrieved through GetSemesters, which returns a list of valid
+// semesters with names and references.
+func (a *Client) GetCourses(semesterRef string) (Courses, error) {
+	payload := url.Values{
+		"sem": []string{semesterRef},
+	}.Encode()
+
+	response, err := a.doRequest(true, http.MethodPost, coursesEndpoint, strings.NewReader(payload))
+	if err != nil {
+		klog.Warningf("request (get courses): %s", err.Error())
+		return nil, errors.New(ErrFailedToVisitPage)
+	}
+
+	courses, err := parse.Courses(response.Body)
+	if err != nil {
+		klog.Errorf("parse (courses): %s", err.Error())
+		return nil, errors.New(ErrFailedToParsePage)
+	}
+
+	return Courses(courses), nil
+}
+
+// GetCurrentCourses retrieves, parses and returns a SemesterList from Amizone for the most recent semester.
+func (a *Client) GetCurrentCourses() (Courses, error) {
+	response, err := a.doRequest(true, http.MethodGet, currentCoursesEndpoint, nil)
+	if err != nil {
+		klog.Warningf("request (get current courses): %s", err.Error())
+		return nil, errors.New(ErrFailedToVisitPage)
+	}
+
+	courses, err := parse.Courses(response.Body)
+	if err != nil {
+		klog.Errorf("parse (current courses): %s", err.Error())
+		return nil, errors.New(ErrFailedToParsePage)
+	}
+
+	return Courses(courses), nil
 }
