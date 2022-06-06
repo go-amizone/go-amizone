@@ -6,10 +6,11 @@ import "embed"
 //go:embed testdata
 var FS embed.FS
 
-// Constants for files in the FS filesystem.
+// Constants for file paths in the FS embedded filesystem.
 const (
 	DiaryEventsJSON     = "testdata/diary_events.json"
 	ExaminationSchedule = "testdata/examination_schedule.html"
 	HomePageLoggedIn    = "testdata/home_page_logged_in.html"
 	LoginPage           = "testdata/login_page.html"
+	CoursesPage         = "testdata/my_courses.html"
 )
