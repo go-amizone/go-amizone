@@ -6,7 +6,7 @@ import (
 )
 
 type ScheduledClass struct {
-	Course    Course
+	Course    CourseRef
 	StartTime time.Time
 	EndTime   time.Time
 	Faculty   string

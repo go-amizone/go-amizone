@@ -39,7 +39,7 @@ func ClassSchedule(body io.Reader) (models.ClassSchedule, error) {
 		}
 
 		class := models.ScheduledClass{
-			Course: models.Course{
+			Course: models.CourseRef{
 				Code: entry.CourseCode,
 				Name: entry.CourseName,
 			},
