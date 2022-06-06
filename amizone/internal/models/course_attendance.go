@@ -1,7 +1,5 @@
 package models
 
-import "time"
-
 type Attendance struct {
 	ClassesHeld     int
 	ClassesAttended int
