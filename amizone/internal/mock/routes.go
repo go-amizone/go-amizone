@@ -4,9 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"gopkg.in/h2non/gock.v1"
+	"io"
 	"net/http"
 	"net/url"
 )
+
+const BaseUrl = "https://s.amizone.net"
 
 // GockRegisterLoginPage registers a gock route for the amizone login page serving the login page from the
 // mock FS.
@@ -16,7 +19,7 @@ func GockRegisterLoginPage() error {
 		return errors.New("Failed to open mock login page: " + err.Error())
 	}
 
-	gock.New("https://s.amizone.net").
+	gock.New(BaseUrl).
 		Get("/").
 		Reply(http.StatusOK).
 		Type("text/html").
@@ -30,7 +33,7 @@ func GockRegisterLoginPage() error {
 // Invalid credentials: InvalidUser, InvalidPass
 func GockRegisterLoginRequest() error {
 	// Valid credentials
-	gock.New("https://s.amizone.net").
+	gock.New(BaseUrl).
 		Post("/").
 		MatchType("application/x-www-form-urlencoded").
 		BodyString(fmt.Sprintf("_Password=%s&_QString=&_UserName=%s&__RequestVerificationToken=.*", url.QueryEscape(ValidPass), ValidUser)).
@@ -47,7 +50,7 @@ func GockRegisterLoginRequest() error {
 	}
 
 	// Invalid credentials
-	gock.New("https://s.amizone.net").
+	gock.New(BaseUrl).
 		Post("/").
 		MatchType("application/x-www-form-urlencoded").
 		BodyString(fmt.Sprintf("_Password=%s&_QString=&_UserName=%s&__RequestVerificationToken=.*", url.QueryEscape(InvalidPass), InvalidUser)).
@@ -59,7 +62,7 @@ func GockRegisterLoginRequest() error {
 	if err != nil {
 		return errors.New("Failed to open mock login page: " + err.Error())
 	}
-	gock.New("https://s.amizone.net").
+	gock.New(BaseUrl).
 		Get("/").
 		MatchHeader("Referer", "https://s.amizone.net/").
 		Reply(http.StatusOK).
@@ -74,18 +77,84 @@ func GockRegisterLoginRequest() error {
 func GockRegisterHomePageLoggedIn() error {
 	mockHome, err := FS.Open(HomePageLoggedIn)
 	if err != nil {
-		return errors.New("Failed to open mock home page: " + err.Error())
+		return errors.New("failed to open mock home page: " + err.Error())
 	}
+	GockRegisterAuthenticatedGet("/Home", mockHome)
+	return nil
+}
 
-	gock.New("https://s.amizone.net").
-		Get("/Home").
-		MatchHeader("User-Agent", ".*").
-		MatchHeader("Referer", "https://s.amizone.net").
-		MatchHeader("Cookie", fmt.Sprintf("ASP.NET_SessionId=%s", SessionID)).
-		MatchHeader("Cookie", fmt.Sprintf(".ASPXAUTH=%s", AuthCookie)).
-		MatchHeader("Cookie", fmt.Sprintf("__RequestVerificationToken=%s", VerificationToken)).
+func GockRegisterSemesterCoursesRequest(semesterRef string) error {
+	mockCourses, err := FS.Open(CoursesPage)
+	if err != nil {
+		return errors.New("failed to open mock courses page: " + err.Error())
+	}
+	GockRegisterAuthenticatedPost("/CourseListSemWise",
+		url.Values{"sem": []string{semesterRef}}.Encode(),
+		mockCourses,
+	)
+	return nil
+}
+
+func GockRegisterCurrentCoursesPage() error {
+	mockCourses, err := FS.Open(CoursesPage)
+	if err != nil {
+		return errors.New("failed to open mock courses page: " + err.Error())
+	}
+	GockRegisterAuthenticatedGet("/Academics/MyCourses", mockCourses)
+	return nil
+}
+
+// GockRegisterAuthenticatedGet registers an authenticated GET request for the relative endpoint passed.
+// The second parameter is used as the response body of the request.
+func GockRegisterAuthenticatedGet(endpoint string, responseBody io.Reader) {
+	authenticateRequest(newRequest()).
+		Get(endpoint).
 		Reply(http.StatusOK).
 		Type("text/html").
-		Body(mockHome)
+		Body(responseBody)
+	return
+}
+
+// GockRegisterUnauthenticatedGet registers an unauthenticated GET request for the relative endpoint passed.
+func GockRegisterUnauthenticatedGet(endpoint string) error {
+	mockLogin, err := FS.Open(LoginPage)
+	if err != nil {
+		return errors.New("failed to open mock login page: " + err.Error())
+	}
+	gock.New(BaseUrl).
+		Get(endpoint).
+		Reply(http.StatusOK).
+		Body(mockLogin)
+
 	return nil
+}
+
+func GockRegisterAuthenticatedPost(endpoint string, requestBody string, responseBody io.Reader) {
+	authenticateRequest(newRequest()).
+		Post(endpoint).
+		BodyString(requestBody).
+		Reply(http.StatusOK).
+		Body(responseBody)
+	return
+}
+
+func GockRegisterUnauthenticatedPost(endpoint string, requestBody string, responseBody io.Reader) {
+	newRequest().
+		Post(endpoint).
+		BodyString(requestBody).
+		Reply(http.StatusOK).
+		Body(responseBody)
+}
+
+func newRequest() *gock.Request {
+	return gock.New(BaseUrl).
+		MatchHeader("User-Agent", ".*").
+		MatchHeader("Referer", BaseUrl)
+}
+
+func authenticateRequest(r *gock.Request) *gock.Request {
+	return r.
+		MatchHeader("Cookie", fmt.Sprintf("ASP.NET_SessionId=%s", SessionID)).
+		MatchHeader("Cookie", fmt.Sprintf(".ASPXAUTH=%s", AuthCookie)).
+		MatchHeader("Cookie", fmt.Sprintf("__RequestVerificationToken=%s", VerificationToken))
 }
