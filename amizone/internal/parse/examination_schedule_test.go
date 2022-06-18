@@ -11,7 +11,7 @@ import (
 func TestExaminationSchedule(t *testing.T) {
 	testCases := []struct {
 		name            string
-		bodyFile        string
+		bodyFile        mock.File
 		scheduleMatcher func(g *GomegaWithT, schedule *models.ExaminationSchedule)
 		errorMatcher    func(g *GomegaWithT, err error)
 	}{
@@ -41,7 +41,7 @@ func TestExaminationSchedule(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			g := NewGomegaWithT(t)
 
-			fileReader, err := mock.FS.Open(testCase.bodyFile)
+			fileReader, err := testCase.bodyFile.Open()
 			g.Expect(err).ToNot(HaveOccurred())
 
 			schedule, err := parse.ExaminationSchedule(fileReader)

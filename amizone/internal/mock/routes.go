@@ -12,9 +12,9 @@ import (
 const BaseUrl = "https://s.amizone.net"
 
 // GockRegisterLoginPage registers a gock route for the amizone login page serving the login page from the
-// mock FS.
+// mock fileSystem.
 func GockRegisterLoginPage() error {
-	mockLogin, err := FS.Open(LoginPage)
+	mockLogin, err := LoginPage.Open()
 	if err != nil {
 		return errors.New("Failed to open mock login page: " + err.Error())
 	}
@@ -58,7 +58,7 @@ func GockRegisterLoginRequest() error {
 		AddHeader("Location", "/")
 
 	// 302 redirect to login page on invalid credentials
-	mockLoginPage, err := FS.Open(LoginPage)
+	mockLoginPage, err := LoginPage.Open()
 	if err != nil {
 		return errors.New("Failed to open mock login page: " + err.Error())
 	}
@@ -73,9 +73,9 @@ func GockRegisterLoginRequest() error {
 }
 
 // GockRegisterHomePageLoggedIn registers a gock route for the amizone home page, serving the home page for a logged-in
-// user from the mock FS. The request must have the referrers and cookies expected by the home page.
+// user from the mock fileSystem. The request must have the referrers and cookies expected by the home page.
 func GockRegisterHomePageLoggedIn() error {
-	mockHome, err := FS.Open(HomePageLoggedIn)
+	mockHome, err := HomePageLoggedIn.Open()
 	if err != nil {
 		return errors.New("failed to open mock home page: " + err.Error())
 	}
@@ -84,7 +84,7 @@ func GockRegisterHomePageLoggedIn() error {
 }
 
 func GockRegisterSemesterCoursesRequest(semesterRef string) error {
-	mockCourses, err := FS.Open(CoursesPage)
+	mockCourses, err := CoursesPage.Open()
 	if err != nil {
 		return errors.New("failed to open mock courses page: " + err.Error())
 	}
@@ -96,7 +96,7 @@ func GockRegisterSemesterCoursesRequest(semesterRef string) error {
 }
 
 func GockRegisterCurrentCoursesPage() error {
-	mockCourses, err := FS.Open(CoursesPage)
+	mockCourses, err := CoursesPage.Open()
 	if err != nil {
 		return errors.New("failed to open mock courses page: " + err.Error())
 	}
@@ -117,7 +117,7 @@ func GockRegisterAuthenticatedGet(endpoint string, responseBody io.Reader) {
 
 // GockRegisterUnauthenticatedGet registers an unauthenticated GET request for the relative endpoint passed.
 func GockRegisterUnauthenticatedGet(endpoint string) error {
-	mockLogin, err := FS.Open(LoginPage)
+	mockLogin, err := LoginPage.Open()
 	if err != nil {
 		return errors.New("failed to open mock login page: " + err.Error())
 	}

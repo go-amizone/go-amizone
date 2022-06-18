@@ -12,7 +12,7 @@ func TestAttendance(t *testing.T) {
 	// @todo add test cases to cover more scenarios
 	testCases := []struct {
 		name              string
-		bodyFile          string
+		bodyFile          mock.File
 		attendanceMatcher func(g *GomegaWithT, attendance *models.AttendanceRecord)
 		errorMatcher      func(g *GomegaWithT, err error)
 	}{
@@ -32,7 +32,7 @@ func TestAttendance(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			g := NewGomegaWithT(t)
 
-			fileReader, err := mock.FS.Open(testCase.bodyFile)
+			fileReader, err := testCase.bodyFile.Open()
 			g.Expect(err).ToNot(HaveOccurred())
 
 			attendance, err := parse.Attendance(fileReader)

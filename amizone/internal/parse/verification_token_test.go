@@ -8,9 +8,10 @@ import (
 )
 
 func TestVerificationToken(t *testing.T) {
+	//goland:noinspection SpellCheckingInspection
 	testCases := []struct {
 		name          string
-		bodyFile      string
+		bodyFile      mock.File
 		expectedToken string
 	}{
 		{
@@ -29,7 +30,7 @@ func TestVerificationToken(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			g := NewGomegaWithT(t)
 
-			body, err := mock.FS.Open(tc.bodyFile)
+			body, err := tc.bodyFile.Open()
 			g.Expect(err).ToNot(HaveOccurred())
 
 			token := parse.VerificationToken(body)

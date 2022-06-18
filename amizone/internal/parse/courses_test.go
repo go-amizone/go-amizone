@@ -11,7 +11,7 @@ import (
 func TestCourses(t *testing.T) {
 	testCases := []struct {
 		name           string
-		bodyFile       string
+		bodyFile       mock.File
 		coursesMatcher func(g *GomegaWithT, courses models.Courses)
 		errMatcher     func(g *GomegaWithT, err error)
 	}{
@@ -41,7 +41,7 @@ func TestCourses(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			g := NewGomegaWithT(t)
-			fileReader, err := mock.FS.Open(testCase.bodyFile)
+			fileReader, err := testCase.bodyFile.Open()
 			g.Expect(err).ToNot(HaveOccurred())
 			courses, err := parse.Courses(fileReader)
 			testCase.coursesMatcher(g, courses)

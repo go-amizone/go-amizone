@@ -10,7 +10,7 @@ import (
 func TestLoggedIn(t *testing.T) {
 	testcases := []struct {
 		name     string
-		bodyFile string
+		bodyFile mock.File
 		expected bool
 	}{
 		{
@@ -34,7 +34,7 @@ func TestLoggedIn(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			g := NewGomegaWithT(t)
 
-			fileReader, err := mock.FS.Open(tc.bodyFile)
+			fileReader, err := tc.bodyFile.Open()
 
 			g.Expect(err).ToNot(HaveOccurred())
 			g.Expect(parse.LoggedIn(fileReader)).To(Equal(tc.expected))

@@ -1,16 +1,26 @@
 package mock
 
-import "embed"
+import (
+	"embed"
+	"io/fs"
+)
 
-// FS is a mock filesystem with some files that can be used for testing.
+// fileSystem is a mock filesystem with some files that can be used for testing.
 //go:embed testdata
-var FS embed.FS
+var fileSystem embed.FS
 
-// Constants for file paths in the FS embedded filesystem.
+type File string
+
+// Open returns a fs.File interface to the file in fileSystem, the mock filesystem.
+func (f File) Open() (fs.File, error) {
+	return fileSystem.Open(string(f))
+}
+
+// Constants for file paths in the fileSystem embedded filesystem.
 const (
-	DiaryEventsJSON     = "testdata/diary_events.json"
-	ExaminationSchedule = "testdata/examination_schedule.html"
-	HomePageLoggedIn    = "testdata/home_page_logged_in.html"
-	LoginPage           = "testdata/login_page.html"
-	CoursesPage         = "testdata/my_courses.html"
+	DiaryEventsJSON     File = "testdata/diary_events.json"
+	ExaminationSchedule File = "testdata/examination_schedule.html"
+	HomePageLoggedIn    File = "testdata/home_page_logged_in.html"
+	LoginPage           File = "testdata/login_page.html"
+	CoursesPage         File = "testdata/my_courses.html"
 )
