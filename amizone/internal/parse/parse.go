@@ -24,5 +24,6 @@ const (
 // cleanString trims off whitespace and additional runes passed.
 func cleanString(s string, set ...rune) string {
 	ws := strings.TrimSpace(s)
-	return strings.Trim(ws, string(set))
+	wd := strings.Trim(ws, string(set))
+	return strings.TrimSpace(wd)
 }
