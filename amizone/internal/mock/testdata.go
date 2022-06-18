@@ -23,4 +23,5 @@ const (
 	HomePageLoggedIn    File = "testdata/home_page_logged_in.html"
 	LoginPage           File = "testdata/login_page.html"
 	CoursesPage         File = "testdata/my_courses.html"
+	IDCardPage          File = "testdata/id_card_page.html"
 )

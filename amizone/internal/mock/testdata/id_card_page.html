@@ -1,0 +1,106 @@
+<div class="main-content">
+  <div class="main-content-inner">
+    <div class="breadcrumbs" id="breadcrumbs">
+      <ul class="breadcrumb">
+        <li><i class="ace-icon fa fa-home home-icon"></i><a href="/">Home</a></li>
+        <li class="active"> ID Card View</li>
+      </ul>
+    </div>
+    <div class="page-content">
+      <div class="row ">
+        <div class="widget-box widget-color-blue">
+          <div class="widget-header ">
+            <h5 class="widget-title bigger lighter">
+              ID Card View
+            </h5>
+          </div>
+          <div class="text-center" id="printableArea">
+            <div id="DivIDCardFront1" runat="server" class="txt-orange">
+              <table align="center" width="100%" cellpadding="0" cellspacing="0" class="abc">
+                <tr Height="85" align="center">
+                  <td>
+                    <img ID="ImgHeaderIDCardFront1"
+                         src="https://amizone.net/AdminAmizone/WebForms/IdCardDetails/images/AUUPHeader.png" Height="85"
+                         Width="212"/>
+                  </td>
+                </tr>
+                <tr Height="10">
+                  <td>&nbsp;</td>
+                </tr>
+                <tr Height="150">
+                  <td align="center">
+                    <img
+                      src="https://s.amizone.net/ImageViewer/Index?Type=1&amp;SUID=98RFGK88-A01C-1JJO-N73D-4BJR42B33J51"
+                      ID="ImgPhotoIDCardFront1" Width="90" Height="100" BorderWidth="0"
+                      style="margin-left:-7px; margin-top:3px"/>
+                    <br/><br/>
+                    <div ID="lblNameIDCardFront1" CssClass=printname>
+                      John Doe<br style='margin: 4px 0;'>B.Tech (CSE)<br style='margin: 4px 0;'>2020-2024
+                    </div>
+                  </td>
+                </tr>
+                <tr Height="10" id="trStudent" runat="server">
+                  <td>&nbsp;</td>
+                </tr>
+                <tr>
+                  <td>
+                    <table width="100%">
+                      <tr height="45">
+                        <td valign="bottom" style="padding-left:10px;">
+                          <img src="https://amizone.net/AdminAmizone/WebForms/IdCardDetails/images/AUUPAuthority.png"
+                               ID="ImgAuthSignIDCardFront1"
+                               runat="server" Width="70" Height="30"/>
+                        </td>
+                        <td valign="bottom" style="padding-right:10px;">
+                          <img
+                            src="https://s.amizone.net/ImageViewer/Index?Type=2&amp;SUID=98RFGK88-A01C-1JJO-N73D-4BJR42B33J51"
+                            ID="ImgHoldSignIDCardFront1" Width="70" Height="30"
+                          />
+                        </td>
+                      </tr>
+                      <tr height="45" class="issue">
+                        <td style="padding-left:10px;" valign="top">
+                          <label>Issuing Authority </label>
+                        </td>
+                        <td valign="top" style="padding-right:10px;"><label>Holder's Signature </label></td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </div>
+            <div id="DivIDCardBack1" runat="server">
+              <table width="90%" height="100%" class="abc" cellpadding="0" cellspacing="0" align="center">
+                <tr Height="130">
+                  <td align=left>
+                    <strong>
+                      <div ID="lblInfoIDCardBack1"><br><br>Enrollment No : A2305221007<Br style='margin: 5px 0;'>
+                        Date Of Birth : 05.04.2001<Br style='margin: 5px 0;'> Blood Group : B-ve<Br><Br><Br> In case of
+                        emergency,<br> Please call : <Br><Br><span style='margin-left:4px;'><img
+                          src='https://amizone.net/AdminAmizone/WebForms/IdCardDetails/images/Bullet_Black.png'/> Family : 9718098709</span><Br><span
+                          style='margin-left:4px;'><img
+                          src='https://amizone.net/AdminAmizone/WebForms/IdCardDetails/images/Bullet_Black.png'/> Institution : +91-120-4392000</span><Br><Br>
+                        Validity : 30.06.2024<Br><Br> ID Card No : 95188911
+                      </div>
+                    </strong>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="left">
+                    <strong>
+                      <div ID="lblOfficeInfoIDCardBack1" CssClass="officeinfo">
+                        <Br><Br><Br> If This card is found, please report to <Br> the office number - 0120-4392599 <br>
+                      </div>
+                    </strong>
+                    &nbsp;
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+          <button type="button" id="btnPrint" class="btn btn-info">Print</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
