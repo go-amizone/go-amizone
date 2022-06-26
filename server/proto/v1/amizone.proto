@@ -40,8 +40,6 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
       key: "BasicAuth";
       value: {
         type: TYPE_BASIC;
-        in: IN_HEADER;
-        name: "Authorization";
         description: "Valid auth credentials for s.amizone.edu"
       }
     }
