@@ -3,7 +3,7 @@ package models
 import "time"
 
 type ScheduledExam struct {
-	Course *CourseRef
+	Course CourseRef
 	Time   time.Time
 	Mode   string
 }

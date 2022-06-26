@@ -161,7 +161,7 @@ func (a *Client) login() error {
 
 // GetAttendance retrieves, parses and returns attendance data from Amizone for courses the client user is enrolled in
 // for their latest semester.
-func (a *Client) GetAttendance() (Attendance, error) {
+func (a *Client) GetAttendance() (AttendanceRecords, error) {
 	response, err := a.doRequest(true, http.MethodGet, attendancePageEndpoint, nil)
 	if err != nil {
 		klog.Warningf("request (attendance): %s", err.Error())
@@ -174,7 +174,7 @@ func (a *Client) GetAttendance() (Attendance, error) {
 		return nil, errors.New(ErrFailedToParsePage)
 	}
 
-	return Attendance(attendanceRecord), nil
+	return AttendanceRecords(attendanceRecord), nil
 }
 
 // GetClassSchedule retrieves, parses and returns class schedule data from Amizone.

@@ -88,8 +88,8 @@ func Courses(body io.Reader) (models.Courses, error) {
 					return models.Attendance{}
 				}
 				return models.Attendance{
-					ClassesAttended: attended,
-					ClassesHeld:     total,
+					ClassesAttended: int32(attended),
+					ClassesHeld:     int32(total),
 				}
 			}(),
 			InternalMarks: func() models.Marks {

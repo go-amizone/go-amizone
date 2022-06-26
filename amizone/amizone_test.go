@@ -61,7 +61,7 @@ func TestAmizoneClient_GetAttendance(t *testing.T) {
 		name              string
 		amizoneClient     *amizone.Client
 		setup             func(g *WithT)
-		attendanceMatcher func(g *WithT, attendance amizone.Attendance)
+		attendanceMatcher func(g *WithT, attendance amizone.AttendanceRecords)
 		errorMatcher      func(g *WithT, err error)
 	}{
 		{
@@ -71,7 +71,7 @@ func TestAmizoneClient_GetAttendance(t *testing.T) {
 				err := mock.GockRegisterHomePageLoggedIn()
 				g.Expect(err).ToNot(HaveOccurred())
 			},
-			attendanceMatcher: func(g *WithT, attendance amizone.Attendance) {
+			attendanceMatcher: func(g *WithT, attendance amizone.AttendanceRecords) {
 				g.Expect(len(attendance)).To(Equal(8))
 			},
 			errorMatcher: func(g *WithT, err error) {
@@ -85,7 +85,7 @@ func TestAmizoneClient_GetAttendance(t *testing.T) {
 				err := mock.GockRegisterUnauthenticatedGet("/Home")
 				g.Expect(err).ToNot(HaveOccurred())
 			},
-			attendanceMatcher: func(g *WithT, attendance amizone.Attendance) {
+			attendanceMatcher: func(g *WithT, attendance amizone.AttendanceRecords) {
 				g.Expect(attendance).To(BeEmpty())
 			},
 			errorMatcher: func(g *WithT, err error) {

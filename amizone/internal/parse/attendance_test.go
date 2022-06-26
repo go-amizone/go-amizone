@@ -13,13 +13,13 @@ func TestAttendance(t *testing.T) {
 	testCases := []struct {
 		name              string
 		bodyFile          mock.File
-		attendanceMatcher func(g *GomegaWithT, attendance *models.AttendanceRecord)
+		attendanceMatcher func(g *GomegaWithT, attendance *models.AttendanceRecords)
 		errorMatcher      func(g *GomegaWithT, err error)
 	}{
 		{
 			name:     "logged in home page",
 			bodyFile: mock.HomePageLoggedIn,
-			attendanceMatcher: func(g *GomegaWithT, attendance *models.AttendanceRecord) {
+			attendanceMatcher: func(g *GomegaWithT, attendance *models.AttendanceRecords) {
 				g.Expect(len(*attendance)).To(Equal(8))
 			},
 			errorMatcher: func(g *GomegaWithT, err error) {
