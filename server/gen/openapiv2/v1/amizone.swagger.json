@@ -18,7 +18,7 @@
       "name": "AmizoneService"
     }
   ],
-  "host": "localhost:8081",
+  "host": "amizone.fly.dev",
   "schemes": [
     "http",
     "https"

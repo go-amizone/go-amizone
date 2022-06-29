@@ -25,8 +25,7 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
       url: "https://github.com/ditsuke/go-amizone/blob/main/LICENSE";
     };
   };
-  // @todo update host
-  host: "localhost:8081"
+  host: "amizone.fly.dev",
   external_docs: {
     url: "https://github.com/ditsuke/go-amizone";
     description: "More about go-amizone";
