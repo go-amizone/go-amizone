@@ -34,8 +34,8 @@ func main() {
 
 	s := server.New(&server.Config{
 		Logger:       klog.NewKlogr(),
-		BindAddr:     "localhost:8081",
-		WellKnownDir: "well_known",
+		BindAddr:     config.address,
+		WellKnownDir: config.wellKnownDir,
 	})
 
 	// Start the server on a new go-thread

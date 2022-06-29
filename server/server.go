@@ -72,8 +72,13 @@ func (s *ApiServer) getHttpMux() *http.ServeMux {
 	// grpc-gateway
 	gwMux := runtime.NewServeMux()
 
-	// @todo configurable port here
-	err := v1.RegisterAmizoneServiceHandlerFromEndpoint(context.Background(), gwMux, "localhost:8081", []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
+	_, port, err := net.SplitHostPort(s.Config.BindAddr)
+	if err != nil {
+		s.Config.Logger.Error(err, "Failed to parse bind port", "addr", s.Config.BindAddr)
+		// @todo check if caller accommodates for the nil return
+		return nil
+	}
+	err = v1.RegisterAmizoneServiceHandlerFromEndpoint(context.Background(), gwMux, "localhost:"+port, []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
 	if err != nil {
 		s.Config.Logger.Error(err, "Failed to register grpc-gateway")
 	}
