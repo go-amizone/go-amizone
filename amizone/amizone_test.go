@@ -280,6 +280,20 @@ func TestClient_GetCurrentCourses(t *testing.T) {
 			},
 		},
 		{
+			name:   "amizone client is logged is and returns the (mock) sem-wise courses page",
+			client: loggedInClient,
+			setup: func(g *WithT) {
+				err := mock.GockRegisterSemWiseCoursesPage()
+				g.Expect(err).ToNot(HaveOccurred())
+			},
+			coursesMatcher: func(g *WithT, courses amizone.Courses) {
+				g.Expect(courses).To(HaveLen(8))
+			},
+			errMatcher: func(g *WithT, err error) {
+				g.Expect(err).ToNot(HaveOccurred())
+			},
+		},
+		{
 			name:   "amizone client is not logged in and returns the login page",
 			client: nonLoggedInClient,
 			setup: func(g *WithT) {

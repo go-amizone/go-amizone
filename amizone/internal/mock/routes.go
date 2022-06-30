@@ -104,6 +104,15 @@ func GockRegisterCurrentCoursesPage() error {
 	return nil
 }
 
+func GockRegisterSemWiseCoursesPage() error {
+	mockCourses, err := CoursesPageSemWise.Open()
+	if err != nil {
+		return errors.New("failed to open mock courses page: " + err.Error())
+	}
+	GockRegisterAuthenticatedGet("/Academics/MyCourses", mockCourses)
+	return nil
+}
+
 // GockRegisterAuthenticatedGet registers an authenticated GET request for the relative endpoint passed.
 // The second parameter is used as the response body of the request.
 func GockRegisterAuthenticatedGet(endpoint string, responseBody io.Reader) {

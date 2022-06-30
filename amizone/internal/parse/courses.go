@@ -11,21 +11,27 @@ import (
 	"strconv"
 )
 
+// Expose these data-title attributes, because they're used by the isCoursesPage function.
+const (
+	dtCourseCode       = "Course Code"
+	dtCourseAttendance = "Attendance"
+)
+
 // Courses parses the Amizone courses page.
 func Courses(body io.Reader) (models.Courses, error) {
 	// selectors
 	const (
-		selectorPrimaryCourseTable   = "#CourseListSemWise > div:nth-child(1) > table:nth-child(1)"
-		selectorSecondaryCourseTable = "#CourseListSemWise > div:nth-child(2) > table:nth-child(1)"
+		selectorPrimaryCourseTable   = "div:nth-child(1) > table:nth-child(1)"
+		selectorSecondaryCourseTable = "div:nth-child(2) > table:nth-child(1)"
 	)
 
 	// "data-title" attributes for the primary course table
 	const (
-		dtCode        = "Course Code"
+		dtCode        = dtCourseCode
 		dtName        = "Course Name"
 		dtType        = "Type"
 		dtSyllabusDoc = "Course Syllabus"
-		dtAttendance  = "Attendance"
+		dtAttendance  = dtCourseAttendance
 		dtInternals   = "Internal Asses."
 	)
 
@@ -34,11 +40,15 @@ func Courses(body io.Reader) (models.Courses, error) {
 		return nil, errors.New(fmt.Sprintf("%s: %s", ErrFailedToParseDOM, err.Error()))
 	}
 
+	// We check for the course page first, but we can't rely on it alone because the "semester wise" course page does
+	// not come with breadcrumbs.
 	if !isCoursesPage(dom) {
 		return nil, errors.New(ErrFailedToParse)
 	}
 
-	courseTablePrimary := dom.Find(selectorPrimaryCourseTable)
+	normDom := normalisePage(dom.Selection)
+
+	courseTablePrimary := normDom.Find(selectorPrimaryCourseTable)
 	if matches := courseTablePrimary.Length(); matches != 1 {
 		klog.Warning("failed to find the main course table. selector matches:", matches)
 		return nil, errors.New(ErrFailedToParse)
@@ -52,7 +62,7 @@ func Courses(body io.Reader) (models.Courses, error) {
 	}
 
 	// secondary courses
-	secondaryEntries := dom.Find(selectorSecondaryCourseTable).Find(selectorDataRows)
+	secondaryEntries := normDom.Find(selectorSecondaryCourseTable).Find(selectorDataRows)
 
 	// all courses
 	courseEntries := primaryEntries.AddSelection(secondaryEntries)
@@ -108,5 +118,18 @@ func Courses(body io.Reader) (models.Courses, error) {
 
 func isCoursesPage(dom *goquery.Document) bool {
 	const coursePageBreadcrumb = "My Courses"
-	return dom.Find(selectorActiveBreadcrumb).Text() == coursePageBreadcrumb
+
+	return dom.Find(selectorActiveBreadcrumb).Text() == coursePageBreadcrumb ||
+		(dom.Find(fmt.Sprintf(selectorTplDataCell, dtCourseCode)).Length() != 0 &&
+			dom.Find(fmt.Sprintf(selectorTplDataCell, dtCourseAttendance)).Length() != 0)
+}
+
+// normalisePage attempts to "normalise" the page by extracting the contexts of the "#CourseListSemWise" div.
+// We need to do this because the page comes in two flavors: one when it has breadcrumbs and the course tables wrapped
+// in the "#CourseListSemWise" div, and one when it doesn't (when we query courses for a non-current semester).
+func normalisePage(dom *goquery.Selection) *goquery.Selection {
+	if child := dom.Find("#CourseListSemWise").Children(); child.Length() > 0 {
+		return child
+	}
+	return dom
 }

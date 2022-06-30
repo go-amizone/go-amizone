@@ -16,8 +16,19 @@ func TestCourses(t *testing.T) {
 		errMatcher     func(g *GomegaWithT, err error)
 	}{
 		{
-			name:     "valid courses page",
+			name:     "current courses page",
 			bodyFile: mock.CoursesPage,
+			coursesMatcher: func(g *GomegaWithT, courses models.Courses) {
+				g.Expect(courses).ToNot(BeNil())
+				g.Expect(len(courses)).To(Equal(8))
+			},
+			errMatcher: func(g *GomegaWithT, err error) {
+				g.Expect(err).ToNot(HaveOccurred())
+			},
+		},
+		{
+			name:     "semester wise courses page",
+			bodyFile: mock.CoursesPageSemWise,
 			coursesMatcher: func(g *GomegaWithT, courses models.Courses) {
 				g.Expect(courses).ToNot(BeNil())
 				g.Expect(len(courses)).To(Equal(8))

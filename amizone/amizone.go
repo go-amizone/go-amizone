@@ -22,7 +22,7 @@ const (
 	scheduleEndpointTemplate = "/Calendar/home/GetDiaryEvents?start=%s&end=%s"
 	examScheduleEndpoint     = "/Examination/ExamSchedule"
 	currentCoursesEndpoint   = "/Academics/MyCourses"
-	coursesEndpoint          = "/CourseListSemWise"
+	coursesEndpoint          = currentCoursesEndpoint + "/CourseListSemWise"
 
 	scheduleEndpointTimeFormat = "2006-01-02"
 
