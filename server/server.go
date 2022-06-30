@@ -182,7 +182,7 @@ func authorizeCtx(ctx context.Context) (context.Context, error) {
 	user, pass := string(credentials[:index]), string(credentials[index+1:])
 	client, err := amizone.NewClient(amizone.Credentials{Username: user, Password: pass}, nil)
 	if err != nil {
-		return ctx, status.Errorf(codes.Unauthenticated, "amizone: ", err.Error())
+		return ctx, status.Error(codes.Unauthenticated, "amizone: "+err.Error())
 	}
 	return context.WithValue(ctx, ContextAmizoneClientKey, client), nil
 }
