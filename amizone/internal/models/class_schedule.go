@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+// ScheduledClass models the data extracted from the class schedule as found on the Amizone
+// home page.
 type ScheduledClass struct {
 	Course    CourseRef
 	StartTime time.Time
