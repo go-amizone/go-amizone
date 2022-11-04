@@ -1,0 +1,481 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Amizone API",
+    "version": "0.2",
+    "contact": {
+      "name": "ditsuke",
+      "url": "https://github.com/ditsuke",
+      "email": "ditsuke@pm.me"
+    },
+    "license": {
+      "name": "GPL-2.0",
+      "url": "https://github.com/ditsuke/go-amizone/blob/main/LICENSE"
+    }
+  },
+  "tags": [
+    {
+      "name": "AmizoneService"
+    }
+  ],
+  "host": "amizone.fly.dev",
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1/attendance": {
+      "get": {
+        "operationId": "AmizoneService_GetAttendance",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1AttendanceRecords"
+            }
+          },
+          "403": {
+            "description": "Returned when the user does not have permission to access the resource.",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "AmizoneService"
+        ]
+      }
+    },
+    "/api/v1/class_schedule/{date.year}/{date.month}/{date.day}": {
+      "get": {
+        "operationId": "AmizoneService_GetClassSchedule",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ScheduledClasses"
+            }
+          },
+          "403": {
+            "description": "Returned when the user does not have permission to access the resource.",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "date.year",
+            "description": "Year of the date. Must be from 1 to 9999, or 0 to specify a date without\na year.",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "date.month",
+            "description": "Month of a year. Must be from 1 to 12, or 0 to specify a year without a\nmonth and day.",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "date.day",
+            "description": "Day of a month. Must be from 1 to 31 and valid for the year and month, or 0\nto specify a year by itself or a year and month where the day isn't\nsignificant.",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "AmizoneService"
+        ]
+      }
+    },
+    "/api/v1/courses": {
+      "get": {
+        "summary": "GetCurrentCourses returns a list of courses for the \"current\" semester.",
+        "operationId": "AmizoneService_GetCurrentCourses",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1Courses"
+            }
+          },
+          "403": {
+            "description": "Returned when the user does not have permission to access the resource.",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "AmizoneService"
+        ]
+      }
+    },
+    "/api/v1/courses/{semesterRef}": {
+      "get": {
+        "summary": "GetCourses returns a list of courses for the given semester.",
+        "operationId": "AmizoneService_GetCourses",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1Courses"
+            }
+          },
+          "403": {
+            "description": "Returned when the user does not have permission to access the resource.",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "semesterRef",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "AmizoneService"
+        ]
+      }
+    },
+    "/api/v1/exam_schedule": {
+      "get": {
+        "summary": "GetExamSchedule returns exam schedule. Amizone only allows access to schedules for the ongoing semester\nand only close to the exam dates, so we don't take any parameters.",
+        "operationId": "AmizoneService_GetExamSchedule",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ExaminationSchedule"
+            }
+          },
+          "403": {
+            "description": "Returned when the user does not have permission to access the resource.",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "AmizoneService"
+        ]
+      }
+    },
+    "/api/v1/semesters": {
+      "get": {
+        "summary": "GetSemesters returns a list of semesters that include past semesters and the current semester.\nThese semesters can be used in other RPCs that consume them, for example GetCourses.",
+        "operationId": "AmizoneService_GetSemesters",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1SemesterList"
+            }
+          },
+          "403": {
+            "description": "Returned when the user does not have permission to access the resource.",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "AmizoneService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string",
+          "description": "A URL/resource name that uniquely identifies the type of the serialized\nprotocol buffer message. This string must contain at least\none \"/\" character. The last segment of the URL's path must represent\nthe fully qualified name of the type (as in\n`path/google.protobuf.Duration`). The name should be in a canonical form\n(e.g., leading \".\" is not accepted).\n\nIn practice, teams usually precompile into the binary all types that they\nexpect it to use in the context of Any. However, for URLs which use the\nscheme `http`, `https`, or no scheme, one can optionally set up a type\nserver that maps type URLs to message definitions as follows:\n\n* If no scheme is provided, `https` is assumed.\n* An HTTP GET on the URL must yield a [google.protobuf.Type][]\n  value in binary format, or produce an error.\n* Applications are allowed to cache lookup results based on the\n  URL, or have them precompiled into a binary to avoid any\n  lookup. Therefore, binary compatibility needs to be preserved\n  on changes to types. (Use versioned type names to manage\n  breaking changes.)\n\nNote: this functionality is not currently available in the official\nprotobuf release, and it is not used for type URLs beginning with\ntype.googleapis.com.\n\nSchemes other than `http`, `https` (or the empty scheme) might be\nused with implementation specific semantics."
+        }
+      },
+      "additionalProperties": {},
+      "description": "`Any` contains an arbitrary serialized protocol buffer message along with a\nURL that describes the type of the serialized message.\n\nProtobuf library provides support to pack/unpack Any values in the form\nof utility functions or additional generated methods of the Any type.\n\nExample 1: Pack and unpack a message in C++.\n\n    Foo foo = ...;\n    Any any;\n    any.PackFrom(foo);\n    ...\n    if (any.UnpackTo(\u0026foo)) {\n      ...\n    }\n\nExample 2: Pack and unpack a message in Java.\n\n    Foo foo = ...;\n    Any any = Any.pack(foo);\n    ...\n    if (any.is(Foo.class)) {\n      foo = any.unpack(Foo.class);\n    }\n\nExample 3: Pack and unpack a message in Python.\n\n    foo = Foo(...)\n    any = Any()\n    any.Pack(foo)\n    ...\n    if any.Is(Foo.DESCRIPTOR):\n      any.Unpack(foo)\n      ...\n\nExample 4: Pack and unpack a message in Go\n\n     foo := \u0026pb.Foo{...}\n     any, err := anypb.New(foo)\n     if err != nil {\n       ...\n     }\n     ...\n     foo := \u0026pb.Foo{}\n     if err := any.UnmarshalTo(foo); err != nil {\n       ...\n     }\n\nThe pack methods provided by protobuf library will by default use\n'type.googleapis.com/full.type.name' as the type URL and the unpack\nmethods only use the fully qualified type name after the last '/'\nin the type URL, for example \"foo.bar.com/x/y.z\" will yield type\nname \"y.z\".\n\n\nJSON\n\nThe JSON representation of an `Any` value uses the regular\nrepresentation of the deserialized, embedded message, with an\nadditional field `@type` which contains the type URL. Example:\n\n    package google.profile;\n    message Person {\n      string first_name = 1;\n      string last_name = 2;\n    }\n\n    {\n      \"@type\": \"type.googleapis.com/google.profile.Person\",\n      \"firstName\": \u003cstring\u003e,\n      \"lastName\": \u003cstring\u003e\n    }\n\nIf the embedded message type is well-known and has a custom JSON\nrepresentation, that representation will be embedded adding a field\n`value` which holds the custom JSON in addition to the `@type`\nfield. Example (for message [google.protobuf.Duration][]):\n\n    {\n      \"@type\": \"type.googleapis.com/google.protobuf.Duration\",\n      \"value\": \"1.212s\"\n    }"
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "typeDate": {
+      "type": "object",
+      "properties": {
+        "year": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Year of the date. Must be from 1 to 9999, or 0 to specify a date without\na year."
+        },
+        "month": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Month of a year. Must be from 1 to 12, or 0 to specify a year without a\nmonth and day."
+        },
+        "day": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Day of a month. Must be from 1 to 31 and valid for the year and month, or 0\nto specify a year by itself or a year and month where the day isn't\nsignificant."
+        }
+      },
+      "description": "* A full date, with non-zero year, month, and day values\n* A month and day value, with a zero year, such as an anniversary\n* A year on its own, with zero month and day values\n* A year and month value, with a zero day, such as a credit card expiration\ndate\n\nRelated types are [google.type.TimeOfDay][google.type.TimeOfDay] and\n`google.protobuf.Timestamp`.",
+      "title": "Represents a whole or partial calendar date, such as a birthday. The time of\nday and time zone are either specified elsewhere or are insignificant. The\ndate is relative to the Gregorian Calendar. This can represent one of the\nfollowing:"
+    },
+    "v1Attendance": {
+      "type": "object",
+      "properties": {
+        "attended": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "held": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "description": "Attendance messages are embedded in other messages (Course, AttendanceRecord)."
+    },
+    "v1AttendanceRecord": {
+      "type": "object",
+      "properties": {
+        "attendance": {
+          "$ref": "#/definitions/v1Attendance"
+        },
+        "Course": {
+          "$ref": "#/definitions/v1CourseRef"
+        }
+      },
+      "description": "AttendanceRecord represents a student's attendance for a course."
+    },
+    "v1AttendanceRecords": {
+      "type": "object",
+      "properties": {
+        "records": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1AttendanceRecord"
+          }
+        }
+      },
+      "description": "AttendanceRecords is a list of attendance records, usually representing attendance records for all\ncourses in a semester."
+    },
+    "v1Course": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/definitions/v1CourseRef"
+        },
+        "type": {
+          "type": "string"
+        },
+        "attendance": {
+          "$ref": "#/definitions/v1Attendance"
+        },
+        "internalMarks": {
+          "$ref": "#/definitions/v1Marks"
+        },
+        "syllabusDoc": {
+          "type": "string"
+        }
+      },
+      "description": "Course represents a course on Amizone."
+    },
+    "v1CourseRef": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "v1Courses": {
+      "type": "object",
+      "properties": {
+        "courses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1Course"
+          }
+        }
+      },
+      "description": "Courses are a list of courses, usually used to group together courses for a semester."
+    },
+    "v1ExaminationSchedule": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "exams": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1ScheduledExam"
+          }
+        }
+      }
+    },
+    "v1Marks": {
+      "type": "object",
+      "properties": {
+        "have": {
+          "type": "number",
+          "format": "float"
+        },
+        "max": {
+          "type": "number",
+          "format": "float"
+        }
+      },
+      "description": "Marks is a general message representing a student's marks (internal, external, total, etc). in a course or otherwise.\nIt is embedded in other messages and its meaning is context-dependent."
+    },
+    "v1ScheduledClass": {
+      "type": "object",
+      "properties": {
+        "course": {
+          "$ref": "#/definitions/v1CourseRef"
+        },
+        "startTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "endTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "faculty": {
+          "type": "string"
+        },
+        "room": {
+          "type": "string"
+        }
+      },
+      "description": "ScheduledClass represents a scheduled class."
+    },
+    "v1ScheduledClasses": {
+      "type": "object",
+      "properties": {
+        "classes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1ScheduledClass"
+          }
+        }
+      },
+      "description": "ScheduledClasses is a group of scheduled classes, usually used to represent daily class schedules."
+    },
+    "v1ScheduledExam": {
+      "type": "object",
+      "properties": {
+        "course": {
+          "$ref": "#/definitions/v1CourseRef"
+        },
+        "time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "mode": {
+          "type": "string"
+        }
+      }
+    },
+    "v1Semester": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "ref": {
+          "type": "string"
+        }
+      },
+      "description": "Semester models a semester reference on Amizone. We include both a semester \"name\" / label and a ref\nto decouple the way they're represented from their form values. These happen to be same at the time of\nmodelling, however, so they might appear duplicitous."
+    },
+    "v1SemesterList": {
+      "type": "object",
+      "properties": {
+        "semesters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1Semester"
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "BasicAuth": {
+      "type": "basic",
+      "description": "Valid auth credentials for s.amizone.edu"
+    }
+  },
+  "security": [
+    {
+      "BasicAuth": [
+        "*"
+      ]
+    }
+  ],
+  "externalDocs": {
+    "description": "More about go-amizone",
+    "url": "https://github.com/ditsuke/go-amizone"
+  }
+}

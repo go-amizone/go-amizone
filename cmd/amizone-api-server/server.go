@@ -9,12 +9,13 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"reflect"
 	"strconv"
 	"time"
 )
 
 const (
-	DefaultAddress = ":8081"
+	DefaultAddress = "0.0.0.0:8081"
 	AddressEnvVar  = "AMIZONE_API_ADDRESS"
 )
 
@@ -22,27 +23,23 @@ func main() {
 	logger := klog.NewKlogr()
 	_ = godotenv.Load(".env")
 
-	config := struct{ address string }{}
+	config := &server.Config{Logger: logger.WithName("server")}
 
 	flagSet := flag.NewFlagSet("server config", flag.ExitOnError)
-	flagSet.StringVar(&config.address, "address", EnvOrDefault(AddressEnvVar, DefaultAddress), "Address to listen on")
+	flagSet.StringVar(&config.BindAddr, "address", EnvOrDefault(AddressEnvVar, DefaultAddress), "Address to listen on")
+	flagSet.StringVar(&config.WellKnownDir, "well-known-dir", "", "Path to the '.well_known' directory used for TLS certificate signing")
+	flagSet.String("v", "", "log verbosity")
 	if err := flagSet.Parse(os.Args[1:]); err != nil {
 		logger.Error(err, "failed to parse flags")
 		os.Exit(1)
 	}
 
-	s := server.ApiServer{
-		Config: &server.Config{
-			Logger:   logger,
-			BindAddr: config.address,
-		},
-		Router: http.NewServeMux(),
-	}
+	s := server.New(config)
 
 	// Start the server on a new go-thread
 	go func() {
-		logger.Info("Starting server", "address", config.address)
-		if err := s.Run(); err != nil && err != http.ErrServerClosed {
+		logger.Info("starting server", "address", config.BindAddr)
+		if err := s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			panic(err)
 		}
 	}()
@@ -58,11 +55,11 @@ func main() {
 	// Log the signal
 	logger.Info("os signal received", "signal", sig)
 
-	ctx, cancelFunc := context.WithTimeout(context.Background(), 20*time.Second)
+	cancelCtx, cancelFunc := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancelFunc()
 
-	if err := s.Stop(ctx); err != nil {
-		logger.Error(err, "failed to gracefully shut down serer", err)
+	if err := s.Stop(cancelCtx); err != nil {
+		logger.Error(err, "failed to gracefully shut down server", err)
 	}
 
 	logger.Info("server gracefully shut down")
@@ -83,6 +80,8 @@ func EnvOrDefault[T string | int | bool](key string, def T) T {
 		*p, _ = strconv.Atoi(env)
 	case *bool:
 		*p, _ = strconv.ParseBool(env)
+	default:
+		panic("unsupported state: type not supported: " + reflect.TypeOf(def).String())
 	}
 	return ret
 }

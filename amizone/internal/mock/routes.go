@@ -12,7 +12,7 @@ import (
 const BaseUrl = "https://s.amizone.net"
 
 // GockRegisterLoginPage registers a gock route for the amizone login page serving the login page from the
-// mock fileSystem.
+// mock filesystem.
 func GockRegisterLoginPage() error {
 	mockLogin, err := LoginPage.Open()
 	if err != nil {
@@ -73,7 +73,7 @@ func GockRegisterLoginRequest() error {
 }
 
 // GockRegisterHomePageLoggedIn registers a gock route for the amizone home page, serving the home page for a logged-in
-// user from the mock fileSystem. The request must have the referrers and cookies expected by the home page.
+// user from the mock filesystem. The request must have the referrers and cookies expected by the home page.
 func GockRegisterHomePageLoggedIn() error {
 	mockHome, err := HomePageLoggedIn.Open()
 	if err != nil {

@@ -8,7 +8,7 @@ import (
 // ClientInterface is an exported interface for client to make mocking and testing more convenient.
 type ClientInterface interface {
 	DidLogin() bool
-	GetAttendance() (Attendance, error)
+	GetAttendance() (AttendanceRecords, error)
 	GetClassSchedule(year int, month time.Month, date int) (ClassSchedule, error)
 	GetExamSchedule() (*ExamSchedule, error)
 }

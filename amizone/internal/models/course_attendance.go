@@ -1,13 +1,13 @@
 package models
 
 type Attendance struct {
-	ClassesHeld     int
-	ClassesAttended int
+	ClassesHeld     int32
+	ClassesAttended int32
 }
-type CourseAttendance struct {
+type AttendanceRecord struct {
 	Attendance
 	Course CourseRef
 }
 
-// AttendanceRecord maps course codes to courseAttendance structs
-type AttendanceRecord []CourseAttendance
+// AttendanceRecords maps course codes to courseAttendance structs
+type AttendanceRecords []AttendanceRecord

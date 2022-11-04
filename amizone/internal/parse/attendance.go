@@ -12,8 +12,8 @@ import (
 )
 
 // Attendance attempts to parse course attendance information from the Amizone home page
-// into a models.AttendanceRecord instance.
-func Attendance(body io.Reader) (models.AttendanceRecord, error) {
+// into a models.AttendanceRecords instance.
+func Attendance(body io.Reader) (models.AttendanceRecords, error) {
 	const (
 		AttendanceTableTitle = "My Attendance"
 	)
@@ -34,7 +34,7 @@ func Attendance(body io.Reader) (models.AttendanceRecord, error) {
 		return nil, errors.New(ErrFailedToParse)
 	}
 
-	attendance := make(models.AttendanceRecord, attendanceList.Length())
+	attendance := make(models.AttendanceRecords, attendanceList.Length())
 	attendanceList.Each(func(i int, record *goquery.Selection) {
 		attended, held := func() (int, int) {
 			raw := record.Find("div.class-count span").Text()
@@ -47,7 +47,7 @@ func Attendance(body io.Reader) (models.AttendanceRecord, error) {
 			return parseToInt(divided[0]), parseToInt(divided[1])
 		}()
 
-		courseAttendance := models.CourseAttendance{
+		courseAttendance := models.AttendanceRecord{
 			Course: models.CourseRef{
 				Code: func() string {
 					raw := record.Find("span.sub-code").Text()
@@ -60,8 +60,8 @@ func Attendance(body io.Reader) (models.AttendanceRecord, error) {
 				}(),
 			},
 			Attendance: models.Attendance{
-				ClassesAttended: attended,
-				ClassesHeld:     held,
+				ClassesAttended: int32(attended),
+				ClassesHeld:     int32(held),
 			},
 		}
 

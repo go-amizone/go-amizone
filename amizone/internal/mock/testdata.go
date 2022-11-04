@@ -5,18 +5,18 @@ import (
 	"io/fs"
 )
 
-// fileSystem is a mock filesystem with some files that can be used for testing.
+// filesystem is a mock filesystem with some files that can be used for testing.
 //go:embed testdata
-var fileSystem embed.FS
+var filesystem embed.FS
 
 type File string
 
-// Open returns a fs.File interface to the file in fileSystem, the mock filesystem.
+// Open returns a fs.File interface to the file in filesystem, the mock filesystem.
 func (f File) Open() (fs.File, error) {
-	return fileSystem.Open(string(f))
+	return filesystem.Open(string(f))
 }
 
-// Constants for file paths in the fileSystem embedded filesystem.
+// Constants for file paths in the filesystem embedded filesystem.
 const (
 	DiaryEventsJSON     File = "testdata/diary_events.json"
 	ExaminationSchedule File = "testdata/examination_schedule.html"

@@ -12,6 +12,6 @@ const (
 	VerificationToken = "fakeRequestVerificationToken"
 	SessionID         = "fakeSessionId"
 
-	// StudentUUID is the UUID associated with the student used across testdata in fileSystem.
+	// StudentUUID is the UUID associated with the student used across testdata in filesystem.
 	StudentUUID = "98RFGK88-A01C-1JJO-N73D-4BJR42B33J51"
 )

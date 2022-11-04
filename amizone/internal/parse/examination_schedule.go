@@ -64,7 +64,7 @@ func ExaminationSchedule(body io.Reader) (*models.ExaminationSchedule, error) {
 	// Iterate through exams rows to parse entries
 	scheduleEntries.Each(func(i int, row *goquery.Selection) {
 		exam := models.ScheduledExam{
-			Course: &models.CourseRef{
+			Course: models.CourseRef{
 				Code: row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleCode)).Text(),
 				Name: row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleName)).Text(),
 			},
