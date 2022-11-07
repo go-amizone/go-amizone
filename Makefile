@@ -33,3 +33,7 @@ test-integration: ## Run integration tests
 
 .PHONY: test-all
 test-all: test-unit test-integration ## Run all tests
+
+.PHONY: tools
+tools:
+	@make -C hack/tools tools
