@@ -8,7 +8,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func Time(t time.Time) *timestamppb.Timestamp {
+func TimeToProtoTS(t time.Time) *timestamppb.Timestamp {
 	return timestamppb.New(t)
 }
 
@@ -47,8 +47,8 @@ func ScheduledClasses(a amizone.ClassSchedule) *v1.ScheduledClasses {
 				Code: c.Course.Code,
 				Name: c.Course.Name,
 			},
-			StartTime: Time(c.StartTime),
-			EndTime:   Time(c.EndTime),
+			StartTime: TimeToProtoTS(c.StartTime),
+			EndTime:   TimeToProtoTS(c.EndTime),
 			Faculty:   c.Faculty,
 			Room:      c.Room,
 		}
@@ -64,7 +64,7 @@ func ExamSchedule(a amizone.ExamSchedule) *v1.ExaminationSchedule {
 	for i, c := range a.Exams {
 		arr[i] = &v1.ScheduledExam{
 			Course: CourseRef(amizone.CourseRef(c.Course)),
-			Time:   Time(c.Time),
+			Time:   TimeToProtoTS(c.Time),
 			Mode:   c.Mode,
 		}
 	}
@@ -111,5 +111,19 @@ func Courses(a amizone.Courses) *v1.Courses {
 	}
 	return &v1.Courses{
 		Courses: arr,
+	}
+}
+
+func Profile(a amizone.Profile) *v1.Profile {
+	return &v1.Profile{
+		Name:               a.Name,
+		EnrollmentNumber:   a.EnrollmentNumber,
+		EnrollmentValidity: TimeToProtoTS(a.EnrollmentValidity),
+		Batch:              a.Batch,
+		Program:            a.Program,
+		DateOfBirth:        TimeToProtoTS(a.DateOfBirth),
+		BloodGroup:         a.BloodGroup,
+		IdCardNumber:       a.IDCardNumber,
+		Uuid:               a.UUID,
 	}
 }

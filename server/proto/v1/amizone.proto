@@ -85,6 +85,11 @@ service AmizoneService {
   rpc GetCurrentCourses(EmptyMessage) returns (Courses) {
     option (google.api.http) = {get: "/api/v1/courses"};
   }
+
+  // GetUserProfile returns the user's profile.
+  rpc GetUserProfile(EmptyMessage) returns (Profile) {
+    option (google.api.http) = {get: "/api/v1/user_profile"};
+  }
 }
 
 message EmptyMessage {}
@@ -203,3 +208,11 @@ message Semester {
 message SemesterList {
   repeated Semester semesters = 1;
 }
+
+// message UserProfile {
+//   string name = 1;
+//   string enrollment_number = 2;
+//   google.protobuf.Timestamp enrollment_validity = 3;
+//   string batch = 4;
+//   string program = 5;
+// }

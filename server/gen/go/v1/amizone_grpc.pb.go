@@ -34,6 +34,8 @@ type AmizoneServiceClient interface {
 	GetCourses(ctx context.Context, in *SemesterRef, opts ...grpc.CallOption) (*Courses, error)
 	// GetCurrentCourses returns a list of courses for the "current" semester.
 	GetCurrentCourses(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*Courses, error)
+	// GetUserProfile returns the user's profile.
+	GetUserProfile(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*Profile, error)
 }
 
 type amizoneServiceClient struct {
@@ -98,6 +100,15 @@ func (c *amizoneServiceClient) GetCurrentCourses(ctx context.Context, in *EmptyM
 	return out, nil
 }
 
+func (c *amizoneServiceClient) GetUserProfile(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*Profile, error) {
+	out := new(Profile)
+	err := c.cc.Invoke(ctx, "/go_amizone.server.proto.v1.AmizoneService/GetUserProfile", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AmizoneServiceServer is the server API for AmizoneService service.
 // All implementations must embed UnimplementedAmizoneServiceServer
 // for forward compatibility
@@ -114,6 +125,8 @@ type AmizoneServiceServer interface {
 	GetCourses(context.Context, *SemesterRef) (*Courses, error)
 	// GetCurrentCourses returns a list of courses for the "current" semester.
 	GetCurrentCourses(context.Context, *EmptyMessage) (*Courses, error)
+	// GetUserProfile returns the user's profile.
+	GetUserProfile(context.Context, *EmptyMessage) (*Profile, error)
 	mustEmbedUnimplementedAmizoneServiceServer()
 }
 
@@ -138,6 +151,9 @@ func (UnimplementedAmizoneServiceServer) GetCourses(context.Context, *SemesterRe
 }
 func (UnimplementedAmizoneServiceServer) GetCurrentCourses(context.Context, *EmptyMessage) (*Courses, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCurrentCourses not implemented")
+}
+func (UnimplementedAmizoneServiceServer) GetUserProfile(context.Context, *EmptyMessage) (*Profile, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserProfile not implemented")
 }
 func (UnimplementedAmizoneServiceServer) mustEmbedUnimplementedAmizoneServiceServer() {}
 
@@ -260,6 +276,24 @@ func _AmizoneService_GetCurrentCourses_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AmizoneService_GetUserProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EmptyMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AmizoneServiceServer).GetUserProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/go_amizone.server.proto.v1.AmizoneService/GetUserProfile",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AmizoneServiceServer).GetUserProfile(ctx, req.(*EmptyMessage))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AmizoneService_ServiceDesc is the grpc.ServiceDesc for AmizoneService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -290,6 +324,10 @@ var AmizoneService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetCurrentCourses",
 			Handler:    _AmizoneService_GetCurrentCourses_Handler,
+		},
+		{
+			MethodName: "GetUserProfile",
+			Handler:    _AmizoneService_GetUserProfile_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
