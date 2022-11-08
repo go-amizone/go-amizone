@@ -208,11 +208,3 @@ message Semester {
 message SemesterList {
   repeated Semester semesters = 1;
 }
-
-// message UserProfile {
-//   string name = 1;
-//   string enrollment_number = 2;
-//   google.protobuf.Timestamp enrollment_validity = 3;
-//   string batch = 4;
-//   string program = 5;
-// }
