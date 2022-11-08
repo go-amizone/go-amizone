@@ -2,15 +2,14 @@ syntax = "proto3";
 
 package go_amizone.server.proto.v1;
 
-import "google/protobuf/timestamp.proto";
-import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
 import "google/protobuf/type.proto";
 import "google/type/date.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
 
 option go_package = "github.com/ditsuke/go-amizone/server/gen/go/api_v1";
-
 option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
   info: {
     title: "Amizone API";
@@ -46,61 +45,45 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
   security: {
     security_requirement: {
       key: "BasicAuth";
-      value: {
-        scope: "*";
-      }
+      value: {scope: "*"}
     }
   }
   responses: {
     key: "403";
-    value: {
-      description: "Returned when the user does not have permission to access the resource.";
-    }
+    value: {description: "Returned when the user does not have permission to access the resource."}
   }
 };
 
 // @todo authentication service for JWT tokens as secure alternative to BasicAuth.
 service AmizoneService {
   rpc GetAttendance(EmptyMessage) returns (AttendanceRecords) {
-    option (google.api.http) = {
-      get: "/api/v1/attendance"
-    };
+    option (google.api.http) = {get: "/api/v1/attendance"};
   }
 
   rpc GetClassSchedule(ClassScheduleRequest) returns (ScheduledClasses) {
-    option (google.api.http) = {
-      get: "/api/v1/class_schedule/{date.year}/{date.month}/{date.day}"
-    };
+    option (google.api.http) = {get: "/api/v1/class_schedule/{date.year}/{date.month}/{date.day}"};
   }
 
   // GetExamSchedule returns exam schedule. Amizone only allows access to schedules for the ongoing semester
   // and only close to the exam dates, so we don't take any parameters.
   rpc GetExamSchedule(EmptyMessage) returns (ExaminationSchedule) {
-    option (google.api.http) = {
-      get: "/api/v1/exam_schedule"
-    };
+    option (google.api.http) = {get: "/api/v1/exam_schedule"};
   }
 
   // GetSemesters returns a list of semesters that include past semesters and the current semester.
   // These semesters can be used in other RPCs that consume them, for example GetCourses.
   rpc GetSemesters(EmptyMessage) returns (SemesterList) {
-    option (google.api.http) = {
-      get: "/api/v1/semesters"
-    };
+    option (google.api.http) = {get: "/api/v1/semesters"};
   }
 
   // GetCourses returns a list of courses for the given semester.
   rpc GetCourses(SemesterRef) returns (Courses) {
-    option (google.api.http) = {
-      get: "/api/v1/courses/{semester_ref}"
-    };
+    option (google.api.http) = {get: "/api/v1/courses/{semester_ref}"};
   }
 
   // GetCurrentCourses returns a list of courses for the "current" semester.
   rpc GetCurrentCourses(EmptyMessage) returns (Courses) {
-    option (google.api.http) = {
-      get: "/api/v1/courses"
-    };
+    option (google.api.http) = {get: "/api/v1/courses"};
   }
 }
 
