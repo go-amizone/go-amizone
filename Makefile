@@ -35,9 +35,9 @@ test-integration: ## Run integration tests
 test-all: test-unit test-integration ## Run all tests
 
 .PHONY: tools
-tools:
+tools: ## Install tools required for development
 	@make -C hack/tools tools
 
 .PHONY: generate-proto
-generate-proto:
+generate-proto: ## Generate code from protobuf files
 	cd server && buf generate
