@@ -4,12 +4,12 @@ deps:
   - remote: buf.build
     owner: gogo
     repository: protobuf
-    commit: 4df00b267f944190a229ce3695781e99
+    commit: 5461a3dfa9d941da82028ab185dc2a0e
   - remote: buf.build
     owner: googleapis
     repository: googleapis
-    commit: 8f04c867ddf14e13a231d5119b8ebb8b
+    commit: 783e4b5374fa488ab068d08af9658438
   - remote: buf.build
     owner: grpc-ecosystem
     repository: grpc-gateway
-    commit: 00116f302b12478b85deb33b734e026c
+    commit: b96615cde70c403f8075c48e56178f88
