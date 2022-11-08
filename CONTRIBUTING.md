@@ -21,8 +21,7 @@ coding style as the rest of the project and make sure to include tests for your 
 - [Buf](https://docs.buf.build/installation) 1.9 or later. Buf is a tool for linting and generating code from protobuf files,
   so you'll only need it if you want to make changes to the backend API (adding a new endpoint, for example).
 
-On Windows, you will need to install [Git Bash](https://gitforwindows.org/) or standalone Make with [scoop](https://scoop.sh) to
-run the Makefile.
+On Windows, you will need to install [Git Bash](https://gitforwindows.org/) to run the make commands.
 
 ### The File Structure
 
@@ -63,7 +62,7 @@ Finally, the `hack` directory contains some setup code to install dependencies f
 
 ### Making changes to the API Server
 
-If you're making changes to the API server, you'll likely to make changes to the following files:
+If you're making changes to the API server, you'll likely make changes to the following files:
 
 - `server/proto/v1/amizone.proto`: Contains definitions for API endpoints.
 - `server/grpc_service_server.go`: Contains bridging code between the gRPC service and the SDK.
@@ -78,4 +77,4 @@ To run the tests locally, run `make test-unit` for unit tests and `make test-int
 
 > **Note**
 >
-> Integration tests require a valid set of Amizone credentials to run. You can set the credentials in the `.env` file by copying the `.env.sample` file and filling in the credentials.
+> Integration tests require a valid set of Amizone credentials to run. You can set the credentials in the `.env` file by copying the `.env.sample` file and filling in your credentials.

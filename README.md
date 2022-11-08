@@ -54,10 +54,11 @@ A docker image will be made available soon to make deployments easier.
 
 ## Contributing
 
-Contributions to the library are welcome! If you have a bug or feature request, please open an issue on the
+Contributions to go-amizone are welcome! If you have a bug or feature request, please open an issue on the
 [GitHub repo][github]. Code contributions should be a great way to get started with Go development and learn
-about the language, reverse-engineering, and other cool stuff. Another way to get involved would be to just use the
-library in your own project! If you're working or planning to work on one, I would love to hear from you!
+about the language, reverse-engineering, and other cool stuff.
+
+Please read the [contribution guide](./CONTRIBUTING.md) for more information on how to get started.
 
 [monday-api]: https://github.com/0xSaurabh/monday-api
 
@@ -76,4 +77,3 @@ library in your own project! If you're working or planning to work on one, I wou
 [heroku]: https://www.heroku.com/
 
 [godocs.io]: https://godocs.io/github.com/ditsuke/go-amizone
-
