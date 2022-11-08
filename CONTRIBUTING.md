@@ -3,7 +3,7 @@
 ## Reporting Bugs
 
 If you find a bug, you can contribute by creating an issue on [GitHub](https://github.com/ditsuke/go-amizone).
-After reporting you can choose to work on the isue yourself or wait for another contributor to pick it up.
+After reporting you can choose to work on the issue yourself or wait for another contributor to pick it up.
 If you choose to pick it up yourself, please leave a comment to let others know. We're also happy to help you
 get started if you need any help!
 
