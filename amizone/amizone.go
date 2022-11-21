@@ -351,8 +351,11 @@ func (a *Client) RegisterWifiMac(addr net.HardwareAddr, overwriteExisting bool) 
 
 	payload := url.Values{}
 	payload.Set(verificationTokenName, info.GetRequestVerificationToken())
+	// ! VULN: register mac as anyone or no one by changing this ID.
 	payload.Set("Amizone_Id", a.credentials.Username)
-	// Dummy field but needs to be present
+
+	// _Name_ is a dummy field, as in it doesn't matter what its value is, but it needs to be present.
+	// I suspect this might go straight into the DB.
 	payload.Set("Name", "DoesntMatter")
 
 	payload.Set("Mac1", marshaller.Mac(wifis[0]))
@@ -387,6 +390,7 @@ func (a *Client) RemoveWifiMac(addr string) error {
 		return errors.New("invalid mac address")
 	}
 
+	// ! VULN: remove mac addresses registered by anyone if you know the mac/username pair.
 	response, err := a.doRequest(true, http.MethodGet, fmt.Sprintf(removeWifiMacEndpoint, a.credentials.Username, marshaller.Mac(mac)), nil)
 	if err != nil {
 		klog.Errorf("request (remove wifi mac): %s", err.Error())
