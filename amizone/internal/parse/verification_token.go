@@ -17,3 +17,7 @@ func VerificationToken(body io.Reader) string {
 	}
 	return dom.Find(fmt.Sprintf("input[name='%s']", verificationTokenName)).AttrOr("value", "")
 }
+
+func VerificationTokenFromDom(dom *goquery.Document) string {
+	return dom.Find(fmt.Sprintf("input[name='%s']", verificationTokenName)).AttrOr("value", "")
+}

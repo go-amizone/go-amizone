@@ -3,6 +3,7 @@ package amizone
 import (
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -11,6 +12,8 @@ import (
 	"time"
 
 	"github.com/ditsuke/go-amizone/amizone/internal"
+	"github.com/ditsuke/go-amizone/amizone/internal/marshaller"
+	"github.com/ditsuke/go-amizone/amizone/internal/models"
 	"github.com/ditsuke/go-amizone/amizone/internal/parse"
 	"github.com/ditsuke/go-amizone/amizone/models"
 	"k8s.io/klog/v2"
@@ -26,6 +29,13 @@ const (
 	currentCoursesEndpoint   = "/Academics/MyCourses"
 	coursesEndpoint          = currentCoursesEndpoint + "/CourseListSemWise"
 	profileEndpoint          = "/IDCard"
+	macBaseEndpoint          = "/RegisterForWifi/mac"
+	getWifiMacsEndpoint      = macBaseEndpoint + "/MacRegistration"
+	registerWifiMacsEndpoint = macBaseEndpoint + "/MacRegistrationSave"
+
+	// deleteWifiMacEndpoint is peculiar in that it requires the user's ID as a parameter.
+	// This _might_ open doors for an exploit (spoiler: indeed it does)
+	removeWifiMacEndpoint = macBaseEndpoint + "/Mac1RegistrationDelete?username=%s&Amizone_Id=%s"
 
 	scheduleEndpointTimeFormat = "2006-01-02"
 
@@ -297,4 +307,101 @@ func (a *Client) GetProfile() (*models.Profile, error) {
 	}
 
 	return (*models.Profile)(profile), nil
+}
+
+func (a *Client) GetWifiMacInfo() (*models.WifiMacInfo, error) {
+	response, err := a.doRequest(true, http.MethodGet, getWifiMacsEndpoint, nil)
+	if err != nil {
+		klog.Warningf("request (get wifi macs): %s", err.Error())
+		return nil, errors.New(ErrFailedToVisitPage)
+	}
+
+	addresses, err := parse.WifiMacs(response.Body)
+	if err != nil {
+		klog.Errorf("parse (wifi macs): %s", err.Error())
+		return nil, errors.New(ErrFailedToParsePage)
+	}
+
+	return addresses, nil
+}
+
+// RegisterWifiMac registers a mac address on Amizone. If overwriteExisting is true,
+// it deletes an existing mac address if there are no free registration slots.
+// TODO: is the overwriteExisting functional?
+func (a *Client) RegisterWifiMac(addr net.HardwareAddr, overwriteExisting bool) error {
+	info, err := a.GetWifiMacInfo()
+	if err != nil {
+		klog.Warningf("failures while getting wifi mac info: %s", err.Error())
+		return err
+	}
+
+	if !info.HasFreeSlot() {
+		// but the limitation is artificial so... we do nothing?
+		// we shouldn't be defaulting to the bypass-style behaviour, though
+		// TODO: flag or param to enable the bypass behavior
+		return errors.New("no free wifi slots")
+	}
+
+	if info.IsRegistered(addr) {
+		klog.Infof("wifi already registered.. skipping request")
+		return nil
+	}
+
+	wifis := append(info.RegisteredAddresses, addr)
+
+	payload := url.Values{}
+	payload.Set(verificationTokenName, info.GetRequestVerificationToken())
+	payload.Set("Amizone_Id", a.credentials.Username)
+	// Dummy field but needs to be present
+	payload.Set("Name", "DoesntMatter")
+
+	payload.Set("Mac1", marshaller.Mac(wifis[0]))
+	payload.Set("Mac2", func() string {
+		if len(wifis) > 1 {
+			return marshaller.Mac(wifis[1])
+		}
+		return ""
+	}())
+
+	// here we make a POST form submission to the form
+	// open question: does the endpoint necessarility need extranneous userinfo (name, admission number (probably yes for this one))
+
+	// Open question: _should_ we be verifying the response? We _could_ parse out the updated mac list and verify that it has our new mac,
+	// but the failure modes are many and the only thing we can do (as of now) is move on. Especially since we're already verifying the
+	// validity of the mac addresses before we even enter this function.
+	_, err = a.doRequest(true, http.MethodPost, registerWifiMacsEndpoint, strings.NewReader(payload.Encode()))
+	if err != nil {
+		klog.Errorf("request (register wifi mac): %s", err.Error())
+		return errors.New(ErrFailedToVisitPage)
+	}
+
+	return nil
+}
+
+// RemoveWifiMac removes a mac address from the Amizone mac address registry. If the mac address is not registered in the
+// first place, this function does nothing.
+func (a *Client) RemoveWifiMac(addr string) error {
+	// just make the GET request here to delete the mac
+	mac, err := net.ParseMAC(addr)
+	if err != nil {
+		return errors.New("invalid mac address")
+	}
+
+	response, err := a.doRequest(true, http.MethodGet, fmt.Sprintf(removeWifiMacEndpoint, a.credentials.Username, marshaller.Mac(mac)), nil)
+	if err != nil {
+		klog.Errorf("request (remove wifi mac): %s", err.Error())
+		return errors.New(ErrFailedToVisitPage)
+	}
+
+	wifiInfo, err := parse.WifiMacs(response.Body)
+	if err != nil {
+		klog.Errorf("parse (wifi macs): %s", err.Error())
+		return errors.New(ErrFailedToParsePage)
+	}
+
+	if wifiInfo.IsRegistered(mac) {
+		return errors.New("failed to remove mac address")
+	}
+
+	return nil
 }

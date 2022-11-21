@@ -1,0 +1,34 @@
+package models
+
+import "net"
+
+type WifiMacInfo struct {
+	RegisteredAddresses []net.HardwareAddr
+	Slots               int
+	FreeSlots           int
+
+	// requestVerificationToken is used when submitting the form to register macs
+	// It is not exported to keep it from being serialized with requests, as it is only (ostensibly) useful when not stale.
+	requestVerificationToken string
+}
+
+func (i *WifiMacInfo) GetRequestVerificationToken() string {
+	return i.requestVerificationToken
+}
+
+func (i *WifiMacInfo) SetRequestVerificationToken(token string) {
+	i.requestVerificationToken = token
+}
+
+func (i *WifiMacInfo) HasFreeSlot() bool {
+	return i.FreeSlots > 0
+}
+
+func (i *WifiMacInfo) IsRegistered(mac net.HardwareAddr) bool {
+	for _, m := range i.RegisteredAddresses {
+		if m.String() == mac.String() {
+			return true
+		}
+	}
+	return false
+}
