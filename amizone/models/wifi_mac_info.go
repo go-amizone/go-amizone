@@ -9,6 +9,7 @@ type WifiMacInfo struct {
 
 	// requestVerificationToken is used when submitting the form to register macs
 	// It is not exported to keep it from being serialized with requests, as it is only (ostensibly) useful when not stale.
+	// TODO: We could export this and instead use custom Stringer/JSON Marshaller to omit it from serialization.
 	requestVerificationToken string
 }
 
