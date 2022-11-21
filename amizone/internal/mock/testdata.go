@@ -26,4 +26,5 @@ const (
 	CoursesPage         File = "testdata/my_courses.html"
 	CoursesPageSemWise  File = "testdata/courses_semwise.html"
 	IDCardPage          File = "testdata/id_card_page.html"
+	WifiPage            File = "testdata/wifi_mac_registration.html"
 )
