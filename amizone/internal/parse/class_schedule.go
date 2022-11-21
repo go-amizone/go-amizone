@@ -47,6 +47,7 @@ func ClassSchedule(body io.Reader) (models.ClassSchedule, error) {
 			EndTime:   parseTime(entry.End),
 			Faculty:   entry.Faculty,
 			Room:      entry.Room,
+			Attended:  entry.AttendanceState(),
 		}
 
 		classSchedule = append(classSchedule, class)

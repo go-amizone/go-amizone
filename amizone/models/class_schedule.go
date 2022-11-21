@@ -5,6 +5,16 @@ import (
 	"time"
 )
 
+type AttendanceState int
+
+const (
+	AttendanceStatePending AttendanceState = iota
+	AttendanceStatePresent
+	AttendanceStateAbsent
+	AttendanceStateNA
+	AttendanceStateInvalid
+)
+
 // ScheduledClass models the data extracted from the class schedule as found on the Amizone
 // home page.
 type ScheduledClass struct {
@@ -13,6 +23,7 @@ type ScheduledClass struct {
 	EndTime   time.Time
 	Faculty   string
 	Room      string
+	Attended  AttendanceState
 }
 
 // ClassSchedule is a model for representing class schedule from the portal.
