@@ -19,6 +19,10 @@ func Profile(body io.Reader) (*models.Profile, error) {
 		return nil, fmt.Errorf("%s: %s", ErrFailedToParseDOM, err)
 	}
 
+	if !IsLoggedInDOM(dom) {
+		return nil, errors.New(ErrNotLoggedIn)
+	}
+
 	if !isIDCardPage(dom) {
 		return nil, errors.New(ErrFailedToParse)
 	}

@@ -56,7 +56,7 @@ func (a *Client) doRequest(tryLogin bool, method string, endpoint string, body i
 	response.Body = io.NopCloser(bytes.NewReader(responseBody))
 
 	// If we're directed to try logging-in and the parser determines we're not, we retry.
-	if tryLogin && *a.credentials != (Credentials{}) && !parse.LoggedIn(bytes.NewReader(responseBody)) {
+	if tryLogin && *a.credentials != (Credentials{}) && !parse.IsLoggedIn(bytes.NewReader(responseBody)) {
 		klog.Infof("doRequest: Attempting to login since we're not logged in (likely: session expired).")
 		if err := a.login(); err != nil {
 			return nil, errors.New(ErrFailedLogin)

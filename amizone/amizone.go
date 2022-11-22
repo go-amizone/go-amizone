@@ -145,7 +145,7 @@ func (a *Client) login() error {
 		return errors.New(ErrInvalidCredentials)
 	}
 
-	if loggedIn := parse.LoggedIn(loginResponse.Body); !loggedIn {
+	if loggedIn := parse.IsLoggedIn(loginResponse.Body); !loggedIn {
 		klog.Error("Login failed. Possible reasons: something broke.")
 		return errors.New(ErrFailedLogin)
 	}
@@ -173,7 +173,7 @@ func (a *Client) GetAttendance() (AttendanceRecords, error) {
 	attendanceRecord, err := parse.Attendance(response.Body)
 	if err != nil {
 		klog.Errorf("parse (attendance): %s", err.Error())
-		return nil, errors.New(ErrFailedToParsePage)
+		return nil, fmt.Errorf("%s: %w", ErrInternalFailure, err)
 	}
 
 	return AttendanceRecords(attendanceRecord), nil
@@ -197,7 +197,7 @@ func (a *Client) GetClassSchedule(year int, month time.Month, date int) (ClassSc
 	classSchedule, err := parse.ClassSchedule(response.Body)
 	if err != nil {
 		klog.Errorf("parse (schedule): %s", err.Error())
-		return nil, errors.New(ErrFailedToParsePage)
+		return nil, fmt.Errorf("%s: %w", ErrInternalFailure, err)
 	}
 	filteredSchedule := classSchedule.FilterByDate(timeFrom)
 
@@ -217,7 +217,7 @@ func (a *Client) GetExamSchedule() (*ExamSchedule, error) {
 	examSchedule, err := parse.ExaminationSchedule(response.Body)
 	if err != nil {
 		klog.Errorf("parse (exam schedule): %s", err.Error())
-		return nil, errors.New(ErrFailedToParsePage)
+		return nil, fmt.Errorf("%s: %w", ErrInternalFailure, err)
 	}
 
 	return (*ExamSchedule)(examSchedule), nil
@@ -235,7 +235,7 @@ func (a *Client) GetSemesters() (SemesterList, error) {
 	semesters, err := parse.Semesters(response.Body)
 	if err != nil {
 		klog.Errorf("parse (semesters): %s", err.Error())
-		return nil, errors.New(ErrFailedToParsePage)
+		return nil, fmt.Errorf("%s: %w", ErrInternalFailure, err)
 	}
 
 	return (SemesterList)(semesters), nil
@@ -258,7 +258,7 @@ func (a *Client) GetCourses(semesterRef string) (Courses, error) {
 	courses, err := parse.Courses(response.Body)
 	if err != nil {
 		klog.Errorf("parse (courses): %s", err.Error())
-		return nil, errors.New(ErrFailedToParsePage)
+		return nil, fmt.Errorf("%s: %w", ErrInternalFailure, err)
 	}
 
 	return Courses(courses), nil
@@ -275,7 +275,7 @@ func (a *Client) GetCurrentCourses() (Courses, error) {
 	courses, err := parse.Courses(response.Body)
 	if err != nil {
 		klog.Errorf("parse (current courses): %s", err.Error())
-		return nil, errors.New(ErrFailedToParsePage)
+		return nil, fmt.Errorf("%s: %w", ErrInternalFailure, err)
 	}
 
 	return Courses(courses), nil
@@ -292,7 +292,7 @@ func (a *Client) GetProfile() (*Profile, error) {
 	profile, err := parse.Profile(response.Body)
 	if err != nil {
 		klog.Errorf("parse (profile): %s", err.Error())
-		return nil, errors.New(ErrFailedToParsePage)
+		return nil, fmt.Errorf("%s: %w", ErrInternalFailure, err)
 	}
 
 	return (*Profile)(profile), nil
