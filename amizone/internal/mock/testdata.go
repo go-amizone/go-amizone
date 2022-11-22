@@ -6,6 +6,7 @@ import (
 )
 
 // filesystem is a mock filesystem with some files that can be used for testing.
+//
 //go:embed testdata
 var filesystem embed.FS
 

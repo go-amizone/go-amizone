@@ -3,6 +3,11 @@ package server
 import (
 	"context"
 	"encoding/base64"
+	"net"
+	"net/http"
+	"strings"
+	"sync"
+
 	"github.com/ditsuke/go-amizone/amizone"
 	v1 "github.com/ditsuke/go-amizone/server/gen/go/v1"
 	"github.com/go-logr/logr"
@@ -15,10 +20,6 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
-	"net"
-	"net/http"
-	"strings"
-	"sync"
 )
 
 const ContextAmizoneClientKey = "amizone_client"

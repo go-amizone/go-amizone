@@ -3,15 +3,16 @@ package amizone
 import (
 	"errors"
 	"fmt"
-	"github.com/ditsuke/go-amizone/amizone/internal"
-	"github.com/ditsuke/go-amizone/amizone/internal/parse"
-	"k8s.io/klog/v2"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/ditsuke/go-amizone/amizone/internal"
+	"github.com/ditsuke/go-amizone/amizone/internal/parse"
+	"k8s.io/klog/v2"
 )
 
 const (

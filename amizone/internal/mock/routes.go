@@ -3,10 +3,11 @@ package mock
 import (
 	"errors"
 	"fmt"
-	"gopkg.in/h2non/gock.v1"
 	"io"
 	"net/http"
 	"net/url"
+
+	"gopkg.in/h2non/gock.v1"
 )
 
 const BaseUrl = "https://s.amizone.net"

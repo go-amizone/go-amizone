@@ -3,15 +3,16 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/ditsuke/go-amizone/server"
-	"github.com/joho/godotenv"
-	"k8s.io/klog/v2"
 	"net/http"
 	"os"
 	"os/signal"
 	"reflect"
 	"strconv"
 	"time"
+
+	"github.com/ditsuke/go-amizone/server"
+	"github.com/joho/godotenv"
+	"k8s.io/klog/v2"
 )
 
 const (

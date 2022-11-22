@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/ditsuke/go-amizone/amizone/internal"
-	"github.com/ditsuke/go-amizone/amizone/internal/parse"
 	"io"
 	"io/ioutil"
-	"k8s.io/klog/v2"
 	"net/http"
+
+	"github.com/ditsuke/go-amizone/amizone/internal"
+	"github.com/ditsuke/go-amizone/amizone/internal/parse"
+	"k8s.io/klog/v2"
 )
 
 // doRequest is an internal http request helper to simplify making requests.

@@ -1,10 +1,11 @@
 package toproto
 
 import (
+	"time"
+
 	"github.com/ditsuke/go-amizone/amizone"
 	v1 "github.com/ditsuke/go-amizone/server/gen/go/v1"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"time"
 )
 
 func Time(t time.Time) *timestamppb.Timestamp {

@@ -3,12 +3,13 @@ package parse
 import (
 	"errors"
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
-	"github.com/ditsuke/go-amizone/amizone/internal/models"
 	"io"
-	"k8s.io/klog/v2"
 	"regexp"
 	"strconv"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/ditsuke/go-amizone/amizone/internal/models"
+	"k8s.io/klog/v2"
 )
 
 // Expose these data-title attributes, because they're used by the isCoursesPage function.

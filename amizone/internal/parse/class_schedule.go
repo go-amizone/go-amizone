@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/ditsuke/go-amizone/amizone/internal/models"
 	"io"
-	"k8s.io/klog/v2"
 	"time"
+
+	"github.com/ditsuke/go-amizone/amizone/internal/models"
+	"k8s.io/klog/v2"
 )
 
 const (

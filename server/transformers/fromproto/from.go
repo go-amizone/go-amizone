@@ -1,8 +1,9 @@
 package fromproto
 
 import (
-	"google.golang.org/genproto/googleapis/type/date"
 	"time"
+
+	"google.golang.org/genproto/googleapis/type/date"
 )
 
 func Date(d *date.Date) time.Time {

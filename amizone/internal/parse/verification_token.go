@@ -2,8 +2,9 @@ package parse
 
 import (
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
 	"io"
+
+	"github.com/PuerkitoBio/goquery"
 	"k8s.io/klog/v2"
 )
 

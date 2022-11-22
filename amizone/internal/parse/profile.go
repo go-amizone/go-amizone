@@ -3,13 +3,14 @@ package parse
 import (
 	"errors"
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
-	"github.com/ditsuke/go-amizone/amizone/internal/models"
 	"io"
-	"k8s.io/klog/v2"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/ditsuke/go-amizone/amizone/internal/models"
+	"k8s.io/klog/v2"
 )
 
 func Profile(body io.Reader) (*models.Profile, error) {

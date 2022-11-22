@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+
 	"github.com/ditsuke/go-amizone/amizone"
 	v1 "github.com/ditsuke/go-amizone/server/gen/go/v1"
 	"github.com/ditsuke/go-amizone/server/transformers/fromproto"

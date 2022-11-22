@@ -3,12 +3,13 @@ package parse
 import (
 	"errors"
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
-	"github.com/ditsuke/go-amizone/amizone/internal/models"
 	"io"
-	"k8s.io/klog/v2"
 	"strings"
 	"time"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/ditsuke/go-amizone/amizone/internal/models"
+	"k8s.io/klog/v2"
 )
 
 const ExamTitleUnknown = "Unknown Exam"
