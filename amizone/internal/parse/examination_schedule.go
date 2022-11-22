@@ -40,7 +40,7 @@ func ExaminationSchedule(body io.Reader) (*models.ExaminationSchedule, error) {
 
 	dom, err := goquery.NewDocumentFromReader(body)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("%s: %s", ErrFailedToParseDOM, err.Error()))
+		return nil, fmt.Errorf("%s: %w", ErrFailedToParseDOM, err)
 	}
 
 	// Try to find the "Examination Schedule" breadcrumb to determine if we're on the right page.

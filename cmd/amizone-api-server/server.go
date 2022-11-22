@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"reflect"
 	"strconv"
+	"syscall"
 	"time"
 
 	"github.com/ditsuke/go-amizone/server"
@@ -48,7 +49,7 @@ func main() {
 	// Main thread -- we use for interrupting OS signals
 	osChannel := make(chan os.Signal, 1)
 	signal.Notify(osChannel, os.Interrupt)
-	signal.Notify(osChannel, os.Kill)
+	signal.Notify(osChannel, syscall.SIGTERM)
 
 	// Block until a signal is received
 	sig := <-osChannel

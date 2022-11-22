@@ -71,7 +71,6 @@ func (s *ApiServer) Init() {
 		Handler: s.router,
 	}
 	s.muInit.done = true
-	return
 }
 
 // ServeHTTP implements the http.Handler interface for ApiServer.

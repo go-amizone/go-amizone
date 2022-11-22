@@ -38,7 +38,7 @@ func Courses(body io.Reader) (models.Courses, error) {
 
 	dom, err := goquery.NewDocumentFromReader(body)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("%s: %s", ErrFailedToParseDOM, err.Error()))
+		return nil, fmt.Errorf("%s: %w", ErrFailedToParseDOM, err)
 	}
 
 	// We check for the course page first, but we can't rely on it alone because the "semester wise" course page does

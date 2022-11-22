@@ -44,7 +44,7 @@ func (a *Client) doRequest(tryLogin bool, method string, endpoint string, body i
 	response, err := a.client.Do(req)
 	if err != nil {
 		klog.Errorf("Failed to visit endpoint '%s': %s", endpoint, err)
-		return nil, errors.New(fmt.Sprintf("%s: %s", ErrFailedToVisitPage, err))
+		return nil, fmt.Errorf("%s: %w", ErrFailedToVisitPage, err)
 	}
 
 	// Read the response into a byte array, so we can reuse it.

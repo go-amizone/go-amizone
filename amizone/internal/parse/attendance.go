@@ -21,7 +21,7 @@ func Attendance(body io.Reader) (models.AttendanceRecords, error) {
 
 	dom, err := goquery.NewDocumentFromReader(body)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("%s: %s", ErrFailedToParseDOM, err.Error()))
+		return nil, fmt.Errorf("%s: %w", ErrFailedToParseDOM, err)
 	}
 
 	// The attendance record is stored in a div-soup "widget". There are no semantic identifiers in the markup,

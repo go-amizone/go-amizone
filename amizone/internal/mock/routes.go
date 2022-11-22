@@ -122,7 +122,6 @@ func GockRegisterAuthenticatedGet(endpoint string, responseBody io.Reader) {
 		Reply(http.StatusOK).
 		Type("text/html").
 		Body(responseBody)
-	return
 }
 
 // GockRegisterUnauthenticatedGet registers an unauthenticated GET request for the relative endpoint passed.
@@ -145,7 +144,6 @@ func GockRegisterAuthenticatedPost(endpoint string, requestBody string, response
 		BodyString(requestBody).
 		Reply(http.StatusOK).
 		Body(responseBody)
-	return
 }
 
 func GockRegisterUnauthenticatedPost(endpoint string, requestBody string, responseBody io.Reader) {

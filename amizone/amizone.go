@@ -101,7 +101,7 @@ func (a *Client) login() error {
 	a.muLogin.Lock()
 	defer a.muLogin.Unlock()
 
-	if time.Now().Sub(a.muLogin.lastAttempt) < time.Minute*2 {
+	if time.Since(a.muLogin.lastAttempt) < time.Minute*2 {
 		return nil
 	}
 
@@ -120,7 +120,7 @@ func (a *Client) login() error {
 
 	if verToken == "" {
 		klog.Error("login: failed to retrieve verification token from the login page")
-		return errors.New(fmt.Sprintf("%s: %s", ErrFailedLogin, ErrFailedToParsePage))
+		return fmt.Errorf("%s: %s", ErrFailedLogin, ErrFailedToParsePage)
 	}
 
 	loginRequestData := func() (v url.Values) {
@@ -135,7 +135,7 @@ func (a *Client) login() error {
 	loginResponse, err := a.doRequest(false, http.MethodPost, loginRequestEndpoint, strings.NewReader(loginRequestData.Encode()))
 	if err != nil {
 		klog.Warningf("Something went wrong while making the login request: ", err.Error())
-		return errors.New(fmt.Sprintf("%s: %s", ErrFailedLogin, err.Error()))
+		return fmt.Errorf("%s: %w", ErrFailedLogin, err)
 	}
 
 	// The login request should redirect our request to the home page with a 302 "found" status code.
