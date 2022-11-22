@@ -9,6 +9,8 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/ditsuke/go-amizone/amizone/internal/models"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"k8s.io/klog/v2"
 )
 
@@ -93,7 +95,7 @@ func ExaminationSchedule(body io.Reader) (*models.ExaminationSchedule, error) {
 		if raw != "" {
 			sanitised := strings.TrimSpace(raw)
 			// The title is usually like "EXAM TITLE ALL CAPS"
-			title := strings.Title(strings.ToLower(sanitised))
+			title := cases.Title(language.English).String(sanitised)
 			return title
 		}
 		klog.Warning("Failed to find the exam title. What's up?")

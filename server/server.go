@@ -22,7 +22,9 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-const ContextAmizoneClientKey = "amizone_client"
+type ContextKey string
+
+const ContextAmizoneClientKey ContextKey = "amizone_client"
 
 // Config is the configuration entity for ApiServer.
 type Config struct {

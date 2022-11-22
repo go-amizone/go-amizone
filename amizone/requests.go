@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/ditsuke/go-amizone/amizone/internal"
@@ -48,13 +47,13 @@ func (a *Client) doRequest(tryLogin bool, method string, endpoint string, body i
 	}
 
 	// Read the response into a byte array, so we can reuse it.
-	responseBody, err := ioutil.ReadAll(response.Body)
+	responseBody, err := io.ReadAll(response.Body)
 	if err != nil {
 		return response, errors.New(ErrFailedToReadResponse)
 	}
 	_ = response.Body.Close()
 
-	response.Body = ioutil.NopCloser(bytes.NewReader(responseBody))
+	response.Body = io.NopCloser(bytes.NewReader(responseBody))
 
 	// If we're directed to try logging-in and the parser determines we're not, we retry.
 	if tryLogin && *a.credentials != (Credentials{}) && !parse.LoggedIn(bytes.NewReader(responseBody)) {
