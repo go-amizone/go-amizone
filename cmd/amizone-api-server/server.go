@@ -3,15 +3,17 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/ditsuke/go-amizone/server"
-	"github.com/joho/godotenv"
-	"k8s.io/klog/v2"
 	"net/http"
 	"os"
 	"os/signal"
 	"reflect"
 	"strconv"
+	"syscall"
 	"time"
+
+	"github.com/ditsuke/go-amizone/server"
+	"github.com/joho/godotenv"
+	"k8s.io/klog/v2"
 )
 
 const (
@@ -47,7 +49,7 @@ func main() {
 	// Main thread -- we use for interrupting OS signals
 	osChannel := make(chan os.Signal, 1)
 	signal.Notify(osChannel, os.Interrupt)
-	signal.Notify(osChannel, os.Kill)
+	signal.Notify(osChannel, syscall.SIGTERM)
 
 	// Block until a signal is received
 	sig := <-osChannel

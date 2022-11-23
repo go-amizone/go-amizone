@@ -1,0 +1,22 @@
+run:
+  go: "1.18"
+  skip-dirs-use-default: true
+  skip-dirs:
+    - "server/gen"
+  tests: true
+
+issues:
+  exclude-use-default: true
+  exclude-case-sensitive: false
+  max-issues-per-linter: 50
+  max-same-issues: 3
+  new: false
+
+linters:
+  enable-all: false
+  disable-all: false
+  fast: false
+  enable:
+    - goimports
+    - unused
+    - durationcheck

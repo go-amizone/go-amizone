@@ -2,12 +2,12 @@ package parse
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
-	"github.com/ditsuke/go-amizone/amizone/internal/models"
 	"io"
-	"k8s.io/klog/v2"
 	"time"
+
+	"github.com/ditsuke/go-amizone/amizone/internal/models"
+	"k8s.io/klog/v2"
 )
 
 const (
@@ -19,7 +19,7 @@ const (
 func ClassSchedule(body io.Reader) (models.ClassSchedule, error) {
 	var diaryEvents models.AmizoneDiaryEvents
 	if err := json.NewDecoder(body).Decode(&diaryEvents); err != nil {
-		return nil, errors.New(fmt.Sprintf("%s: %s", ErrFailedToParse, err.Error()))
+		return nil, fmt.Errorf("%s: %w", ErrFailedToParse, err)
 	}
 
 	var classSchedule models.ClassSchedule

@@ -1,15 +1,16 @@
 package amizone_test
 
 import (
-	"github.com/ditsuke/go-amizone/amizone"
-	"github.com/ditsuke/go-amizone/amizone/internal/mock"
-	. "github.com/onsi/gomega"
-	"gopkg.in/h2non/gock.v1"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
 	"strings"
 	"testing"
+
+	"github.com/ditsuke/go-amizone/amizone"
+	"github.com/ditsuke/go-amizone/amizone/internal/mock"
+	. "github.com/onsi/gomega"
+	"gopkg.in/h2non/gock.v1"
 )
 
 // @todo: implement test cases to test behavior when:

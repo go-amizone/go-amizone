@@ -3,10 +3,11 @@ package mock
 import (
 	"errors"
 	"fmt"
-	"gopkg.in/h2non/gock.v1"
 	"io"
 	"net/http"
 	"net/url"
+
+	"gopkg.in/h2non/gock.v1"
 )
 
 const BaseUrl = "https://s.amizone.net"
@@ -121,7 +122,6 @@ func GockRegisterAuthenticatedGet(endpoint string, responseBody io.Reader) {
 		Reply(http.StatusOK).
 		Type("text/html").
 		Body(responseBody)
-	return
 }
 
 // GockRegisterUnauthenticatedGet registers an unauthenticated GET request for the relative endpoint passed.
@@ -144,7 +144,6 @@ func GockRegisterAuthenticatedPost(endpoint string, requestBody string, response
 		BodyString(requestBody).
 		Reply(http.StatusOK).
 		Body(responseBody)
-	return
 }
 
 func GockRegisterUnauthenticatedPost(endpoint string, requestBody string, responseBody io.Reader) {

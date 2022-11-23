@@ -3,6 +3,11 @@ package server
 import (
 	"context"
 	"encoding/base64"
+	"net"
+	"net/http"
+	"strings"
+	"sync"
+
 	"github.com/ditsuke/go-amizone/amizone"
 	v1 "github.com/ditsuke/go-amizone/server/gen/go/v1"
 	"github.com/go-logr/logr"
@@ -15,13 +20,11 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
-	"net"
-	"net/http"
-	"strings"
-	"sync"
 )
 
-const ContextAmizoneClientKey = "amizone_client"
+type ContextKey string
+
+const ContextAmizoneClientKey ContextKey = "amizone_client"
 
 // Config is the configuration entity for ApiServer.
 type Config struct {
@@ -70,7 +73,6 @@ func (s *ApiServer) Init() {
 		Handler: s.router,
 	}
 	s.muInit.done = true
-	return
 }
 
 // ServeHTTP implements the http.Handler interface for ApiServer.

@@ -2,9 +2,10 @@ package parse
 
 import (
 	"errors"
+	"io"
+
 	"github.com/PuerkitoBio/goquery"
 	"github.com/ditsuke/go-amizone/amizone/internal/models"
-	"io"
 )
 
 // Semesters returns the number of ongoing or passed semesters from the Amizone courses page.

@@ -3,12 +3,15 @@ package parse
 import (
 	"errors"
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
-	"github.com/ditsuke/go-amizone/amizone/internal/models"
 	"io"
-	"k8s.io/klog/v2"
 	"strings"
 	"time"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/ditsuke/go-amizone/amizone/internal/models"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+	"k8s.io/klog/v2"
 )
 
 const ExamTitleUnknown = "Unknown Exam"
@@ -39,7 +42,7 @@ func ExaminationSchedule(body io.Reader) (*models.ExaminationSchedule, error) {
 
 	dom, err := goquery.NewDocumentFromReader(body)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("%s: %s", ErrFailedToParseDOM, err.Error()))
+		return nil, fmt.Errorf("%s: %w", ErrFailedToParseDOM, err)
 	}
 
 	// Try to find the "Examination Schedule" breadcrumb to determine if we're on the right page.
@@ -92,7 +95,7 @@ func ExaminationSchedule(body io.Reader) (*models.ExaminationSchedule, error) {
 		if raw != "" {
 			sanitised := strings.TrimSpace(raw)
 			// The title is usually like "EXAM TITLE ALL CAPS"
-			title := strings.Title(strings.ToLower(sanitised))
+			title := cases.Title(language.English).String(sanitised)
 			return title
 		}
 		klog.Warning("Failed to find the exam title. What's up?")

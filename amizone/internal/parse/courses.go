@@ -3,12 +3,13 @@ package parse
 import (
 	"errors"
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
-	"github.com/ditsuke/go-amizone/amizone/internal/models"
 	"io"
-	"k8s.io/klog/v2"
 	"regexp"
 	"strconv"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/ditsuke/go-amizone/amizone/internal/models"
+	"k8s.io/klog/v2"
 )
 
 // Expose these data-title attributes, because they're used by the isCoursesPage function.
@@ -37,7 +38,7 @@ func Courses(body io.Reader) (models.Courses, error) {
 
 	dom, err := goquery.NewDocumentFromReader(body)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("%s: %s", ErrFailedToParseDOM, err.Error()))
+		return nil, fmt.Errorf("%s: %w", ErrFailedToParseDOM, err)
 	}
 
 	// We check for the course page first, but we can't rely on it alone because the "semester wise" course page does

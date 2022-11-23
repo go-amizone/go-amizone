@@ -2,8 +2,9 @@ package parse
 
 import (
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
 	"io"
+
+	"github.com/PuerkitoBio/goquery"
 )
 
 const loginFormHtmlId = "loginform"

@@ -1,11 +1,12 @@
 package parse_test
 
 import (
+	"testing"
+
 	"github.com/ditsuke/go-amizone/amizone/internal/mock"
 	"github.com/ditsuke/go-amizone/amizone/internal/models"
 	"github.com/ditsuke/go-amizone/amizone/internal/parse"
 	. "github.com/onsi/gomega"
-	"testing"
 )
 
 func TestClassSchedule(t *testing.T) {

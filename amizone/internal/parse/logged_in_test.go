@@ -1,10 +1,11 @@
 package parse_test
 
 import (
+	"testing"
+
 	"github.com/ditsuke/go-amizone/amizone/internal/mock"
 	"github.com/ditsuke/go-amizone/amizone/internal/parse"
 	. "github.com/onsi/gomega"
-	"testing"
 )
 
 func TestLoggedIn(t *testing.T) {
