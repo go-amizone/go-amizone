@@ -1,5 +1,7 @@
 run:
   go: "1.18"
+  build-tags:
+    - "integration"
   skip-dirs-use-default: true
   skip-dirs:
     - "server/gen"
