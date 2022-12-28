@@ -58,6 +58,8 @@ func TestAmizoneClient_GetAttendance(t *testing.T) {
 	nonLoggedInClient := getNonLoggedInClient(g)
 	loggedInClient := getLoggedInClient(g)
 
+	gock.Clean()
+
 	testCases := []struct {
 		name              string
 		amizoneClient     *amizone.Client
@@ -99,7 +101,7 @@ func TestAmizoneClient_GetAttendance(t *testing.T) {
 	for _, c := range testCases {
 		t.Run(c.name, func(t *testing.T) {
 			g := NewGomegaWithT(t)
-			defer gock.Off()
+			t.Cleanup(setupNetworking)
 
 			c.setup(g)
 
@@ -159,7 +161,7 @@ func TestClient_GetSemesters(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			g := NewWithT(t)
-			t.Cleanup(gock.Off)
+			t.Cleanup(setupNetworking)
 			testCase.setup(g)
 
 			semesters, err := testCase.client.GetSemesters()
@@ -313,7 +315,7 @@ func TestClient_GetCurrentCourses(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			g := NewWithT(t)
-			t.Cleanup(gock.Off)
+			t.Cleanup(setupNetworking)
 			testCase.setup(g)
 
 			courses, err := testCase.client.GetCurrentCourses()
@@ -323,18 +325,89 @@ func TestClient_GetCurrentCourses(t *testing.T) {
 	}
 }
 
+func TestClient_GetProfile(t *testing.T) {
+	g := NewWithT(t)
+
+	setupNetworking()
+	t.Cleanup(teardown)
+
+	loggedInClient := getLoggedInClient(g)
+	nonLoggedInClient := getNonLoggedInClient(g)
+
+	testCases := []struct {
+		name           string
+		client         *amizone.Client
+		setup          func(g *WithT)
+		profileMatcher func(g *WithT, profile *amizone.Profile)
+		errMatcher     func(g *WithT, err error)
+	}{
+		{
+			name:   "amizone client logged in and returns the (mock) profile page",
+			client: loggedInClient,
+			setup: func(g *WithT) {
+				err := mock.GockRegisterProfilePage()
+				g.Expect(err).ToNot(HaveOccurred())
+			},
+			profileMatcher: func(g *WithT, profile *amizone.Profile) {
+				g.Expect(profile).To(Equal(&amizone.Profile{
+					Name:               mock.StudentName,
+					EnrollmentNumber:   mock.StudentEnrollmentNumber,
+					EnrollmentValidity: mock.StudentIDValidity.Time(),
+					DateOfBirth:        mock.StudentDOB.Time(),
+					Batch:              mock.StudentBatch,
+					Program:            mock.StudentProgram,
+					BloodGroup:         mock.StudentBloodGroup,
+					IDCardNumber:       mock.StudentIDCardNumber,
+					UUID:               mock.StudentUUID,
+				}))
+			},
+			errMatcher: func(g *WithT, err error) {
+				g.Expect(err).ToNot(HaveOccurred())
+			},
+		},
+		{
+			name:   "amizone client is not logged in and returns the login page",
+			client: nonLoggedInClient,
+			setup: func(g *WithT) {
+				_ = mock.GockRegisterUnauthenticatedGet("/IDCard")
+			},
+			profileMatcher: func(g *WithT, profile *amizone.Profile) {
+				g.Expect(profile).To(BeNil())
+			},
+			errMatcher: func(g *WithT, err error) {
+				g.Expect(err).To(HaveOccurred())
+				g.Expect(err.Error()).To(ContainSubstring("not logged in"))
+			},
+		},
+	}
+
+	for _, testCases := range testCases {
+		t.Run(testCases.name, func(t *testing.T) {
+			g := NewWithT(t)
+			t.Cleanup(setupNetworking)
+			testCases.setup(g)
+
+			profile, err := testCases.client.GetProfile()
+			testCases.errMatcher(g, err)
+			testCases.profileMatcher(g, profile)
+		})
+	}
+}
+
 // Test utilities
 
-// setupNetworking uses gock to disable real HTTP networking to ensure we don't use any real network calls
-// for unit tests.
+// setupNetworking tears down any existing network mocks and sets up gock anew to intercept network
+// calls and disable real network calls.
 func setupNetworking() {
 	// tear everything all routes down
 	teardown()
+	gock.Intercept()
 	gock.DisableNetworking()
 }
 
 // teardown disables all networking restrictions and mock routes registered with gock for unit testing.
 func teardown() {
+	gock.Clean()
 	gock.Off()
 	gock.EnableNetworking()
 }
@@ -346,7 +419,6 @@ func getNonLoggedInClient(g *GomegaWithT) *amizone.Client {
 }
 
 func getLoggedInClient(g *GomegaWithT) *amizone.Client {
-	defer gock.Off()
 	err := mock.GockRegisterLoginPage()
 	g.Expect(err).ToNot(HaveOccurred(), "failed to register mock login page")
 	err = mock.GockRegisterLoginRequest()

@@ -105,6 +105,15 @@ func GockRegisterCurrentCoursesPage() error {
 	return nil
 }
 
+func GockRegisterProfilePage() error {
+	mockProfile, err := IDCardPage.Open()
+	if err != nil {
+		return errors.New("failed to open mock profile page: " + err.Error())
+	}
+	GockRegisterAuthenticatedGet("/IDCard", mockProfile)
+	return nil
+}
+
 func GockRegisterSemWiseCoursesPage() error {
 	mockCourses, err := CoursesPageSemWise.Open()
 	if err != nil {

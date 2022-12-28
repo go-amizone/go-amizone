@@ -12,6 +12,10 @@ import (
 	"k8s.io/klog/v2"
 )
 
+const (
+	ErrNon200StatusCode = "received non-200 status code from amizone - is it down?"
+)
+
 // doRequest is an internal http request helper to simplify making requests.
 // This method takes care of both composing requests, setting custom headers and such as needed.
 // If tryLogin is true, the Client will attempt to log in if it is not already logged in.
@@ -40,10 +44,17 @@ func (a *Client) doRequest(tryLogin bool, method string, endpoint string, body i
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	}
 
+	// TODO: check error handling logic following here
 	response, err := a.client.Do(req)
 	if err != nil {
 		klog.Errorf("Failed to visit endpoint '%s': %s", endpoint, err)
 		return nil, fmt.Errorf("%s: %w", ErrFailedToVisitPage, err)
+	}
+
+	// Amizone uses code 200 even for POST requests, so we make sure we have that before proceeding.
+	if response.StatusCode != http.StatusOK {
+		klog.Warningf("Received non-200 status code from endpoint '%s': %d. Amizone down?", endpoint, response.StatusCode)
+		return nil, fmt.Errorf("%s: %d", ErrNon200StatusCode, response.StatusCode)
 	}
 
 	// Read the response into a byte array, so we can reuse it.
