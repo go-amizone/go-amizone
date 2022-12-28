@@ -34,7 +34,7 @@ func WifiMacs(body io.Reader) (*models.WifiMacInfo, error) {
 		macs = append(macs, mac)
 	})
 
-	info  := models.WifiMacInfo{
+	info := models.WifiMacInfo{
 		RegisteredAddresses: macs,
 		Slots:               nodes.Length(),
 		FreeSlots:           nodes.Length() - len(macs),
