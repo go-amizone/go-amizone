@@ -41,6 +41,10 @@ func Courses(body io.Reader) (models.Courses, error) {
 		return nil, fmt.Errorf("%s: %w", ErrFailedToParseDOM, err)
 	}
 
+	if !IsLoggedInDOM(dom) {
+		return nil, errors.New(ErrNotLoggedIn)
+	}
+
 	// We check for the course page first, but we can't rely on it alone because the "semester wise" course page does
 	// not come with breadcrumbs.
 	if !isCoursesPage(dom) {

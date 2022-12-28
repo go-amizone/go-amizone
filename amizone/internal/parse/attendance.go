@@ -24,6 +24,10 @@ func Attendance(body io.Reader) (models.AttendanceRecords, error) {
 		return nil, fmt.Errorf("%s: %w", ErrFailedToParseDOM, err)
 	}
 
+	if !IsLoggedInDOM(dom) {
+		return nil, errors.New(ErrNotLoggedIn)
+	}
+
 	// The attendance record is stored in a div-soup "widget". There are no semantic identifiers in the markup,
 	// so we search this widget by title.
 	attendanceWidgetHeader := dom.Find(".widget-header").

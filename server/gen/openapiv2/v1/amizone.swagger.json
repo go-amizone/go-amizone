@@ -223,6 +223,33 @@
           "AmizoneService"
         ]
       }
+    },
+    "/api/v1/user_profile": {
+      "get": {
+        "summary": "GetUserProfile returns the user's profile.",
+        "operationId": "AmizoneService_GetUserProfile",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1Profile"
+            }
+          },
+          "403": {
+            "description": "Returned when the user does not have permission to access the resource.",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "AmizoneService"
+        ]
+      }
     }
   },
   "definitions": {
@@ -386,6 +413,41 @@
         }
       },
       "description": "Marks is a general message representing a student's marks (internal, external, total, etc). in a course or otherwise.\nIt is embedded in other messages and its meaning is context-dependent."
+    },
+    "v1Profile": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "enrollmentNumber": {
+          "type": "string"
+        },
+        "enrollmentValidity": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "batch": {
+          "type": "string"
+        },
+        "program": {
+          "type": "string"
+        },
+        "dateOfBirth": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "bloodGroup": {
+          "type": "string"
+        },
+        "idCardNumber": {
+          "type": "string"
+        },
+        "uuid": {
+          "type": "string"
+        }
+      },
+      "title": "Profile models information exposed by the Amizone ID card page"
     },
     "v1ScheduledClass": {
       "type": "object",

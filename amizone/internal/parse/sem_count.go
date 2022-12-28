@@ -15,6 +15,10 @@ func Semesters(body io.Reader) (models.SemesterList, error) {
 		return nil, errors.New(ErrFailedToParseDOM)
 	}
 
+	if !IsLoggedInDOM(dom) {
+		return nil, errors.New(ErrNotLoggedIn)
+	}
+
 	if !isCoursesPage(dom) {
 		return nil, errors.New(ErrFailedToParse)
 	}

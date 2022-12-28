@@ -38,7 +38,7 @@ func TestLoggedIn(t *testing.T) {
 			fileReader, err := tc.bodyFile.Open()
 
 			g.Expect(err).ToNot(HaveOccurred())
-			g.Expect(parse.LoggedIn(fileReader)).To(Equal(tc.expected))
+			g.Expect(parse.IsLoggedIn(fileReader)).To(Equal(tc.expected))
 		})
 	}
 }

@@ -27,3 +27,6 @@ type Courses models.Courses
 
 // Marks is a model for representing marks (have/max).
 type Marks models.Marks
+
+// Profile is a model for representing a user's Amizone profile.
+type Profile models.Profile

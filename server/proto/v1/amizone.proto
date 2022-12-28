@@ -85,6 +85,11 @@ service AmizoneService {
   rpc GetCurrentCourses(EmptyMessage) returns (Courses) {
     option (google.api.http) = {get: "/api/v1/courses"};
   }
+
+  // GetUserProfile returns the user's profile.
+  rpc GetUserProfile(EmptyMessage) returns (Profile) {
+    option (google.api.http) = {get: "/api/v1/user_profile"};
+  }
 }
 
 message EmptyMessage {}

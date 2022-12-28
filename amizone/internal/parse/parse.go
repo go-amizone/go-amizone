@@ -6,6 +6,7 @@ import "strings"
 const (
 	ErrFailedToParse    = "failed to parse"
 	ErrFailedToParseDOM = ErrFailedToParse + " DOM"
+	ErrNotLoggedIn      = ErrFailedToParse + ": not logged in"
 )
 
 // Shared selectors

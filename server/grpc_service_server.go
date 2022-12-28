@@ -114,3 +114,16 @@ func (serviceServer) GetCurrentCourses(ctx context.Context, _ *v1.EmptyMessage) 
 
 	return toproto.Courses(courses), nil
 }
+
+func (serviceServer) GetUserProfile(ctx context.Context, _ *v1.EmptyMessage) (*v1.Profile, error) {
+	amizoneClient, ok := ctx.Value(ContextAmizoneClientKey).(*amizone.Client)
+	if !ok {
+		return nil, status.Errorf(codes.Internal, "failed to authenticate")
+	}
+
+	profile, err := amizoneClient.GetProfile()
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to retrieve user-profile: %v", err)
+	}
+	return toproto.Profile(*profile), nil
+}
