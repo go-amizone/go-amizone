@@ -76,12 +76,7 @@ func GockRegisterLoginRequest() error {
 // GockRegisterHomePageLoggedIn registers a gock route for the amizone home page, serving the home page for a logged-in
 // user from the mock filesystem. The request must have the referrers and cookies expected by the home page.
 func GockRegisterHomePageLoggedIn() error {
-	mockHome, err := HomePageLoggedIn.Open()
-	if err != nil {
-		return errors.New("failed to open mock home page: " + err.Error())
-	}
-	GockRegisterAuthenticatedGet("/Home", mockHome)
-	return nil
+	return GockRegisterAuthenticatedGet("/Home", HomePageLoggedIn)
 }
 
 func GockRegisterSemesterCoursesRequest(semesterRef string) error {
@@ -97,40 +92,36 @@ func GockRegisterSemesterCoursesRequest(semesterRef string) error {
 }
 
 func GockRegisterCurrentCoursesPage() error {
-	mockCourses, err := CoursesPage.Open()
-	if err != nil {
-		return errors.New("failed to open mock courses page: " + err.Error())
-	}
-	GockRegisterAuthenticatedGet("/Academics/MyCourses", mockCourses)
-	return nil
+	return GockRegisterAuthenticatedGet("/Academics/MyCourses", CoursesPage)
 }
 
 func GockRegisterProfilePage() error {
-	mockProfile, err := IDCardPage.Open()
-	if err != nil {
-		return errors.New("failed to open mock profile page: " + err.Error())
-	}
-	GockRegisterAuthenticatedGet("/IDCard", mockProfile)
+	GockRegisterAuthenticatedGet("/IDCard", IDCardPage)
 	return nil
 }
 
 func GockRegisterSemWiseCoursesPage() error {
-	mockCourses, err := CoursesPageSemWise.Open()
-	if err != nil {
-		return errors.New("failed to open mock courses page: " + err.Error())
-	}
-	GockRegisterAuthenticatedGet("/Academics/MyCourses", mockCourses)
-	return nil
+	return GockRegisterAuthenticatedGet("/Academics/MyCourses", CoursesPageSemWise)
+}
+
+func GockRegisterWifiInfo() error {
+	return GockRegisterAuthenticatedGet("/RegisterForWifi/mac/MacRegistration", WifiPage)
 }
 
 // GockRegisterAuthenticatedGet registers an authenticated GET request for the relative endpoint passed.
 // The second parameter is used as the response body of the request.
-func GockRegisterAuthenticatedGet(endpoint string, responseBody io.Reader) {
+func GockRegisterAuthenticatedGet(endpoint string, file File) error {
+	responseBody, err := file.Open()
+	if err != nil {
+		return errors.New("failed to open file: " + string(file))
+	}
+
 	authenticateRequest(newRequest()).
 		Get(endpoint).
 		Reply(http.StatusOK).
 		Type("text/html").
 		Body(responseBody)
+	return nil
 }
 
 // GockRegisterUnauthenticatedGet registers an unauthenticated GET request for the relative endpoint passed.
