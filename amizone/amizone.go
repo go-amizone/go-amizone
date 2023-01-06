@@ -309,20 +309,20 @@ func (a *Client) GetProfile() (*models.Profile, error) {
 	return (*models.Profile)(profile), nil
 }
 
-func (a *Client) GetWifiMacInfo() (*models.WifiMacInfo, error) {
+func (a *Client) GetWifiMacInfo() (*WifiMacInfo, error) {
 	response, err := a.doRequest(true, http.MethodGet, getWifiMacsEndpoint, nil)
 	if err != nil {
 		klog.Warningf("request (get wifi macs): %s", err.Error())
 		return nil, errors.New(ErrFailedToVisitPage)
 	}
 
-	addresses, err := parse.WifiMacs(response.Body)
+	info, err := parse.WifiMacInfo(response.Body)
 	if err != nil {
 		klog.Errorf("parse (wifi macs): %s", err.Error())
 		return nil, errors.New(ErrFailedToParsePage)
 	}
 
-	return addresses, nil
+	return (*WifiMacInfo)(info), nil
 }
 
 // RegisterWifiMac registers a mac address on Amizone. If overwriteExisting is true,
@@ -335,22 +335,24 @@ func (a *Client) RegisterWifiMac(addr net.HardwareAddr, overwriteExisting bool) 
 		return err
 	}
 
-	if !info.HasFreeSlot() {
+	// ! HACKY
+	infor := (*models.WifiMacInfo)(info)
+	if !infor.HasFreeSlot() {
 		// but the limitation is artificial so... we do nothing?
 		// we shouldn't be defaulting to the bypass-style behaviour, though
 		// TODO: flag or param to enable the bypass behavior
 		return errors.New("no free wifi slots")
 	}
 
-	if info.IsRegistered(addr) {
+	if infor.IsRegistered(addr) {
 		klog.Infof("wifi already registered.. skipping request")
 		return nil
 	}
 
-	wifis := append(info.RegisteredAddresses, addr)
+	wifis := append(infor.RegisteredAddresses, addr)
 
 	payload := url.Values{}
-	payload.Set(verificationTokenName, info.GetRequestVerificationToken())
+	payload.Set(verificationTokenName, infor.GetRequestVerificationToken())
 	// ! VULN: register mac as anyone or no one by changing this ID.
 	payload.Set("Amizone_Id", a.credentials.Username)
 
@@ -397,7 +399,7 @@ func (a *Client) RemoveWifiMac(addr string) error {
 		return errors.New(ErrFailedToVisitPage)
 	}
 
-	wifiInfo, err := parse.WifiMacs(response.Body)
+	wifiInfo, err := parse.WifiMacInfo(response.Body)
 	if err != nil {
 		klog.Errorf("parse (wifi macs): %s", err.Error())
 		return errors.New(ErrFailedToParsePage)

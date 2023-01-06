@@ -39,7 +39,7 @@ func TestWifi(t *testing.T) {
 			g := NewWithT(t)
 			body, err := tc.bodyFile.Open()
 			g.Expect(err).ToNot(HaveOccurred())
-			addresses, err := parse.WifiMacs(body)
+			addresses, err := parse.WifiMacInfo(body)
 			tc.AddressesMatcher(g, addresses)
 			tc.errMatcher(g, err)
 		})

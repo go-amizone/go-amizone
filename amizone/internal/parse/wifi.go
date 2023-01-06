@@ -11,7 +11,7 @@ import (
 	"github.com/ditsuke/go-amizone/amizone/models"
 )
 
-func WifiMacs(body io.Reader) (*models.WifiMacInfo, error) {
+func WifiMacInfo(body io.Reader) (*models.WifiMacInfo, error) {
 	dom, err := goquery.NewDocumentFromReader(body)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", ErrFailedToParse, err)

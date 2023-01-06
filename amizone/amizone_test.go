@@ -18,7 +18,7 @@ import (
 // - Amizone is not reachable
 // - Amizone is reachable but login fails (invalid credentials, etc?)
 func TestNewClient(t *testing.T) {
-	g := NewGomegaWithT(t)
+	g := 		NewGomegaWithT(t)
 
 	setupNetworking()
 	t.Cleanup(teardown)
@@ -395,6 +395,69 @@ func TestClient_GetProfile(t *testing.T) {
 	}
 }
 
+func TestClient_GetWifiMacInfo(t *testing.T) {
+	g := NewWithT(t)
+
+	setupNetworking()
+	t.Cleanup(teardown)
+
+	loggedInClient := getLoggedInClient(g)
+	getNonLoggedInClient(g)
+
+	testCases := []struct {
+		name        string
+		client      *amizone.Client
+		setup       func(g *WithT)
+		infoMatcher func(g *WithT, info *amizone.WifiMacInfo)
+		errMatcher  func(g *WithT, err error)
+	}{
+		{
+			name:   "qkweq",
+			client: loggedInClient,
+			setup: func(g *WithT) {
+				g.Expect(mock.GockRegisterWifiInfo()).ToNot(HaveOccurred())
+			},
+			infoMatcher: func(g *WithT, info *amizone.WifiMacInfo) {
+				g.Expect(info).ToNot(BeNil())
+				g.Expect(info.RegisteredAddresses).To(HaveLen(2))
+			},
+			errMatcher: func(g *WithT, err error) {
+				g.Expect(err).ToNot(HaveOccurred())
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			g := NewWithT(t)
+			t.Cleanup(setupNetworking)
+			testCase.setup(g)
+
+			info, err := testCase.client.GetWifiMacInfo()
+			testCase.errMatcher(g, err)
+			testCase.infoMatcher(g, info)
+		})
+	}
+}
+
+type TestCase[T any] = struct {
+	name string
+	client *amizone.Client
+	setup func(g *WithT)
+	dataMatcher func(T data, g *WithT)
+	errMatcher func(err error, g *WithT)
+}
+
+func TestClient_RegisterWifiMac(t *testing.T) {
+	// ! TODO
+	testCases := []TestCase[*amizone.]
+}
+
+func TestClient_RemoveWifiMac(t *testing.T) {
+	// ! TODO
+}
+
+// Test utilities
 
 // setupNetworking tears down any existing network mocks and sets up gock anew to intercept network
 // calls and disable real network calls.
