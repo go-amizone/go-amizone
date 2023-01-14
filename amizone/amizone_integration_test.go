@@ -3,10 +3,11 @@
 package amizone_test
 
 import (
-	"github.com/ditsuke/go-amizone/amizone"
-	. "github.com/onsi/gomega"
 	"os"
 	"testing"
+
+	"github.com/ditsuke/go-amizone/amizone"
+	. "github.com/onsi/gomega"
 )
 
 func TestIntegrateNewClient(t *testing.T) {

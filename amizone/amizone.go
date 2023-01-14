@@ -12,6 +12,7 @@ import (
 
 	"github.com/ditsuke/go-amizone/amizone/internal"
 	"github.com/ditsuke/go-amizone/amizone/internal/parse"
+	"github.com/ditsuke/go-amizone/amizone/models"
 	"k8s.io/klog/v2"
 )
 
@@ -163,7 +164,7 @@ func (a *Client) login() error {
 
 // GetAttendance retrieves, parses and returns attendance data from Amizone for courses the client user is enrolled in
 // for their latest semester.
-func (a *Client) GetAttendance() (AttendanceRecords, error) {
+func (a *Client) GetAttendance() (models.AttendanceRecords, error) {
 	response, err := a.doRequest(true, http.MethodGet, attendancePageEndpoint, nil)
 	if err != nil {
 		klog.Warningf("request (attendance): %s", err.Error())
@@ -176,13 +177,13 @@ func (a *Client) GetAttendance() (AttendanceRecords, error) {
 		return nil, fmt.Errorf("%s: %w", ErrInternalFailure, err)
 	}
 
-	return AttendanceRecords(attendanceRecord), nil
+	return models.AttendanceRecords(attendanceRecord), nil
 }
 
-// GetClassSchedule retrieves, parses and returns class schedule data from Amizone.
+// Getmodels.ClassSchedule retrieves, parses and returns class schedule data from Amizone.
 // The date parameter is used to determine which schedule to retrieve, but Amizone imposes arbitrary limits on the
 // date range, so we have no way of knowing if a request will succeed.
-func (a *Client) GetClassSchedule(year int, month time.Month, date int) (ClassSchedule, error) {
+func (a *Client) ClassSchedule(year int, month time.Month, date int) (models.ClassSchedule, error) {
 	timeFrom := time.Date(year, month, date, 0, 0, 0, 0, time.UTC)
 	timeTo := timeFrom.Add(time.Hour * 24)
 
@@ -201,13 +202,13 @@ func (a *Client) GetClassSchedule(year int, month time.Month, date int) (ClassSc
 	}
 	filteredSchedule := classSchedule.FilterByDate(timeFrom)
 
-	return ClassSchedule(filteredSchedule), nil
+	return models.ClassSchedule(filteredSchedule), nil
 }
 
 // GetExamSchedule retrieves, parses and returns exam schedule data from Amizone.
 // Amizone only allows to retrieve the exam schedule for the current semester, and only close to the exam
 // dates once the date sheets are out, so we don't take a parameter here.
-func (a *Client) GetExamSchedule() (*ExamSchedule, error) {
+func (a *Client) GetExamSchedule() (*models.ExaminationSchedule, error) {
 	response, err := a.doRequest(true, http.MethodGet, examScheduleEndpoint, nil)
 	if err != nil {
 		klog.Warningf("request (exam schedule): %s", err.Error())
@@ -220,12 +221,12 @@ func (a *Client) GetExamSchedule() (*ExamSchedule, error) {
 		return nil, fmt.Errorf("%s: %w", ErrInternalFailure, err)
 	}
 
-	return (*ExamSchedule)(examSchedule), nil
+	return (*models.ExaminationSchedule)(examSchedule), nil
 }
 
 // GetSemesters retrieves, parses and returns a SemesterList from Amizone. This list includes all semesters for which
 // information can be retrieved through other semester-specific methods like GetCourses.
-func (a *Client) GetSemesters() (SemesterList, error) {
+func (a *Client) GetSemesters() (models.SemesterList, error) {
 	response, err := a.doRequest(true, http.MethodGet, currentCoursesEndpoint, nil)
 	if err != nil {
 		klog.Warningf("request (get semesters): %s", err.Error())
@@ -238,13 +239,13 @@ func (a *Client) GetSemesters() (SemesterList, error) {
 		return nil, fmt.Errorf("%s: %w", ErrInternalFailure, err)
 	}
 
-	return (SemesterList)(semesters), nil
+	return (models.SemesterList)(semesters), nil
 }
 
 // GetCourses retrieves, parses and returns a SemesterList from Amizone for the semester referred by
 // semesterRef. Semester references should be retrieved through GetSemesters, which returns a list of valid
 // semesters with names and references.
-func (a *Client) GetCourses(semesterRef string) (Courses, error) {
+func (a *Client) GetCourses(semesterRef string) (models.Courses, error) {
 	payload := url.Values{
 		"sem": []string{semesterRef},
 	}.Encode()
@@ -261,11 +262,11 @@ func (a *Client) GetCourses(semesterRef string) (Courses, error) {
 		return nil, fmt.Errorf("%s: %w", ErrInternalFailure, err)
 	}
 
-	return Courses(courses), nil
+	return models.Courses(courses), nil
 }
 
 // GetCurrentCourses retrieves, parses and returns a SemesterList from Amizone for the most recent semester.
-func (a *Client) GetCurrentCourses() (Courses, error) {
+func (a *Client) GetCurrentCourses() (models.Courses, error) {
 	response, err := a.doRequest(true, http.MethodGet, currentCoursesEndpoint, nil)
 	if err != nil {
 		klog.Warningf("request (get current courses): %s", err.Error())
@@ -278,11 +279,11 @@ func (a *Client) GetCurrentCourses() (Courses, error) {
 		return nil, fmt.Errorf("%s: %w", ErrInternalFailure, err)
 	}
 
-	return Courses(courses), nil
+	return models.Courses(courses), nil
 }
 
 // GetProfile retrieves, parsed and returns the current user's profile from Amizone.
-func (a *Client) GetProfile() (*Profile, error) {
+func (a *Client) GetProfile() (*models.Profile, error) {
 	response, err := a.doRequest(true, http.MethodGet, profileEndpoint, nil)
 	if err != nil {
 		klog.Warningf("request (get profile): %s", err.Error())
@@ -295,5 +296,5 @@ func (a *Client) GetProfile() (*Profile, error) {
 		return nil, fmt.Errorf("%s: %w", ErrInternalFailure, err)
 	}
 
-	return (*Profile)(profile), nil
+	return (*models.Profile)(profile), nil
 }

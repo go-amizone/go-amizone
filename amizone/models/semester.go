@@ -8,4 +8,6 @@ type Semester struct {
 	Ref  string
 }
 
+// SemesterList is a model for representing semesters. Often, this model will be used
+// for ongoing and past semesters for which information can be retrieved.
 type SemesterList []Semester

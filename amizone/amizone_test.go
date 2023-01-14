@@ -9,6 +9,7 @@ import (
 
 	"github.com/ditsuke/go-amizone/amizone"
 	"github.com/ditsuke/go-amizone/amizone/internal/mock"
+	"github.com/ditsuke/go-amizone/amizone/models"
 	. "github.com/onsi/gomega"
 	"gopkg.in/h2non/gock.v1"
 )
@@ -64,7 +65,7 @@ func TestAmizoneClient_GetAttendance(t *testing.T) {
 		name              string
 		amizoneClient     *amizone.Client
 		setup             func(g *WithT)
-		attendanceMatcher func(g *WithT, attendance amizone.AttendanceRecords)
+		attendanceMatcher func(g *WithT, attendance models.AttendanceRecords)
 		errorMatcher      func(g *WithT, err error)
 	}{
 		{
@@ -74,7 +75,7 @@ func TestAmizoneClient_GetAttendance(t *testing.T) {
 				err := mock.GockRegisterHomePageLoggedIn()
 				g.Expect(err).ToNot(HaveOccurred())
 			},
-			attendanceMatcher: func(g *WithT, attendance amizone.AttendanceRecords) {
+			attendanceMatcher: func(g *WithT, attendance models.AttendanceRecords) {
 				g.Expect(len(attendance)).To(Equal(8))
 			},
 			errorMatcher: func(g *WithT, err error) {
@@ -88,7 +89,7 @@ func TestAmizoneClient_GetAttendance(t *testing.T) {
 				err := mock.GockRegisterUnauthenticatedGet("/Home")
 				g.Expect(err).ToNot(HaveOccurred())
 			},
-			attendanceMatcher: func(g *WithT, attendance amizone.AttendanceRecords) {
+			attendanceMatcher: func(g *WithT, attendance models.AttendanceRecords) {
 				g.Expect(attendance).To(BeEmpty())
 			},
 			errorMatcher: func(g *WithT, err error) {
@@ -125,7 +126,7 @@ func TestClient_GetSemesters(t *testing.T) {
 		name             string
 		client           *amizone.Client
 		setup            func(g *WithT)
-		semestersMatcher func(g *WithT, semesters amizone.SemesterList)
+		semestersMatcher func(g *WithT, semesters models.SemesterList)
 		errMatcher       func(g *WithT, err error)
 	}{
 		{
@@ -135,7 +136,7 @@ func TestClient_GetSemesters(t *testing.T) {
 				err := mock.GockRegisterCurrentCoursesPage()
 				g.Expect(err).ToNot(HaveOccurred())
 			},
-			semestersMatcher: func(g *WithT, semesters amizone.SemesterList) {
+			semestersMatcher: func(g *WithT, semesters models.SemesterList) {
 				g.Expect(semesters).To(HaveLen(4))
 			},
 			errMatcher: func(g *WithT, err error) {
@@ -149,7 +150,7 @@ func TestClient_GetSemesters(t *testing.T) {
 				err := mock.GockRegisterLoginPage()
 				g.Expect(err).ToNot(HaveOccurred())
 			},
-			semestersMatcher: func(g *WithT, semesters amizone.SemesterList) {
+			semestersMatcher: func(g *WithT, semesters models.SemesterList) {
 				g.Expect(semesters).To(HaveLen(0))
 			},
 			errMatcher: func(g *WithT, err error) {
@@ -185,7 +186,7 @@ func TestClient_GetCourses(t *testing.T) {
 		client         *amizone.Client
 		semesterRef    string
 		setup          func(g *WithT)
-		coursesMatcher func(g *WithT, courses amizone.Courses)
+		coursesMatcher func(g *WithT, courses models.Courses)
 		errMatcher     func(g *WithT, err error)
 	}{
 		{
@@ -196,7 +197,7 @@ func TestClient_GetCourses(t *testing.T) {
 				err := mock.GockRegisterSemesterCoursesRequest("1")
 				g.Expect(err).ToNot(HaveOccurred())
 			},
-			coursesMatcher: func(g *WithT, courses amizone.Courses) {
+			coursesMatcher: func(g *WithT, courses models.Courses) {
 				g.Expect(courses).To(HaveLen(8))
 			},
 			errMatcher: func(g *WithT, err error) {
@@ -211,7 +212,7 @@ func TestClient_GetCourses(t *testing.T) {
 				err := mock.GockRegisterSemesterCoursesRequest("2")
 				g.Expect(err).ToNot(HaveOccurred())
 			},
-			coursesMatcher: func(g *WithT, courses amizone.Courses) {
+			coursesMatcher: func(g *WithT, courses models.Courses) {
 				g.Expect(courses).To(HaveLen(8))
 			},
 			errMatcher: func(g *WithT, err error) {
@@ -229,7 +230,7 @@ func TestClient_GetCourses(t *testing.T) {
 				g.Expect(err).ToNot(HaveOccurred())
 				mock.GockRegisterUnauthenticatedPost("/CourseListSemWise", url.Values{"sem": []string{"3"}}.Encode(), strings.NewReader("<no></no>"))
 			},
-			coursesMatcher: func(g *WithT, courses amizone.Courses) {
+			coursesMatcher: func(g *WithT, courses models.Courses) {
 				g.Expect(courses).To(HaveLen(0))
 			},
 			errMatcher: func(g *WithT, err error) {
@@ -265,7 +266,7 @@ func TestClient_GetCurrentCourses(t *testing.T) {
 		name           string
 		client         *amizone.Client
 		setup          func(g *WithT)
-		coursesMatcher func(g *WithT, courses amizone.Courses)
+		coursesMatcher func(g *WithT, courses models.Courses)
 		errMatcher     func(g *WithT, err error)
 	}{
 		{
@@ -275,7 +276,7 @@ func TestClient_GetCurrentCourses(t *testing.T) {
 				err := mock.GockRegisterCurrentCoursesPage()
 				g.Expect(err).ToNot(HaveOccurred())
 			},
-			coursesMatcher: func(g *WithT, courses amizone.Courses) {
+			coursesMatcher: func(g *WithT, courses models.Courses) {
 				g.Expect(courses).To(HaveLen(8))
 			},
 			errMatcher: func(g *WithT, err error) {
@@ -289,7 +290,7 @@ func TestClient_GetCurrentCourses(t *testing.T) {
 				err := mock.GockRegisterSemWiseCoursesPage()
 				g.Expect(err).ToNot(HaveOccurred())
 			},
-			coursesMatcher: func(g *WithT, courses amizone.Courses) {
+			coursesMatcher: func(g *WithT, courses models.Courses) {
 				g.Expect(courses).To(HaveLen(8))
 			},
 			errMatcher: func(g *WithT, err error) {
@@ -303,7 +304,7 @@ func TestClient_GetCurrentCourses(t *testing.T) {
 				err := mock.GockRegisterUnauthenticatedGet("/")
 				g.Expect(err).ToNot(HaveOccurred())
 			},
-			coursesMatcher: func(g *WithT, courses amizone.Courses) {
+			coursesMatcher: func(g *WithT, courses models.Courses) {
 				g.Expect(courses).To(HaveLen(0))
 			},
 			errMatcher: func(g *WithT, err error) {
@@ -338,7 +339,7 @@ func TestClient_GetProfile(t *testing.T) {
 		name           string
 		client         *amizone.Client
 		setup          func(g *WithT)
-		profileMatcher func(g *WithT, profile *amizone.Profile)
+		profileMatcher func(g *WithT, profile *models.Profile)
 		errMatcher     func(g *WithT, err error)
 	}{
 		{
@@ -348,8 +349,8 @@ func TestClient_GetProfile(t *testing.T) {
 				err := mock.GockRegisterProfilePage()
 				g.Expect(err).ToNot(HaveOccurred())
 			},
-			profileMatcher: func(g *WithT, profile *amizone.Profile) {
-				g.Expect(profile).To(Equal(&amizone.Profile{
+			profileMatcher: func(g *WithT, profile *models.Profile) {
+				g.Expect(profile).To(Equal(&models.Profile{
 					Name:               mock.StudentName,
 					EnrollmentNumber:   mock.StudentEnrollmentNumber,
 					EnrollmentValidity: mock.StudentIDValidity.Time(),
@@ -371,7 +372,7 @@ func TestClient_GetProfile(t *testing.T) {
 			setup: func(g *WithT) {
 				_ = mock.GockRegisterUnauthenticatedGet("/IDCard")
 			},
-			profileMatcher: func(g *WithT, profile *amizone.Profile) {
+			profileMatcher: func(g *WithT, profile *models.Profile) {
 				g.Expect(profile).To(BeNil())
 			},
 			errMatcher: func(g *WithT, err error) {
@@ -394,7 +395,6 @@ func TestClient_GetProfile(t *testing.T) {
 	}
 }
 
-// Test utilities
 
 // setupNetworking tears down any existing network mocks and sets up gock anew to intercept network
 // calls and disable real network calls.

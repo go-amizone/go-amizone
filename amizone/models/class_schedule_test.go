@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ditsuke/go-amizone/amizone/internal/models"
+	"github.com/ditsuke/go-amizone/amizone/models"
 	. "github.com/onsi/gomega"
 )
 
