@@ -13,7 +13,6 @@ import (
 
 	"github.com/ditsuke/go-amizone/amizone/internal"
 	"github.com/ditsuke/go-amizone/amizone/internal/marshaller"
-	"github.com/ditsuke/go-amizone/amizone/internal/models"
 	"github.com/ditsuke/go-amizone/amizone/internal/parse"
 	"github.com/ditsuke/go-amizone/amizone/models"
 	"k8s.io/klog/v2"
@@ -309,7 +308,7 @@ func (a *Client) GetProfile() (*models.Profile, error) {
 	return (*models.Profile)(profile), nil
 }
 
-func (a *Client) GetWifiMacInfo() (*WifiMacInfo, error) {
+func (a *Client) GetWifiMacInfo() (*models.WifiMacInfo, error) {
 	response, err := a.doRequest(true, http.MethodGet, getWifiMacsEndpoint, nil)
 	if err != nil {
 		klog.Warningf("request (get wifi macs): %s", err.Error())
@@ -322,7 +321,7 @@ func (a *Client) GetWifiMacInfo() (*WifiMacInfo, error) {
 		return nil, errors.New(ErrFailedToParsePage)
 	}
 
-	return (*WifiMacInfo)(info), nil
+	return (*models.WifiMacInfo)(info), nil
 }
 
 // RegisterWifiMac registers a mac address on Amizone. If overwriteExisting is true,

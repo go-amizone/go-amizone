@@ -18,7 +18,7 @@ import (
 // - Amizone is not reachable
 // - Amizone is reachable but login fails (invalid credentials, etc?)
 func TestNewClient(t *testing.T) {
-	g := 		NewGomegaWithT(t)
+	g := NewGomegaWithT(t)
 
 	setupNetworking()
 	t.Cleanup(teardown)
@@ -408,7 +408,7 @@ func TestClient_GetWifiMacInfo(t *testing.T) {
 		name        string
 		client      *amizone.Client
 		setup       func(g *WithT)
-		infoMatcher func(g *WithT, info *amizone.WifiMacInfo)
+		infoMatcher func(g *WithT, info *models.WifiMacInfo)
 		errMatcher  func(g *WithT, err error)
 	}{
 		{
@@ -417,7 +417,7 @@ func TestClient_GetWifiMacInfo(t *testing.T) {
 			setup: func(g *WithT) {
 				g.Expect(mock.GockRegisterWifiInfo()).ToNot(HaveOccurred())
 			},
-			infoMatcher: func(g *WithT, info *amizone.WifiMacInfo) {
+			infoMatcher: func(g *WithT, info *models.WifiMacInfo) {
 				g.Expect(info).ToNot(BeNil())
 				g.Expect(info.RegisteredAddresses).To(HaveLen(2))
 			},
