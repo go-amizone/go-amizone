@@ -3,14 +3,16 @@ package amizone
 import (
 	"net/http"
 	"time"
+
+	"github.com/ditsuke/go-amizone/amizone/models"
 )
 
 // ClientInterface is an exported interface for client to make mocking and testing more convenient.
 type ClientInterface interface {
 	DidLogin() bool
-	GetAttendance() (AttendanceRecords, error)
-	GetClassSchedule(year int, month time.Month, date int) (ClassSchedule, error)
-	GetExamSchedule() (*ExamSchedule, error)
+	GetAttendance() (models.AttendanceRecords, error)
+	ClassSchedule(year int, month time.Month, date int) (models.ClassSchedule, error)
+	GetExamSchedule() (*models.ExaminationSchedule, error)
 }
 
 // Interface compliance constraint for Client

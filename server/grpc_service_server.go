@@ -47,7 +47,7 @@ func (a serviceServer) GetClassSchedule(ctx context.Context, in *v1.ClassSchedul
 		return nil, status.Errorf(codes.InvalidArgument, "date is required")
 	}
 	nDate := fromproto.Date(pDate)
-	schedule, err := amizoneClient.GetClassSchedule(nDate.Date())
+	schedule, err := amizoneClient.ClassSchedule(nDate.Date())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to retrieve class schedule: %v", err)
 	}

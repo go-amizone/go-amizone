@@ -3,7 +3,7 @@ package toproto
 import (
 	"time"
 
-	"github.com/ditsuke/go-amizone/amizone"
+	"github.com/ditsuke/go-amizone/amizone/models"
 	v1 "github.com/ditsuke/go-amizone/server/gen/go/v1"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -12,16 +12,16 @@ func TimeToProtoTS(t time.Time) *timestamppb.Timestamp {
 	return timestamppb.New(t)
 }
 
-func CourseRef(a amizone.CourseRef) *v1.CourseRef {
+func CourseRef(a models.CourseRef) *v1.CourseRef {
 	return &v1.CourseRef{
 		Code: a.Code,
 		Name: a.Name,
 	}
 }
 
-func AttendanceRecord(a amizone.AttendanceRecord) *v1.AttendanceRecord {
+func AttendanceRecord(a models.AttendanceRecord) *v1.AttendanceRecord {
 	return &v1.AttendanceRecord{
-		Course: CourseRef(amizone.CourseRef(a.Course)),
+		Course: CourseRef(models.CourseRef(a.Course)),
 		Attendance: &v1.Attendance{
 			Attended: a.ClassesAttended,
 			Held:     a.ClassesHeld,
@@ -29,17 +29,17 @@ func AttendanceRecord(a amizone.AttendanceRecord) *v1.AttendanceRecord {
 	}
 }
 
-func AttendanceRecords(a amizone.AttendanceRecords) *v1.AttendanceRecords {
+func AttendanceRecords(a models.AttendanceRecords) *v1.AttendanceRecords {
 	t := make([]*v1.AttendanceRecord, len(a))
 	for i, c := range a {
-		t[i] = AttendanceRecord(amizone.AttendanceRecord(c))
+		t[i] = AttendanceRecord(models.AttendanceRecord(c))
 	}
 	return &v1.AttendanceRecords{
 		Records: t,
 	}
 }
 
-func ScheduledClasses(a amizone.ClassSchedule) *v1.ScheduledClasses {
+func ScheduledClasses(a models.ClassSchedule) *v1.ScheduledClasses {
 	arr := make([]*v1.ScheduledClass, len(a))
 	for i, c := range a {
 		arr[i] = &v1.ScheduledClass{
@@ -58,12 +58,12 @@ func ScheduledClasses(a amizone.ClassSchedule) *v1.ScheduledClasses {
 	}
 }
 
-func ExamSchedule(a amizone.ExamSchedule) *v1.ExaminationSchedule {
+func ExamSchedule(a models.ExaminationSchedule) *v1.ExaminationSchedule {
 	arr := make([]*v1.ScheduledExam, len(a.Exams))
 
 	for i, c := range a.Exams {
 		arr[i] = &v1.ScheduledExam{
-			Course: CourseRef(amizone.CourseRef(c.Course)),
+			Course: CourseRef(models.CourseRef(c.Course)),
 			Time:   TimeToProtoTS(c.Time),
 			Mode:   c.Mode,
 		}
@@ -75,7 +75,7 @@ func ExamSchedule(a amizone.ExamSchedule) *v1.ExaminationSchedule {
 	}
 }
 
-func SemesterList(a amizone.SemesterList) *v1.SemesterList {
+func SemesterList(a models.SemesterList) *v1.SemesterList {
 	arr := make([]*v1.Semester, len(a))
 	for i, c := range a {
 		arr[i] = &v1.Semester{
@@ -88,24 +88,24 @@ func SemesterList(a amizone.SemesterList) *v1.SemesterList {
 	}
 }
 
-func Marks(marks amizone.Marks) *v1.Marks {
+func Marks(marks models.Marks) *v1.Marks {
 	return &v1.Marks{
 		Have: marks.Have,
 		Max:  marks.Max,
 	}
 }
 
-func Courses(a amizone.Courses) *v1.Courses {
+func Courses(a models.Courses) *v1.Courses {
 	arr := make([]*v1.Course, len(a))
 	for i, c := range a {
 		arr[i] = &v1.Course{
-			Ref:  CourseRef(amizone.CourseRef(c.CourseRef)),
+			Ref:  CourseRef(models.CourseRef(c.CourseRef)),
 			Type: c.Type,
 			Attendance: &v1.Attendance{
 				Attended: c.Attendance.ClassesAttended,
 				Held:     c.Attendance.ClassesHeld,
 			},
-			InternalMarks: Marks(amizone.Marks(c.InternalMarks)),
+			InternalMarks: Marks(models.Marks(c.InternalMarks)),
 			SyllabusDoc:   c.SyllabusDoc,
 		}
 	}
@@ -114,7 +114,7 @@ func Courses(a amizone.Courses) *v1.Courses {
 	}
 }
 
-func Profile(a amizone.Profile) *v1.Profile {
+func Profile(a models.Profile) *v1.Profile {
 	return &v1.Profile{
 		Name:               a.Name,
 		EnrollmentNumber:   a.EnrollmentNumber,

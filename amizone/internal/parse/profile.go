@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/ditsuke/go-amizone/amizone/internal/models"
+	"github.com/ditsuke/go-amizone/amizone/models"
 	"k8s.io/klog/v2"
 )
 

@@ -15,7 +15,7 @@ type ScheduledClass struct {
 	Room      string
 }
 
-// ClassSchedule is an array of ScheduledClass, typically for a single day
+// ClassSchedule is a model for representing class schedule from the portal.
 type ClassSchedule []ScheduledClass
 
 // Sort sorts the ClassSchedule by ScheduledClass.StartTime

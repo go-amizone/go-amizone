@@ -8,6 +8,7 @@ type ScheduledExam struct {
 	Mode   string
 }
 
+// ExaminationSchedule is a model for representing exam schedule from the portal.
 type ExaminationSchedule struct {
 	Title string
 	Exams []ScheduledExam

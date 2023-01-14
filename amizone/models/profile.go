@@ -2,7 +2,7 @@ package models
 
 import "time"
 
-// Profile models information exposed by the Amizone ID card page
+// Profile is a model for representing a user's Amizone profile.
 type Profile struct {
 	Name               string
 	EnrollmentNumber   string

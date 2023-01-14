@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/ditsuke/go-amizone/amizone/internal/models"
+	"github.com/ditsuke/go-amizone/amizone/models"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"k8s.io/klog/v2"

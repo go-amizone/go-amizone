@@ -1,13 +1,13 @@
 package models
 
-// CourseRef models a reference to a course, most useful for models that have references but not complete course
-// information.
+// CourseRef is a model for representing a minimal reference to a course, usually embedded in other models.
 type CourseRef struct {
 	Code string
 	Name string
 }
 
-// Course models the data found on the Amizone courses page.
+// Courses is a model for representing a list of courses from the portal. This model
+// should most often be used to hold all courses for a certain semester.
 type Course struct {
 	CourseRef
 	Type          string
