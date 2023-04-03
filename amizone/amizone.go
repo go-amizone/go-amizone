@@ -18,6 +18,7 @@ import (
 	"k8s.io/klog/v2"
 )
 
+// Endpoints
 const (
 	BaseUrl = "https://" + internal.AmizoneDomain
 
@@ -35,11 +36,17 @@ const (
 	// deleteWifiMacEndpoint is peculiar in that it requires the user's ID as a parameter.
 	// This _might_ open doors for an exploit (spoiler: indeed it does)
 	removeWifiMacEndpoint = macBaseEndpoint + "/Mac1RegistrationDelete?username=%s&Amizone_Id=%s"
+)
 
+// Miscellaneous
+const (
 	scheduleEndpointTimeFormat = "2006-01-02"
 
 	verificationTokenName = "__RequestVerificationToken"
+)
 
+// Errors
+const (
 	ErrBadClient              = "the http client passed must have a cookie jar, or be nil"
 	ErrFailedToVisitPage      = "failed to visit page"
 	ErrFailedToReadResponse   = "failed to read response body"
@@ -324,34 +331,38 @@ func (a *Client) GetWifiMacInfo() (*models.WifiMacInfo, error) {
 	return (*models.WifiMacInfo)(info), nil
 }
 
-// RegisterWifiMac registers a mac address on Amizone. If overwriteExisting is true,
-// it deletes an existing mac address if there are no free registration slots.
+// RegisterWifiMac registers a mac address on Amizone.
+// If bypassLimit is true, it bypasses Amizone's artificial 2-address
+// limitation. However, only the 2 oldest mac addresses are reflected
+// in the GetWifiMacInfo response.
 // TODO: is the overwriteExisting functional?
-func (a *Client) RegisterWifiMac(addr net.HardwareAddr, overwriteExisting bool) error {
+func (a *Client) RegisterWifiMac(addr net.HardwareAddr, bypassLimit bool) error {
 	info, err := a.GetWifiMacInfo()
 	if err != nil {
 		klog.Warningf("failures while getting wifi mac info: %s", err.Error())
 		return err
 	}
 
-	// ! HACKY
-	infor := (*models.WifiMacInfo)(info)
-	if !infor.HasFreeSlot() {
+	if !info.HasFreeSlot() {
 		// but the limitation is artificial so... we do nothing?
 		// we shouldn't be defaulting to the bypass-style behaviour, though
 		// TODO: flag or param to enable the bypass behavior
-		return errors.New("no free wifi slots")
+		if !bypassLimit {
+			return errors.New("no free wifi slots")
+		}
+		// Remove the last mac address :)
+		info.RegisteredAddresses = info.RegisteredAddresses[:len(info.RegisteredAddresses)-1]
 	}
 
-	if infor.IsRegistered(addr) {
+	if info.IsRegistered(addr) {
 		klog.Infof("wifi already registered.. skipping request")
 		return nil
 	}
 
-	wifis := append(infor.RegisteredAddresses, addr)
+	wifis := append(info.RegisteredAddresses, addr)
 
 	payload := url.Values{}
-	payload.Set(verificationTokenName, infor.GetRequestVerificationToken())
+	payload.Set(verificationTokenName, info.GetRequestVerificationToken())
 	// ! VULN: register mac as anyone or no one by changing this ID.
 	payload.Set("Amizone_Id", a.credentials.Username)
 
@@ -361,11 +372,14 @@ func (a *Client) RegisterWifiMac(addr net.HardwareAddr, overwriteExisting bool) 
 
 	payload.Set("Mac1", marshaller.Mac(wifis[0]))
 	payload.Set("Mac2", func() string {
-		if len(wifis) > 1 {
+		if len(wifis) == 2 {
 			return marshaller.Mac(wifis[1])
 		}
 		return ""
 	}())
+	if len(wifis) == 2 {
+		payload.Set("Mac2", marshaller.Mac(wifis[1]))
+	}
 
 	// here we make a POST form submission to the form
 	// open question: does the endpoint necessarility need extranneous userinfo (name, admission number (probably yes for this one))
