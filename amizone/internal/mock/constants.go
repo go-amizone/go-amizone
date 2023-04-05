@@ -32,4 +32,9 @@ const (
 
 	StudentIDValidity Timestamp = 1719705600
 	StudentDOB        Timestamp = 986428800
+
+	// A valid mac address, and the first mac in the mock wifi pages
+	ValidMac1   = "55-04-2d-e7-be-a4"
+	ValidMac2   = "fd-d5-14-18-0c-8b"
+	ValidMacNew = "dd-d5-14-18-0c-8c"
 )

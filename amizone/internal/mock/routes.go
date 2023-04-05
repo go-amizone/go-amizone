@@ -80,15 +80,19 @@ func GockRegisterHomePageLoggedIn() error {
 }
 
 func GockRegisterSemesterCoursesRequest(semesterRef string) error {
-	mockCourses, err := CoursesPage.Open()
-	if err != nil {
-		return errors.New("failed to open mock courses page: " + err.Error())
-	}
-	GockRegisterAuthenticatedPost("/CourseListSemWise",
-		url.Values{"sem": []string{semesterRef}}.Encode(),
-		mockCourses,
+	return GockRegisterAuthenticatedPost("/CourseListSemWise",
+		func(r1 *http.Request, r2 *gock.Request) (bool, error) {
+			r, err := io.ReadAll(r1.Body)
+			if err != nil {
+				return false, fmt.Errorf("error checking request body: %s", err.Error())
+			}
+			if string(r) == (url.Values{"sem": []string{semesterRef}}.Encode()) {
+				return true, nil
+			}
+			return false, nil
+		},
+		CoursesPage,
 	)
-	return nil
 }
 
 func GockRegisterCurrentCoursesPage() error {
@@ -106,6 +110,31 @@ func GockRegisterSemWiseCoursesPage() error {
 
 func GockRegisterWifiInfo() error {
 	return GockRegisterAuthenticatedGet("/RegisterForWifi/mac/MacRegistration", WifiPage)
+}
+
+func GockRegisterWifiInfoOneSlot() error {
+	return GockRegisterAuthenticatedGet("/RegisterForWifi/mac/MacRegistration", WifiPageOneSlot)
+}
+
+// GockRegisterWifiRegistration() registers a gock route for the wifi registration page.
+// The request must have the expected referrer, cookies and post data to be successful.
+func GockRegisterWifiRegistration(payload url.Values) error {
+	return GockRegisterAuthenticatedPost("/RegisterForWifi/mac/MacRegistrationSave", func(r1 *http.Request, r2 *gock.Request) (bool, error) {
+		r, err := io.ReadAll(r1.Body)
+		if err != nil {
+			return false, fmt.Errorf("error checking request body: %s", err.Error())
+		}
+		query, err := url.ParseQuery(string(r))
+		if err != nil {
+			return false, fmt.Errorf("error parsing POST query: %s", err.Error())
+		}
+		for k, v := range payload {
+			if vAct := query.Get(k); vAct != v[0] {
+				return false, nil
+			}
+		}
+		return true, nil
+	}, WifiPage)
 }
 
 // GockRegisterAuthenticatedGet registers an authenticated GET request for the relative endpoint passed.
@@ -138,12 +167,18 @@ func GockRegisterUnauthenticatedGet(endpoint string) error {
 	return nil
 }
 
-func GockRegisterAuthenticatedPost(endpoint string, requestBody string, responseBody io.Reader) {
+func GockRegisterAuthenticatedPost(endpoint string, requestMatcher gock.MatchFunc, file File) error {
+	responseBody, err := file.Open()
+	if err != nil {
+		return errors.New("failed to open file: " + string(file))
+	}
+
 	authenticateRequest(newRequest()).
 		Post(endpoint).
-		BodyString(requestBody).
+		AddMatcher(requestMatcher).
 		Reply(http.StatusOK).
 		Body(responseBody)
+	return nil
 }
 
 func GockRegisterUnauthenticatedPost(endpoint string, requestBody string, responseBody io.Reader) {
