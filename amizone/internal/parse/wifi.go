@@ -26,7 +26,12 @@ func WifiMacInfo(body io.Reader) (*models.WifiMacInfo, error) {
 	}
 
 	nodes.Each(func(_ int, s *goquery.Selection) {
-		mac, err := net.ParseMAC(s.AttrOr("value", ""))
+		v := s.AttrOr("value", "")
+		if v == "" {
+			return
+		}
+
+		mac, err := net.ParseMAC(v)
 		if err != nil {
 			// LOG
 			return

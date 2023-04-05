@@ -14,6 +14,7 @@ import (
 	"github.com/ditsuke/go-amizone/amizone/internal"
 	"github.com/ditsuke/go-amizone/amizone/internal/marshaller"
 	"github.com/ditsuke/go-amizone/amizone/internal/parse"
+	"github.com/ditsuke/go-amizone/amizone/internal/validator"
 	"github.com/ditsuke/go-amizone/amizone/models"
 	"k8s.io/klog/v2"
 )
@@ -49,12 +50,15 @@ const (
 const (
 	ErrBadClient              = "the http client passed must have a cookie jar, or be nil"
 	ErrFailedToVisitPage      = "failed to visit page"
+	ErrFailedToFetchPage      = "failed to fetch page"
 	ErrFailedToReadResponse   = "failed to read response body"
 	ErrFailedLogin            = "failed to login"
 	ErrInvalidCredentials     = ErrFailedLogin + ": invalid credentials"
 	ErrInternalFailure        = "internal failure"
 	ErrFailedToComposeRequest = ErrInternalFailure + ": failed to compose request"
 	ErrFailedToParsePage      = ErrInternalFailure + ": failed to parse page"
+	ErrInvalidMac             = "invalid mac address passed"
+	ErrNoMacSlots             = "no free wifi mac slots"
 )
 
 type Credentials struct {
@@ -319,7 +323,7 @@ func (a *Client) GetWifiMacInfo() (*models.WifiMacInfo, error) {
 	response, err := a.doRequest(true, http.MethodGet, getWifiMacsEndpoint, nil)
 	if err != nil {
 		klog.Warningf("request (get wifi macs): %s", err.Error())
-		return nil, errors.New(ErrFailedToVisitPage)
+		return nil, fmt.Errorf("%s: %s", ErrFailedToFetchPage, err.Error())
 	}
 
 	info, err := parse.WifiMacInfo(response.Body)
@@ -335,34 +339,40 @@ func (a *Client) GetWifiMacInfo() (*models.WifiMacInfo, error) {
 // If bypassLimit is true, it bypasses Amizone's artificial 2-address
 // limitation. However, only the 2 oldest mac addresses are reflected
 // in the GetWifiMacInfo response.
-// TODO: is the overwriteExisting functional?
+// TODO: is the bypassLimit functional?
 func (a *Client) RegisterWifiMac(addr net.HardwareAddr, bypassLimit bool) error {
-	info, err := a.GetWifiMacInfo()
+	// validate
+	err := validator.ValidateHardwareAddr(addr)
 	if err != nil {
-		klog.Warningf("failures while getting wifi mac info: %s", err.Error())
+		return errors.New(ErrInvalidMac)
+	}
+	wifiInfo, err := a.GetWifiMacInfo()
+	if err != nil {
+		klog.Warningf("failure while getting wifi mac info: %s", err.Error())
 		return err
 	}
 
-	if !info.HasFreeSlot() {
-		// but the limitation is artificial so... we do nothing?
-		// we shouldn't be defaulting to the bypass-style behaviour, though
-		// TODO: flag or param to enable the bypass behavior
-		if !bypassLimit {
-			return errors.New("no free wifi slots")
-		}
-		// Remove the last mac address :)
-		info.RegisteredAddresses = info.RegisteredAddresses[:len(info.RegisteredAddresses)-1]
-	}
-
-	if info.IsRegistered(addr) {
+	if wifiInfo.IsRegistered(addr) {
 		klog.Infof("wifi already registered.. skipping request")
 		return nil
 	}
 
-	wifis := append(info.RegisteredAddresses, addr)
+	if !wifiInfo.HasFreeSlot() {
+		klog.Infof("wifi does not have free slot")
+		// but the limitation is artificial so... we do nothing?
+		// we shouldn't be defaulting to the bypass-style behaviour, though
+		// TODO: flag or param to enable the bypass behavior
+		if !bypassLimit {
+			return errors.New(ErrNoMacSlots)
+		}
+		// Remove the last mac address :)
+		wifiInfo.RegisteredAddresses = wifiInfo.RegisteredAddresses[:len(wifiInfo.RegisteredAddresses)-1]
+	}
+
+	wifis := append(wifiInfo.RegisteredAddresses, addr)
 
 	payload := url.Values{}
-	payload.Set(verificationTokenName, info.GetRequestVerificationToken())
+	payload.Set(verificationTokenName, wifiInfo.GetRequestVerificationToken())
 	// ! VULN: register mac as anyone or no one by changing this ID.
 	payload.Set("Amizone_Id", a.credentials.Username)
 
@@ -387,6 +397,7 @@ func (a *Client) RegisterWifiMac(addr net.HardwareAddr, bypassLimit bool) error 
 	// Open question: _should_ we be verifying the response? We _could_ parse out the updated mac list and verify that it has our new mac,
 	// but the failure modes are many and the only thing we can do (as of now) is move on. Especially since we're already verifying the
 	// validity of the mac addresses before we even enter this function.
+
 	_, err = a.doRequest(true, http.MethodPost, registerWifiMacsEndpoint, strings.NewReader(payload.Encode()))
 	if err != nil {
 		klog.Errorf("request (register wifi mac): %s", err.Error())
