@@ -21,12 +21,10 @@ type Empty struct{}
 // / DummyMatcher is a matcher for the Empty datatype that does exactly nothing,
 // / for when the function to be tested returns nothing.
 func DummyMatcher(_ Empty, _ *WithT) {
-	return
 }
 
 // DummySetup is used when a test requires no setup.
 func DummySetup(_ *WithT) {
-	return
 }
 
 func NoError(err error, g *WithT) {
@@ -41,6 +39,13 @@ type TestCase[D any, I any] struct {
 	input       I
 	dataMatcher func(date D, g *WithT)
 	errMatcher  func(err error, g *WithT)
+}
+
+// Sanity check testcase, since the go type system won't do it for us 😭
+func (c *TestCase[D, I]) sanityCheck(g *WithT) {
+	g.Expect(c.setup).ToNot(BeNil())
+	g.Expect(c.dataMatcher).ToNot(BeNil())
+	g.Expect(c.errMatcher).ToNot(BeNil())
 }
 
 // @todo: implement test cases to test behavior when:
@@ -123,7 +128,7 @@ func TestAmizoneClient_GetAttendance(t *testing.T) {
 			},
 			errorMatcher: func(g *WithT, err error) {
 				g.Expect(err).To(HaveOccurred())
-				g.Expect(err.Error()).To(ContainSubstring("not logged in"))
+				g.Expect(err.Error()).To(ContainSubstring(amizone.ErrFailedLogin))
 			},
 		},
 	}
@@ -176,8 +181,7 @@ func TestClient_GetSemesters(t *testing.T) {
 			name:   "client is not logged in and amizone returns the login page",
 			client: nonLoggedInClient,
 			setup: func(g *WithT) {
-				err := mock.GockRegisterLoginPage()
-				g.Expect(err).ToNot(HaveOccurred())
+				g.Expect(mock.GockRegisterLoginPage()).ToNot(HaveOccurred())
 			},
 			semestersMatcher: func(g *WithT, semesters models.SemesterList) {
 				g.Expect(semesters).To(HaveLen(0))
@@ -406,7 +410,7 @@ func TestClient_GetProfile(t *testing.T) {
 			},
 			errMatcher: func(g *WithT, err error) {
 				g.Expect(err).To(HaveOccurred())
-				g.Expect(err.Error()).To(ContainSubstring("not logged in"))
+				g.Expect(err.Error()).To(ContainSubstring(amizone.ErrFailedLogin))
 			},
 		},
 	}
@@ -502,15 +506,17 @@ func TestClient_RegisterWifiMac(t *testing.T) {
 				g.Expect(mock.GockRegisterHomePageLoggedIn()).ToNot(HaveOccurred())
 				g.Expect(mock.GockRegisterWifiInfo()).ToNot(HaveOccurred())
 			},
-			input: RegisterMacArgs{A: net.HardwareAddr{}, O: false},
+			input:       RegisterMacArgs{A: net.HardwareAddr{}, O: false},
+			dataMatcher: DummyMatcher,
 			errMatcher: func(err error, g *WithT) {
 				g.Expect(err).To(HaveOccurred())
 				g.Expect(err.Error()).To(ContainSubstring(amizone.ErrInvalidMac))
 			},
 		},
 		{
-			name:   "client: logged in; mac: valid; free_slots: none; bypass: false",
-			client: loggedInClient,
+			name:        "client: logged in; mac: valid; free_slots: none; bypass: false",
+			client:      loggedInClient,
+			dataMatcher: DummyMatcher,
 			errMatcher: func(err error, g *WithT) {
 				g.Expect(err).To(HaveOccurred())
 				g.Expect(err.Error()).To(ContainSubstring(amizone.ErrNoMacSlots))
@@ -521,10 +527,11 @@ func TestClient_RegisterWifiMac(t *testing.T) {
 			input: RegisterMacArgs{A: macNew, O: false},
 		},
 		{
-			name:       "client: logged in; mac: valid; free_slots: none; bypass: true",
-			client:     loggedInClient,
-			errMatcher: NoError,
-			input:      RegisterMacArgs{A: macNew, O: true},
+			name:        "client: logged in; mac: valid; free_slots: none; bypass: true",
+			client:      loggedInClient,
+			dataMatcher: DummyMatcher,
+			errMatcher:  NoError,
+			input:       RegisterMacArgs{A: macNew, O: true},
 			setup: func(g *WithT) {
 				g.Expect(mock.GockRegisterWifiInfo()).ToNot(HaveOccurred())
 				g.Expect(mock.GockRegisterWifiRegistration(url.Values{
@@ -537,10 +544,11 @@ func TestClient_RegisterWifiMac(t *testing.T) {
 			},
 		},
 		{
-			name:       "client: logged in; mac: valid; free slots: 1, bypass: false",
-			client:     loggedInClient,
-			input:      RegisterMacArgs{A: macNew, O: false},
-			errMatcher: NoError,
+			name:        "client: logged in; mac: valid; free slots: 1, bypass: false",
+			client:      loggedInClient,
+			input:       RegisterMacArgs{A: macNew, O: false},
+			dataMatcher: DummyMatcher,
+			errMatcher:  NoError,
 			setup: func(g *WithT) {
 				g.Expect(mock.GockRegisterWifiInfoOneSlot()).ToNot(HaveOccurred())
 				g.Expect(mock.GockRegisterWifiRegistration(url.Values{
@@ -553,10 +561,11 @@ func TestClient_RegisterWifiMac(t *testing.T) {
 			},
 		},
 		{
-			name:       "client: logged in; mac: valid; free_slots: 1; bypass: true",
-			client:     loggedInClient,
-			input:      RegisterMacArgs{A: macNew, O: true},
-			errMatcher: NoError,
+			name:        "client: logged in; mac: valid; free_slots: 1; bypass: true",
+			client:      loggedInClient,
+			input:       RegisterMacArgs{A: macNew, O: true},
+			dataMatcher: DummyMatcher,
+			errMatcher:  NoError,
 			setup: func(g *WithT) {
 				g.Expect(mock.GockRegisterWifiInfoOneSlot()).ToNot(HaveOccurred())
 				g.Expect(mock.GockRegisterWifiRegistration(url.Values{
@@ -569,10 +578,11 @@ func TestClient_RegisterWifiMac(t *testing.T) {
 			},
 		},
 		{
-			name:       "client is logged in, mac already exists",
-			client:     loggedInClient,
-			input:      RegisterMacArgs{A: getMac(mock.ValidMac2, g), O: false},
-			errMatcher: NoError,
+			name:        "client is logged in, mac already exists",
+			client:      loggedInClient,
+			input:       RegisterMacArgs{A: getMac(mock.ValidMac2, g), O: false},
+			dataMatcher: DummyMatcher,
+			errMatcher:  NoError,
 			setup: func(g *WithT) {
 				g.Expect(mock.GockRegisterWifiInfo()).ToNot(HaveOccurred())
 				// We don't expect a registration request
@@ -587,6 +597,7 @@ func TestClient_RegisterWifiMac(t *testing.T) {
 				g.Expect(mock.GockRegisterUnauthenticatedGet("/Home")).ToNot(HaveOccurred())
 				g.Expect(mock.GockRegisterUnauthenticatedGet("RegisterForWifi/mac/MacRegistration")).ToNot(HaveOccurred())
 			},
+			dataMatcher: DummyMatcher,
 			errMatcher: func(err error, g *WithT) {
 				g.Expect(err).To(HaveOccurred())
 				g.Expect(err.Error()).To(ContainSubstring(amizone.ErrFailedLogin))
@@ -598,11 +609,7 @@ func TestClient_RegisterWifiMac(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			g := NewWithT(t)
 			t.Cleanup(setupNetworking)
-			// Sanity check testcase, since the go type system won't do it for us 😭
-			g.Expect(testCase.setup).ToNot(BeNil())
-			g.Expect(testCase.dataMatcher).To(BeNil())
-			g.Expect(testCase.errMatcher).ToNot(BeNil())
-
+			testCase.sanityCheck(g)
 			testCase.setup(g)
 			err := testCase.client.RegisterWifiMac(testCase.input.A, testCase.input.O)
 			testCase.errMatcher(err, g)

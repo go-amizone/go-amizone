@@ -188,7 +188,7 @@ func (a *Client) GetAttendance() (models.AttendanceRecords, error) {
 	response, err := a.doRequest(true, http.MethodGet, attendancePageEndpoint, nil)
 	if err != nil {
 		klog.Warningf("request (attendance): %s", err.Error())
-		return nil, errors.New(ErrFailedToVisitPage)
+		return nil, fmt.Errorf("%s: %s", ErrFailedToFetchPage, err.Error())
 	}
 
 	attendanceRecord, err := parse.Attendance(response.Body)
@@ -273,7 +273,7 @@ func (a *Client) GetCourses(semesterRef string) (models.Courses, error) {
 	response, err := a.doRequest(true, http.MethodPost, coursesEndpoint, strings.NewReader(payload))
 	if err != nil {
 		klog.Warningf("request (get courses): %s", err.Error())
-		return nil, errors.New(ErrFailedToVisitPage)
+		return nil, fmt.Errorf("%s: %s", ErrFailedToFetchPage, err.Error())
 	}
 
 	courses, err := parse.Courses(response.Body)
@@ -290,7 +290,7 @@ func (a *Client) GetCurrentCourses() (models.Courses, error) {
 	response, err := a.doRequest(true, http.MethodGet, currentCoursesEndpoint, nil)
 	if err != nil {
 		klog.Warningf("request (get current courses): %s", err.Error())
-		return nil, errors.New(ErrFailedToVisitPage)
+		return nil, fmt.Errorf("%s: %s", ErrFailedToFetchPage, err.Error())
 	}
 
 	courses, err := parse.Courses(response.Body)
@@ -307,7 +307,7 @@ func (a *Client) GetProfile() (*models.Profile, error) {
 	response, err := a.doRequest(true, http.MethodGet, profileEndpoint, nil)
 	if err != nil {
 		klog.Warningf("request (get profile): %s", err.Error())
-		return nil, errors.New(ErrFailedToVisitPage)
+		return nil, fmt.Errorf("%s: %s", ErrFailedToFetchPage, err.Error())
 	}
 
 	profile, err := parse.Profile(response.Body)
@@ -401,7 +401,7 @@ func (a *Client) RegisterWifiMac(addr net.HardwareAddr, bypassLimit bool) error 
 	_, err = a.doRequest(true, http.MethodPost, registerWifiMacsEndpoint, strings.NewReader(payload.Encode()))
 	if err != nil {
 		klog.Errorf("request (register wifi mac): %s", err.Error())
-		return errors.New(ErrFailedToVisitPage)
+		return fmt.Errorf("%s: %s", ErrFailedToFetchPage, err.Error())
 	}
 
 	return nil
@@ -420,7 +420,7 @@ func (a *Client) RemoveWifiMac(addr string) error {
 	response, err := a.doRequest(true, http.MethodGet, fmt.Sprintf(removeWifiMacEndpoint, a.credentials.Username, marshaller.Mac(mac)), nil)
 	if err != nil {
 		klog.Errorf("request (remove wifi mac): %s", err.Error())
-		return errors.New(ErrFailedToVisitPage)
+		return fmt.Errorf("%s: %s", ErrFailedToFetchPage, err.Error())
 	}
 
 	wifiInfo, err := parse.WifiMacInfo(response.Body)
