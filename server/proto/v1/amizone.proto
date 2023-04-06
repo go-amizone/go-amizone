@@ -165,7 +165,7 @@ message ScheduledClass {
   google.protobuf.Timestamp end_time = 3;
   string faculty = 4;
   string room = 5;
-  AttendanceState Attendance = 8;
+  AttendanceState attendance = 8;
 }
 
 // ScheduledClasses is a group of scheduled classes, usually used to represent daily class schedules.
@@ -174,11 +174,11 @@ message ScheduledClasses {
 }
 
 enum AttendanceState {
-  PENDING = 0;
-  PRESENT = 1;
-  ABSENT = 2;
-  NA = 3;
-  INVALID = 4;
+  ATTENDANCE_STATE_PENDING = 0;
+  ATTENDANCE_STATE_PRESENT = 1;
+  ATTENDANCE_STATE_ABSENT = 2;
+  ATTENDANCE_STATE_NA = 3;
+  ATTENDANCE_STATE_INVALID = 4;
 }
 
 // AmizoneDiaryEvent models an event from the amizone "diary" API.
