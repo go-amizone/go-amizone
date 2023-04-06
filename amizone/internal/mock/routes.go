@@ -100,8 +100,7 @@ func GockRegisterCurrentCoursesPage() error {
 }
 
 func GockRegisterProfilePage() error {
-	GockRegisterAuthenticatedGet("/IDCard", IDCardPage)
-	return nil
+	return GockRegisterAuthenticatedGet("/IDCard", IDCardPage)
 }
 
 func GockRegisterSemWiseCoursesPage() error {
