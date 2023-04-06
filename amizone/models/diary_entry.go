@@ -7,9 +7,9 @@ import (
 )
 
 const (
-	ColorAttendanceAbsent  = "#4FCC4F"
+	ColorAttendanceAbsent  = "#F00"
 	ColorAttendancePending = "#3A87AD"
-	ColorAttendancePresent = "#F00"
+	ColorAttendancePresent = "#4FCC4F"
 	ColorAttendanceNA      = ""
 )
 

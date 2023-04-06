@@ -586,7 +586,7 @@
         "room": {
           "type": "string"
         },
-        "Attendance": {
+        "attendance": {
           "$ref": "#/definitions/v1AttendanceState"
         }
       },

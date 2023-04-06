@@ -174,11 +174,11 @@ message ScheduledClasses {
 }
 
 enum AttendanceState {
-  ATTENDANCE_STATE_PENDING = 0;
-  ATTENDANCE_STATE_PRESENT = 1;
-  ATTENDANCE_STATE_ABSENT = 2;
-  ATTENDANCE_STATE_NA = 3;
-  ATTENDANCE_STATE_INVALID = 4;
+  PENDING = 0;
+  PRESENT = 1;
+  ABSENT = 2;
+  NA = 3;
+  INVALID = 4;
 }
 
 // AmizoneDiaryEvent models an event from the amizone "diary" API.
