@@ -3,6 +3,7 @@ package amizone
 import (
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -11,11 +12,14 @@ import (
 	"time"
 
 	"github.com/ditsuke/go-amizone/amizone/internal"
+	"github.com/ditsuke/go-amizone/amizone/internal/marshaller"
 	"github.com/ditsuke/go-amizone/amizone/internal/parse"
+	"github.com/ditsuke/go-amizone/amizone/internal/validator"
 	"github.com/ditsuke/go-amizone/amizone/models"
 	"k8s.io/klog/v2"
 )
 
+// Endpoints
 const (
 	BaseUrl = "https://" + internal.AmizoneDomain
 
@@ -26,19 +30,35 @@ const (
 	currentCoursesEndpoint   = "/Academics/MyCourses"
 	coursesEndpoint          = currentCoursesEndpoint + "/CourseListSemWise"
 	profileEndpoint          = "/IDCard"
+	macBaseEndpoint          = "/RegisterForWifi/mac"
+	getWifiMacsEndpoint      = macBaseEndpoint + "/MacRegistration"
+	registerWifiMacsEndpoint = macBaseEndpoint + "/MacRegistrationSave"
 
+	// deleteWifiMacEndpoint is peculiar in that it requires the user's ID as a parameter.
+	// This _might_ open doors for an exploit (spoiler: indeed it does)
+	removeWifiMacEndpoint = macBaseEndpoint + "/Mac1RegistrationDelete?username=%s&Amizone_Id=%s"
+)
+
+// Miscellaneous
+const (
 	scheduleEndpointTimeFormat = "2006-01-02"
 
 	verificationTokenName = "__RequestVerificationToken"
+)
 
+// Errors
+const (
 	ErrBadClient              = "the http client passed must have a cookie jar, or be nil"
 	ErrFailedToVisitPage      = "failed to visit page"
+	ErrFailedToFetchPage      = "failed to fetch page"
 	ErrFailedToReadResponse   = "failed to read response body"
 	ErrFailedLogin            = "failed to login"
 	ErrInvalidCredentials     = ErrFailedLogin + ": invalid credentials"
 	ErrInternalFailure        = "internal failure"
 	ErrFailedToComposeRequest = ErrInternalFailure + ": failed to compose request"
 	ErrFailedToParsePage      = ErrInternalFailure + ": failed to parse page"
+	ErrInvalidMac             = "invalid mac address passed"
+	ErrNoMacSlots             = "no free wifi mac slots"
 )
 
 type Credentials struct {
@@ -168,7 +188,7 @@ func (a *Client) GetAttendance() (models.AttendanceRecords, error) {
 	response, err := a.doRequest(true, http.MethodGet, attendancePageEndpoint, nil)
 	if err != nil {
 		klog.Warningf("request (attendance): %s", err.Error())
-		return nil, errors.New(ErrFailedToVisitPage)
+		return nil, fmt.Errorf("%s: %s", ErrFailedToFetchPage, err.Error())
 	}
 
 	attendanceRecord, err := parse.Attendance(response.Body)
@@ -253,7 +273,7 @@ func (a *Client) GetCourses(semesterRef string) (models.Courses, error) {
 	response, err := a.doRequest(true, http.MethodPost, coursesEndpoint, strings.NewReader(payload))
 	if err != nil {
 		klog.Warningf("request (get courses): %s", err.Error())
-		return nil, errors.New(ErrFailedToVisitPage)
+		return nil, fmt.Errorf("%s: %s", ErrFailedToFetchPage, err.Error())
 	}
 
 	courses, err := parse.Courses(response.Body)
@@ -270,7 +290,7 @@ func (a *Client) GetCurrentCourses() (models.Courses, error) {
 	response, err := a.doRequest(true, http.MethodGet, currentCoursesEndpoint, nil)
 	if err != nil {
 		klog.Warningf("request (get current courses): %s", err.Error())
-		return nil, errors.New(ErrFailedToVisitPage)
+		return nil, fmt.Errorf("%s: %s", ErrFailedToFetchPage, err.Error())
 	}
 
 	courses, err := parse.Courses(response.Body)
@@ -287,7 +307,7 @@ func (a *Client) GetProfile() (*models.Profile, error) {
 	response, err := a.doRequest(true, http.MethodGet, profileEndpoint, nil)
 	if err != nil {
 		klog.Warningf("request (get profile): %s", err.Error())
-		return nil, errors.New(ErrFailedToVisitPage)
+		return nil, fmt.Errorf("%s: %s", ErrFailedToFetchPage, err.Error())
 	}
 
 	profile, err := parse.Profile(response.Body)
@@ -297,4 +317,120 @@ func (a *Client) GetProfile() (*models.Profile, error) {
 	}
 
 	return (*models.Profile)(profile), nil
+}
+
+func (a *Client) GetWifiMacInfo() (*models.WifiMacInfo, error) {
+	response, err := a.doRequest(true, http.MethodGet, getWifiMacsEndpoint, nil)
+	if err != nil {
+		klog.Warningf("request (get wifi macs): %s", err.Error())
+		return nil, fmt.Errorf("%s: %s", ErrFailedToFetchPage, err.Error())
+	}
+
+	info, err := parse.WifiMacInfo(response.Body)
+	if err != nil {
+		klog.Errorf("parse (wifi macs): %s", err.Error())
+		return nil, errors.New(ErrFailedToParsePage)
+	}
+
+	return (*models.WifiMacInfo)(info), nil
+}
+
+// RegisterWifiMac registers a mac address on Amizone.
+// If bypassLimit is true, it bypasses Amizone's artificial 2-address
+// limitation. However, only the 2 oldest mac addresses are reflected
+// in the GetWifiMacInfo response.
+// TODO: is the bypassLimit functional?
+func (a *Client) RegisterWifiMac(addr net.HardwareAddr, bypassLimit bool) error {
+	// validate
+	err := validator.ValidateHardwareAddr(addr)
+	if err != nil {
+		return errors.New(ErrInvalidMac)
+	}
+	wifiInfo, err := a.GetWifiMacInfo()
+	if err != nil {
+		klog.Warningf("failure while getting wifi mac info: %s", err.Error())
+		return err
+	}
+
+	if wifiInfo.IsRegistered(addr) {
+		klog.Infof("wifi already registered.. skipping request")
+		return nil
+	}
+
+	if !wifiInfo.HasFreeSlot() {
+		klog.Infof("wifi does not have free slot")
+		// but the limitation is artificial so... we do nothing?
+		// we shouldn't be defaulting to the bypass-style behaviour, though
+		// TODO: flag or param to enable the bypass behavior
+		if !bypassLimit {
+			return errors.New(ErrNoMacSlots)
+		}
+		// Remove the last mac address :)
+		wifiInfo.RegisteredAddresses = wifiInfo.RegisteredAddresses[:len(wifiInfo.RegisteredAddresses)-1]
+	}
+
+	wifis := append(wifiInfo.RegisteredAddresses, addr)
+
+	payload := url.Values{}
+	payload.Set(verificationTokenName, wifiInfo.GetRequestVerificationToken())
+	// ! VULN: register mac as anyone or no one by changing this ID.
+	payload.Set("Amizone_Id", a.credentials.Username)
+
+	// _Name_ is a dummy field, as in it doesn't matter what its value is, but it needs to be present.
+	// I suspect this might go straight into the DB.
+	payload.Set("Name", "DoesntMatter")
+
+	payload.Set("Mac1", marshaller.Mac(wifis[0]))
+	payload.Set("Mac2", func() string {
+		if len(wifis) == 2 {
+			return marshaller.Mac(wifis[1])
+		}
+		return ""
+	}())
+	if len(wifis) == 2 {
+		payload.Set("Mac2", marshaller.Mac(wifis[1]))
+	}
+
+	// here we make a POST form submission to the form
+	// open question: does the endpoint necessarility need extranneous userinfo (name, admission number (probably yes for this one))
+
+	// Open question: _should_ we be verifying the response? We _could_ parse out the updated mac list and verify that it has our new mac,
+	// but the failure modes are many and the only thing we can do (as of now) is move on. Especially since we're already verifying the
+	// validity of the mac addresses before we even enter this function.
+
+	_, err = a.doRequest(true, http.MethodPost, registerWifiMacsEndpoint, strings.NewReader(payload.Encode()))
+	if err != nil {
+		klog.Errorf("request (register wifi mac): %s", err.Error())
+		return fmt.Errorf("%s: %s", ErrFailedToFetchPage, err.Error())
+	}
+
+	return nil
+}
+
+// RemoveWifiMac removes a mac address from the Amizone mac address registry. If the mac address is not registered in the
+// first place, this function does nothing.
+func (a *Client) RemoveWifiMac(addr net.HardwareAddr) error {
+	err := validator.ValidateHardwareAddr(addr)
+	if err != nil {
+		return errors.New(ErrInvalidMac)
+	}
+
+	// ! VULN: remove mac addresses registered by anyone if you know the mac/username pair.
+	response, err := a.doRequest(true, http.MethodGet, fmt.Sprintf(removeWifiMacEndpoint, a.credentials.Username, marshaller.Mac(addr)), nil)
+	if err != nil {
+		klog.Errorf("request (remove wifi mac): %s", err.Error())
+		return fmt.Errorf("%s: %s", ErrFailedToFetchPage, err.Error())
+	}
+
+	wifiInfo, err := parse.WifiMacInfo(response.Body)
+	if err != nil {
+		klog.Errorf("parse (wifi macs): %s", err.Error())
+		return errors.New(ErrFailedToParsePage)
+	}
+
+	if wifiInfo.IsRegistered(addr) {
+		return errors.New("failed to remove mac address")
+	}
+
+	return nil
 }

@@ -60,3 +60,10 @@ func TestIntegrateNewClient(t *testing.T) {
 		})
 	}
 }
+
+func TestIntegrateAmizone_GetProfile(t *testing.T) {
+	// g := NewWithT(t)
+
+	// goal: test that we can get a profile matching
+	// the information in the environment (need to add name, UUID, etc as environment variables)
+}

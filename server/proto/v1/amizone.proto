@@ -3,9 +3,7 @@ syntax = "proto3";
 package go_amizone.server.proto.v1;
 
 import "google/api/annotations.proto";
-import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
-import "google/protobuf/type.proto";
 import "google/type/date.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
 
@@ -90,6 +88,18 @@ service AmizoneService {
   rpc GetUserProfile(EmptyMessage) returns (Profile) {
     option (google.api.http) = {get: "/api/v1/user_profile"};
   }
+  rpc GetWifiMacInfo(EmptyMessage) returns (WifiMacInfo) {
+    option (google.api.http) = {get: "/api/v1/wifi_mac"};
+  }
+  rpc RegisterWifiMac(RegisterWifiMacRequest) returns (EmptyMessage) {
+    option (google.api.http) = {
+      post: "/api/v1/wifi_mac"
+      body: "*"
+    };
+  }
+  rpc DeregisterWifiMac(DeregisterWifiMacRequest) returns (EmptyMessage) {
+    option (google.api.http) = {delete: "/api/v1/wifi_mac/{address}"};
+  }
 }
 
 message EmptyMessage {}
@@ -127,7 +137,7 @@ message Course {
   CourseRef ref = 1;
   string type = 2;
   Attendance attendance = 3;
-  Marks internalMarks = 4;
+  Marks internal_marks = 4;
   string syllabus_doc = 5;
 }
 
@@ -139,7 +149,7 @@ message Courses {
 // AttendanceRecord represents a student's attendance for a course.
 message AttendanceRecord {
   Attendance attendance = 1;
-  CourseRef Course = 2;
+  CourseRef course = 2;
 }
 
 // AttendanceRecords is a list of attendance records, usually representing attendance records for all
@@ -151,8 +161,8 @@ message AttendanceRecords {
 // ScheduledClass represents a scheduled class.
 message ScheduledClass {
   CourseRef course = 1;
-  google.protobuf.Timestamp startTime = 2;
-  google.protobuf.Timestamp endTime = 3;
+  google.protobuf.Timestamp start_time = 2;
+  google.protobuf.Timestamp end_time = 3;
   string faculty = 4;
   string room = 5;
 }
@@ -164,13 +174,13 @@ message ScheduledClasses {
 
 // AmizoneDiaryEvent models an event from the amizone "diary" API.
 message AmizoneDiaryEvent {
-  string Type = 1;
-  string CourseCode = 2;
-  string CourseName = 3;
-  string Faculty = 4;
-  string Room = 5;
-  string Start = 6;
-  string End = 7;
+  string type = 1;
+  string course_code = 2;
+  string course_name = 3;
+  string faculty = 4;
+  string room = 5;
+  string start = 6;
+  string end = 7;
 }
 
 message ScheduledExam {
@@ -207,4 +217,19 @@ message Semester {
 
 message SemesterList {
   repeated Semester semesters = 1;
+}
+
+message WifiMacInfo {
+  repeated string addresses = 1;
+  int32 slots = 2;
+  int32 free_slots = 3;
+}
+
+message DeregisterWifiMacRequest {
+  string address = 1;
+}
+
+message RegisterWifiMacRequest {
+  string address = 1;
+  bool override_limit = 2;
 }

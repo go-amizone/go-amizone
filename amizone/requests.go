@@ -22,8 +22,12 @@ const (
 // method must be a valid http request method.
 // endpoint must be relative to BaseUrl.
 func (a *Client) doRequest(tryLogin bool, method string, endpoint string, body io.Reader) (*http.Response, error) {
+	if *a.credentials == (Credentials{}) {
+		return nil, fmt.Errorf("%s: invalid credentials", ErrFailedLogin)
+	}
+
 	// Login now if we didn't log in at instantiation.
-	if tryLogin && !a.DidLogin() && *a.credentials != (Credentials{}) {
+	if tryLogin && !a.DidLogin() {
 		klog.Infof("doRequest: Attempting to login since we haven't logged in yet.")
 		if err := a.login(); err != nil {
 			return nil, err

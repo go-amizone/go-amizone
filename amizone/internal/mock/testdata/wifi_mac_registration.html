@@ -1,0 +1,114 @@
+<div class="main-content">
+    <div class="main-content-inner">
+        <div class="breadcrumbs" id="breadcrumbs">
+            <script type="text/javascript">
+                try { ace.settings.check('breadcrumbs', 'fixed') } catch (e) { }
+            </script>
+            <ul class="breadcrumb">
+                <li>
+                    <i class="ace-icon fa fa-home home-icon"></i>
+                    <a href="#">Home</a>
+                </li>
+
+                <li class="active">Register wi-fi</li>
+            </ul><!-- /.breadcrumb -->
+        </div>
+        <div class="page-content">
+            <div class="page-header">
+                <h1>
+                    Register your wi-fi devices
+                </h1>
+            </div><!-- /.page-header -->
+            <form action="/RegisterForWifi/mac/MacRegistrationSave" class="f1 form-horizontal clearfix" data-ajax="true"
+                data-ajax-loading="#lodingDiv" data-ajax-method="POST" data-ajax-mode="replace"
+                data-ajax-update="#Div_Partial" data-toggle="validator" id="f1" method="post"><input
+                    name="__RequestVerificationToken" type="hidden"
+                    value="wUs15ELhuam7dhNZjDkmv4vItZFjArsmqLo8rDa6LJjArbxIwZUugTBnHTDpOvWxsJiH35YmvLlJsOie-yCvSF_QxmGYZ7JVb1yaJtVh5-c1" /><input
+                    id="Email" name="Email" type="hidden" value="NA" /><input id="Name" name="Name" type="hidden"
+                    value="Monsieur John Dow" /><input id="Password" name="Password" type="hidden"
+                    value="23333312mmm" /><input id="Amizone_Id" name="Amizone_Id" type="hidden"
+                    value="aaurmso" /><input id="Batch" name="Batch" type="hidden" value="9831" /><input id="Dept"
+                    name="Dept" type="hidden" value="ASET" /><input id="AdmYear" name="AdmYear" type="hidden"
+                    value="1999" />
+                <div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2">Device 1</label>
+                        <div class="col-sm-3">
+                            <input class="form-control required" data-val="true"
+                                data-val-regex="Invalid password format" data-val-regex-pattern="^[a-fA-F0-9-]{17}$"
+                                id="Mac1" name="Mac1" placeholder="Device 1 {00-00-00-00-00-00}" required="required"
+                                type="text" value="55-04-2D-E7-BE-A4" />
+                            <span class="field-validation-valid text-danger" data-valmsg-for="Mac1"
+                                data-valmsg-replace="true"></span>
+                        </div>
+                        <div class="col-sm-3" style="text-align:left">
+                            <a class="btn btn-sm btn-success" data-ajax="true"
+                                data-ajax-begin="return confirm(&#39;Are you sure, you want to remove this.&#39;) ;"
+                                data-ajax-loading="#lodingDiv" data-ajax-mode="replace" data-ajax-update="#Div_Partial"
+                                href="/RegisterForWifi/mac/Mac1RegistrationDelete?Amizone_Id=8888888&amp;username=55-04-2D-E7-BE-A4"
+                                id="5" rel="0"> Delete </a>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2">Device 2 </label>
+                        <div class="col-sm-3">
+                            <input class="form-control required" data-val="true"
+                                data-val-regex="Invalid password format" data-val-regex-pattern="^[a-fA-F0-9-]{17}$"
+                                id="Mac2" name="Mac2" placeholder="Device 2 {00-00-00-00-00-00}" type="text"
+                                value="fd-d5-14-18-0c-8b" />
+                            <span class="field-validation-valid text-danger" data-valmsg-for="Mac2"
+                                data-valmsg-replace="true"></span>
+                        </div>
+                        <div class="col-lg-3" style="text-align:left">
+                            <a class="btn btn-sm btn-success" data-ajax="true"
+                                data-ajax-begin="return confirm(&#39;Are you sure, you want to remove this.&#39;) ;"
+                                data-ajax-loading="#lodingDiv" data-ajax-mode="replace" data-ajax-update="#Div_Partial"
+                                href="/RegisterForWifi/mac/Mac1RegistrationDelete?Amizone_Id=8888888&amp;username=fd-d5-14-18-0c-8b"
+                                id="5" rel="0"> Delete </a>
+                        </div>
+                    </div>
+                    <div class="col-sm-8 clearfix row">
+                        <div class="align-center">
+                            <h4 class="text-danger"> Already updated.</h4>
+                        </div>
+                    </div>
+                    <div class="clearfix col-sm-8">
+                        <h4>Note:-</h4>
+                        <ul>
+                            <li> Once registered, the MAC IDs can’t be altered. Please take enough care to input correct
+                                MAC ID of your devices.</li>
+                            <li> <a href="Steps_to_find_Device_MAC.pdf" target="_blank">Click here</a> to see how to get
+                                MAC IDs of your device. </li>
+                            <li>You can register maximum 2 Devices.</li>
+                        </ul>
+                    </div>
+                </div>
+
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function redirect(dat, dat1) {
+        alertify.confirm('Mac Registration', 'Are you sure, you want to delete?', function () {
+            var ajaxData = { "Amizone_Id": dat, "username": dat1 };
+            $.ajax({
+                type: "POST",
+                url: '/RegisterForWifi/mac/Mac1RegistrationDelete',
+                async: false, dataType: "html",
+                data: ajaxData,
+                success: function (data) {
+                    alertify.success("Deleted Successfully!");
+                },
+                error: function (aa) {
+                    alertify.error("Error , Something wrong");
+                },
+            });
+        }
+            , function () {
+                alertify.error('Canceled')
+            });
+    }
+</script>

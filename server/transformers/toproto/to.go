@@ -127,3 +127,17 @@ func Profile(a models.Profile) *v1.Profile {
 		Uuid:               a.UUID,
 	}
 }
+
+func WifiInfo(i models.WifiMacInfo) *v1.WifiMacInfo {
+	return &v1.WifiMacInfo{
+		Addresses: func() []string {
+			addresses := make([]string, 0)
+			for _, a := range i.RegisteredAddresses {
+				addresses = append(addresses, a.String())
+			}
+			return addresses
+		}(),
+		Slots:     int32(i.Slots),
+		FreeSlots: int32(i.FreeSlots),
+	}
+}

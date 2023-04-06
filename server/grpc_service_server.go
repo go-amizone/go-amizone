@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"net"
 
 	"github.com/ditsuke/go-amizone/amizone"
 	v1 "github.com/ditsuke/go-amizone/server/gen/go/v1"
@@ -126,4 +127,54 @@ func (serviceServer) GetUserProfile(ctx context.Context, _ *v1.EmptyMessage) (*v
 		return nil, status.Errorf(codes.Internal, "failed to retrieve user-profile: %v", err)
 	}
 	return toproto.Profile(*profile), nil
+}
+
+func (serviceServer) GetWifiMacInfo(ctx context.Context, _ *v1.EmptyMessage) (*v1.WifiMacInfo, error) {
+	amizoneClient, ok := ctx.Value(ContextAmizoneClientKey).(*amizone.Client)
+	if !ok {
+		return nil, status.Errorf(codes.Internal, "failed to authenticate")
+	}
+
+	macInfo, err := amizoneClient.GetWifiMacInfo()
+	if err != nil {
+		// TODO: ! reevalute these error codes, I get the feeling they shouldn't just be codes.Internal
+		return nil, status.Errorf(codes.Internal, "failed to retrieve mac info")
+	}
+	return toproto.WifiInfo(*macInfo), nil
+}
+
+func (serviceServer) RegisterWifiMac(ctx context.Context, req *v1.RegisterWifiMacRequest) (*v1.EmptyMessage, error) {
+	amizoneClient, ok := ctx.Value(ContextAmizoneClientKey).(*amizone.Client)
+	if !ok {
+		return nil, status.Errorf(codes.Internal, "failed to authenticate")
+	}
+	addr, err := net.ParseMAC(req.Address)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "bad mac address")
+	}
+
+	err = amizoneClient.RegisterWifiMac(addr, req.OverrideLimit)
+	if err != nil {
+		return nil, status.Errorf(codes.Unknown, "failed to register: %s", err.Error())
+	}
+
+	return &v1.EmptyMessage{}, nil
+}
+
+func (serviceServer) DeregisterWifiMac(ctx context.Context, req *v1.DeregisterWifiMacRequest) (*v1.EmptyMessage, error) {
+	amizoneClient, ok := ctx.Value(ContextAmizoneClientKey).(*amizone.Client)
+	if !ok {
+		return nil, status.Errorf(codes.Internal, "failed to authenticate")
+	}
+
+	addr, err := net.ParseMAC(req.Address)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "bad mac address")
+	}
+	err = amizoneClient.RemoveWifiMac(addr)
+	if err != nil {
+		return nil, status.Errorf(codes.Unknown, "failed removal: %s", err.Error())
+	}
+
+	return &v1.EmptyMessage{}, nil
 }
