@@ -36,6 +36,9 @@ type AmizoneServiceClient interface {
 	GetCurrentCourses(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*Courses, error)
 	// GetUserProfile returns the user's profile.
 	GetUserProfile(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*Profile, error)
+	GetWifiMacInfo(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*WifiMacInfo, error)
+	RegisterWifiMac(ctx context.Context, in *RegisterWifiMacRequest, opts ...grpc.CallOption) (*EmptyMessage, error)
+	DeregisterWifiMac(ctx context.Context, in *DeregisterWifiMacRequest, opts ...grpc.CallOption) (*EmptyMessage, error)
 }
 
 type amizoneServiceClient struct {
@@ -109,6 +112,33 @@ func (c *amizoneServiceClient) GetUserProfile(ctx context.Context, in *EmptyMess
 	return out, nil
 }
 
+func (c *amizoneServiceClient) GetWifiMacInfo(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*WifiMacInfo, error) {
+	out := new(WifiMacInfo)
+	err := c.cc.Invoke(ctx, "/go_amizone.server.proto.v1.AmizoneService/GetWifiMacInfo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *amizoneServiceClient) RegisterWifiMac(ctx context.Context, in *RegisterWifiMacRequest, opts ...grpc.CallOption) (*EmptyMessage, error) {
+	out := new(EmptyMessage)
+	err := c.cc.Invoke(ctx, "/go_amizone.server.proto.v1.AmizoneService/RegisterWifiMac", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *amizoneServiceClient) DeregisterWifiMac(ctx context.Context, in *DeregisterWifiMacRequest, opts ...grpc.CallOption) (*EmptyMessage, error) {
+	out := new(EmptyMessage)
+	err := c.cc.Invoke(ctx, "/go_amizone.server.proto.v1.AmizoneService/DeregisterWifiMac", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AmizoneServiceServer is the server API for AmizoneService service.
 // All implementations must embed UnimplementedAmizoneServiceServer
 // for forward compatibility
@@ -127,6 +157,9 @@ type AmizoneServiceServer interface {
 	GetCurrentCourses(context.Context, *EmptyMessage) (*Courses, error)
 	// GetUserProfile returns the user's profile.
 	GetUserProfile(context.Context, *EmptyMessage) (*Profile, error)
+	GetWifiMacInfo(context.Context, *EmptyMessage) (*WifiMacInfo, error)
+	RegisterWifiMac(context.Context, *RegisterWifiMacRequest) (*EmptyMessage, error)
+	DeregisterWifiMac(context.Context, *DeregisterWifiMacRequest) (*EmptyMessage, error)
 	mustEmbedUnimplementedAmizoneServiceServer()
 }
 
@@ -154,6 +187,15 @@ func (UnimplementedAmizoneServiceServer) GetCurrentCourses(context.Context, *Emp
 }
 func (UnimplementedAmizoneServiceServer) GetUserProfile(context.Context, *EmptyMessage) (*Profile, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserProfile not implemented")
+}
+func (UnimplementedAmizoneServiceServer) GetWifiMacInfo(context.Context, *EmptyMessage) (*WifiMacInfo, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetWifiMacInfo not implemented")
+}
+func (UnimplementedAmizoneServiceServer) RegisterWifiMac(context.Context, *RegisterWifiMacRequest) (*EmptyMessage, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RegisterWifiMac not implemented")
+}
+func (UnimplementedAmizoneServiceServer) DeregisterWifiMac(context.Context, *DeregisterWifiMacRequest) (*EmptyMessage, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeregisterWifiMac not implemented")
 }
 func (UnimplementedAmizoneServiceServer) mustEmbedUnimplementedAmizoneServiceServer() {}
 
@@ -294,6 +336,60 @@ func _AmizoneService_GetUserProfile_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AmizoneService_GetWifiMacInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EmptyMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AmizoneServiceServer).GetWifiMacInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/go_amizone.server.proto.v1.AmizoneService/GetWifiMacInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AmizoneServiceServer).GetWifiMacInfo(ctx, req.(*EmptyMessage))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AmizoneService_RegisterWifiMac_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RegisterWifiMacRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AmizoneServiceServer).RegisterWifiMac(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/go_amizone.server.proto.v1.AmizoneService/RegisterWifiMac",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AmizoneServiceServer).RegisterWifiMac(ctx, req.(*RegisterWifiMacRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AmizoneService_DeregisterWifiMac_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeregisterWifiMacRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AmizoneServiceServer).DeregisterWifiMac(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/go_amizone.server.proto.v1.AmizoneService/DeregisterWifiMac",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AmizoneServiceServer).DeregisterWifiMac(ctx, req.(*DeregisterWifiMacRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AmizoneService_ServiceDesc is the grpc.ServiceDesc for AmizoneService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -328,6 +424,18 @@ var AmizoneService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserProfile",
 			Handler:    _AmizoneService_GetUserProfile_Handler,
+		},
+		{
+			MethodName: "GetWifiMacInfo",
+			Handler:    _AmizoneService_GetWifiMacInfo_Handler,
+		},
+		{
+			MethodName: "RegisterWifiMac",
+			Handler:    _AmizoneService_RegisterWifiMac_Handler,
+		},
+		{
+			MethodName: "DeregisterWifiMac",
+			Handler:    _AmizoneService_DeregisterWifiMac_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
