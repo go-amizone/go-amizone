@@ -137,17 +137,29 @@ func GockRegisterWifiRegistration(payload url.Values) error {
 	}, WifiPage)
 }
 
+func GockRegisterWifiMacDeletion(params map[string]string, response File) error {
+	return GockRegisterAuthenticatedGetWithParams("/RegisterForWifi/mac/Mac1RegistrationDelete", params, response)
+}
+
 // GockRegisterAuthenticatedGet registers an authenticated GET request for the relative endpoint passed.
 // The second parameter is used as the response body of the request.
 func GockRegisterAuthenticatedGet(endpoint string, file File) error {
+	return GockRegisterAuthenticatedGetWithParams(endpoint, nil, file)
+}
+
+// GockRegisterAuthenticatedGetWithParams registers an authenticated GET request for the relative endpoint passed.
+// The second parameter is used as the parameters of the request.
+// The third parameter is used as the response body of the request.
+func GockRegisterAuthenticatedGetWithParams(endpoint string, params map[string]string, file File) error {
 	responseBody, err := file.Open()
 	if err != nil {
 		return errors.New("failed to open file: " + string(file))
 	}
-
-	authenticateRequest(newRequest()).
-		Get(endpoint).
-		Reply(http.StatusOK).
+	req := authenticateRequest(newRequest()).Get(endpoint)
+	if len(params) > 0 {
+		req = req.MatchParams(params)
+	}
+	req.Reply(http.StatusOK).
 		Type("text/html").
 		Body(responseBody)
 	return nil

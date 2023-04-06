@@ -43,9 +43,9 @@ type TestCase[D any, I any] struct {
 
 // Sanity check testcase, since the go type system won't do it for us 😭
 func (c *TestCase[D, I]) sanityCheck(g *WithT) {
-	g.Expect(c.setup).ToNot(BeNil())
-	g.Expect(c.dataMatcher).ToNot(BeNil())
-	g.Expect(c.errMatcher).ToNot(BeNil())
+	g.Expect(c.setup).ToNot(BeNil(), "setup function must not be nil")
+	g.Expect(c.dataMatcher).ToNot(BeNil(), "data matcher function must not be nil")
+	g.Expect(c.errMatcher).ToNot(BeNil(), "error matcher function must not be nil")
 }
 
 // @todo: implement test cases to test behavior when:
@@ -427,6 +427,11 @@ func TestClient_GetProfile(t *testing.T) {
 		})
 	}
 }
+func macStringtoMac(a string, g *WithT) net.HardwareAddr {
+	addr, err := net.ParseMAC(a)
+	g.Expect(err).ToNot(HaveOccurred())
+	return addr
+}
 
 func TestClient_GetWifiMacInfo(t *testing.T) {
 	g := NewWithT(t)
@@ -486,12 +491,7 @@ func TestClient_RegisterWifiMac(t *testing.T) {
 	loggedInClient := getLoggedInClient(g)
 	nonLoggedInClient := getNonLoggedInClient(g)
 
-	getMac := func(a string, g *WithT) net.HardwareAddr {
-		addr, err := net.ParseMAC(a)
-		g.Expect(err).ToNot(HaveOccurred())
-		return addr
-	}
-	macNew := getMac(mock.ValidMacNew, g)
+	macNew := macStringtoMac(mock.ValidMacNew, g)
 
 	infoOneShot, err := mock.WifiPageOneSlot.Open()
 	g.Expect(err).ToNot(HaveOccurred())
@@ -580,7 +580,7 @@ func TestClient_RegisterWifiMac(t *testing.T) {
 		{
 			name:        "client is logged in, mac already exists",
 			client:      loggedInClient,
-			input:       RegisterMacArgs{A: getMac(mock.ValidMac2, g), O: false},
+			input:       RegisterMacArgs{A: macStringtoMac(mock.ValidMac2, g), O: false},
 			dataMatcher: DummyMatcher,
 			errMatcher:  NoError,
 			setup: func(g *WithT) {
@@ -591,7 +591,7 @@ func TestClient_RegisterWifiMac(t *testing.T) {
 		{
 			name:   "client not logged in, returns error",
 			client: nonLoggedInClient,
-			input:  RegisterMacArgs{A: getMac(mock.ValidMac1, g), O: false},
+			input:  RegisterMacArgs{A: macStringtoMac(mock.ValidMac1, g), O: false},
 			setup: func(g *WithT) {
 				g.Expect(mock.GockRegisterWifiInfo()).ToNot(HaveOccurred())
 				g.Expect(mock.GockRegisterUnauthenticatedGet("/Home")).ToNot(HaveOccurred())
@@ -618,19 +618,113 @@ func TestClient_RegisterWifiMac(t *testing.T) {
 }
 
 func TestClient_RemoveWifiMac(t *testing.T) {
+	// TODO
 	setupNetworking()
 	t.Cleanup(teardown)
-	// g := NewWithT(t)
+	g := NewWithT(t)
 
 	type RemoveWifiArgs = struct {
-		A string
+		A net.HardwareAddr
+	}
+
+	loggedInClient := getLoggedInClient(g)
+	nonLoggedInClient := getNonLoggedInClient(g)
+
+	testCases := []TestCase[Empty, RemoveWifiArgs]{
+		{
+			name:   "mac address is invalid",
+			client: loggedInClient,
+			setup:  DummySetup,
+			input:  RemoveWifiArgs{A: net.HardwareAddr{}},
+			errMatcher: func(err error, g *WithT) {
+				g.Expect(err).To(HaveOccurred())
+				g.Expect(err.Error()).To(ContainSubstring(amizone.ErrInvalidMac))
+			},
+			dataMatcher: DummyMatcher,
+		},
+		{
+			name:   "amizone is unreachable",
+			client: loggedInClient,
+			setup:  DummySetup,
+			input:  RemoveWifiArgs{A: macStringtoMac(mock.ValidMac1, g)},
+			errMatcher: func(err error, g *WithT) {
+				g.Expect(err).To(HaveOccurred())
+				g.Expect(err.Error()).To(ContainSubstring(amizone.ErrFailedToVisitPage))
+			},
+			dataMatcher: DummyMatcher,
+		},
+		{
+			name:   "client is not logged in",
+			client: nonLoggedInClient,
+			setup:  DummySetup,
+			input:  RemoveWifiArgs{A: macStringtoMac(mock.ValidMac1, g)},
+			errMatcher: func(err error, g *WithT) {
+				g.Expect(err).To(HaveOccurred())
+				g.Expect(err.Error()).To(ContainSubstring(amizone.ErrFailedLogin))
+			},
+			dataMatcher: DummyMatcher,
+		},
+		{
+			name:   "parser breaks when amizone changes something",
+			client: loggedInClient,
+			setup: func(g *WithT) {
+				// Return some random other page
+				g.Expect(
+					mock.GockRegisterWifiMacDeletion(
+						map[string]string{
+							"username":   mock.ValidUser,
+							"Amizone_Id": mock.ValidMac2,
+						},
+						// Send some unexpected page back
+						mock.CoursesPage,
+					),
+				)
+			},
+			input: RemoveWifiArgs{A: macStringtoMac(mock.ValidMac2, g)},
+			errMatcher: func(err error, g *WithT) {
+				g.Expect(err).To(HaveOccurred())
+				g.Expect(err.Error()).To(ContainSubstring(amizone.ErrFailedToParsePage))
+			},
+			dataMatcher: DummyMatcher,
+		},
+		{
+			name:   "everything goes ok",
+			client: loggedInClient,
+			setup: func(g *WithT) {
+				// Return some random other page
+				g.Expect(
+					mock.GockRegisterWifiMacDeletion(
+						map[string]string{
+							"username":   mock.ValidUser,
+							"Amizone_Id": mock.ValidMac2,
+						},
+						mock.WifiPageOneSlot,
+					),
+				)
+			},
+			input:       RemoveWifiArgs{A: macStringtoMac(mock.ValidMac2, g)},
+			errMatcher:  NoError,
+			dataMatcher: DummyMatcher,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Cleanup(setupNetworking)
+			g := NewWithT(t)
+
+			testCase.sanityCheck(g)
+			testCase.setup(g)
+			err := testCase.client.RemoveWifiMac(testCase.input.A)
+			testCase.errMatcher(err, g)
+		})
 	}
 }
 
 // Test utilities
 
-// / setupNetworking tears down any existing network mocks and sets up gock anew to intercept network
-// / calls and disable real network calls.
+// setupNetworking tears down any existing network mocks and sets up gock anew to intercept network
+// calls and disable real network calls.
 func setupNetworking() {
 	// tear everything all routes down
 	teardown()
@@ -638,7 +732,7 @@ func setupNetworking() {
 	gock.DisableNetworking()
 }
 
-// / teardown disables all networking restrictions and mock routes registered with gock for unit testing.
+// teardown disables all networking restrictions and mock routes registered with gock for unit testing.
 func teardown() {
 	gock.Clean()
 	gock.Off()

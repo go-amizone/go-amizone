@@ -409,15 +409,14 @@ func (a *Client) RegisterWifiMac(addr net.HardwareAddr, bypassLimit bool) error 
 
 // RemoveWifiMac removes a mac address from the Amizone mac address registry. If the mac address is not registered in the
 // first place, this function does nothing.
-func (a *Client) RemoveWifiMac(addr string) error {
-	// just make the GET request here to delete the mac
-	mac, err := net.ParseMAC(addr)
+func (a *Client) RemoveWifiMac(addr net.HardwareAddr) error {
+	err := validator.ValidateHardwareAddr(addr)
 	if err != nil {
-		return errors.New("invalid mac address")
+		return errors.New(ErrInvalidMac)
 	}
 
 	// ! VULN: remove mac addresses registered by anyone if you know the mac/username pair.
-	response, err := a.doRequest(true, http.MethodGet, fmt.Sprintf(removeWifiMacEndpoint, a.credentials.Username, marshaller.Mac(mac)), nil)
+	response, err := a.doRequest(true, http.MethodGet, fmt.Sprintf(removeWifiMacEndpoint, a.credentials.Username, marshaller.Mac(addr)), nil)
 	if err != nil {
 		klog.Errorf("request (remove wifi mac): %s", err.Error())
 		return fmt.Errorf("%s: %s", ErrFailedToFetchPage, err.Error())
@@ -429,7 +428,7 @@ func (a *Client) RemoveWifiMac(addr string) error {
 		return errors.New(ErrFailedToParsePage)
 	}
 
-	if wifiInfo.IsRegistered(mac) {
+	if wifiInfo.IsRegistered(addr) {
 		return errors.New("failed to remove mac address")
 	}
 
