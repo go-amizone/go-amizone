@@ -212,13 +212,13 @@ func (a *Client) ClassSchedule(year int, month time.Month, date int) (models.Cla
 	response, err := a.doRequest(true, http.MethodGet, endpoint, nil)
 	if err != nil {
 		klog.Warningf("request (schedule): %s", err.Error())
-		return nil, errors.New(ErrFailedToVisitPage)
+		return nil, fmt.Errorf("%s: %s", ErrFailedToFetchPage, err.Error())
 	}
 
 	classSchedule, err := parse.ClassSchedule(response.Body)
 	if err != nil {
 		klog.Errorf("parse (schedule): %s", err.Error())
-		return nil, fmt.Errorf("%s: %w", ErrInternalFailure, err)
+		return nil, fmt.Errorf("%s: %w", ErrFailedToParsePage, err)
 	}
 	filteredSchedule := classSchedule.FilterByDate(timeFrom)
 

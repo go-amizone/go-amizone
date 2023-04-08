@@ -1,0 +1,47 @@
+[
+  {
+    "id": 43381795,
+    "title": "SS",
+    "start": "2023/04/01 12:15:00 PM",
+    "end": "2023/04/01 01:10:00 PM",
+    "color": "class-schedule-color",
+    "CourseCode": "IT414 ",
+    "sType": "C",
+    "className": "class-schedule-color",
+    "FacultyName": "DRS[2434]",
+    "RoomNo": "E1-309",
+    "AttndColor": "#f00",
+    "url": "",
+    "allDay": false
+  },
+  {
+    "id": 43386514,
+    "title": "SE",
+    "start": "2023/04/01 12:15:00 PM",
+    "end": "2023/04/01 01:10:00 PM",
+    "color": "class-schedule-color",
+    "CourseCode": "IT301 ",
+    "sType": "C",
+    "className": "class-schedule-color",
+    "FacultyName": "DRG[2397],DSKD[2436]",
+    "RoomNo": "E1-000",
+    "AttndColor": "#4FCC4F",
+    "url": "",
+    "allDay": false
+  },
+  {
+    "id": 43378789,
+    "title": "CC",
+    "start": "2023/04/01 01:15:00 PM",
+    "end": "2023/04/01 02:10:00 PM",
+    "color": "class-schedule-color",
+    "CourseCode": "CSE304",
+    "sType": "C",
+    "className": "class-schedule-color",
+    "FacultyName": "DAG[307870]",
+    "RoomNo": "E1-000",
+    "AttndColor": "#3a87ad",
+    "url": "",
+    "allDay": false
+  }
+]

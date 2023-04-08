@@ -115,6 +115,13 @@ func GockRegisterWifiInfoOneSlot() error {
 	return GockRegisterAuthenticatedGet("/RegisterForWifi/mac/MacRegistration", WifiPageOneSlot)
 }
 
+func GockRegisterCalendarEndpoint(start, end string, file File) error {
+	return GockRegisterAuthenticatedGetWithParams("/Calendar/home/GetDiaryEvents", map[string]string{
+		"start": start,
+		"end":   end,
+	}, file)
+}
+
 // GockRegisterWifiRegistration() registers a gock route for the wifi registration page.
 // The request must have the expected referrer, cookies and post data to be successful.
 func GockRegisterWifiRegistration(payload url.Values) error {
