@@ -51,6 +51,20 @@ func ScheduledClasses(a models.ClassSchedule) *v1.ScheduledClasses {
 			EndTime:   TimeToProtoTS(c.EndTime),
 			Faculty:   c.Faculty,
 			Room:      c.Room,
+			Attendance: func() v1.AttendanceState {
+				switch c.Attended {
+				case models.AttendanceStatePresent:
+					return v1.AttendanceState_PRESENT
+				case models.AttendanceStateAbsent:
+					return v1.AttendanceState_ABSENT
+				case models.AttendanceStatePending:
+					return v1.AttendanceState_PENDING
+				case models.AttendanceStateNA:
+					return v1.AttendanceState_NA
+				default:
+					return v1.AttendanceState_INVALID
+				}
+			}(),
 		}
 	}
 	return &v1.ScheduledClasses{

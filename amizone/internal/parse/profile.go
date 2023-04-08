@@ -24,7 +24,7 @@ func Profile(body io.Reader) (*models.Profile, error) {
 	}
 
 	if !isIDCardPage(dom) {
-		return nil, errors.New(ErrFailedToParse)
+		return nil, fmt.Errorf("%s: Not ID Card Page", ErrFailedToParse)
 	}
 
 	const (

@@ -19,7 +19,7 @@ const (
 func ClassSchedule(body io.Reader) (models.ClassSchedule, error) {
 	var diaryEvents models.AmizoneDiaryEvents
 	if err := json.NewDecoder(body).Decode(&diaryEvents); err != nil {
-		return nil, fmt.Errorf("%s: %w", ErrFailedToParse, err)
+		return nil, fmt.Errorf("JSON decode: %w", err)
 	}
 
 	var classSchedule models.ClassSchedule
@@ -40,13 +40,14 @@ func ClassSchedule(body io.Reader) (models.ClassSchedule, error) {
 
 		class := models.ScheduledClass{
 			Course: models.CourseRef{
-				Code: entry.CourseCode,
-				Name: entry.CourseName,
+				Code: cleanString(entry.CourseCode),
+				Name: cleanString(entry.CourseName),
 			},
 			StartTime: parseTime(entry.Start),
 			EndTime:   parseTime(entry.End),
-			Faculty:   entry.Faculty,
-			Room:      entry.Room,
+			Faculty:   cleanString(entry.Faculty),
+			Room:      cleanString(entry.Room),
+			Attended:  entry.AttendanceState(),
 		}
 
 		classSchedule = append(classSchedule, class)

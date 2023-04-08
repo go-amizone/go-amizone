@@ -1,12 +1,15 @@
 package amizone_test
 
 import (
+	"encoding/json"
+	"fmt"
 	"net"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/ditsuke/go-amizone/amizone"
 	"github.com/ditsuke/go-amizone/amizone/internal/mock"
@@ -16,11 +19,13 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
+// === Test setup helpers ===
+
 type Empty struct{}
 
-// / DummyMatcher is a matcher for the Empty datatype that does exactly nothing,
-// / for when the function to be tested returns nothing.
-func DummyMatcher(_ Empty, _ *WithT) {
+// DummyMatcher is a matcher for the Empty datatype that does exactly nothing,
+// for when the function to be tested returns nothing.
+func DummyMatcher[T any](_ T, _ *WithT) {
 }
 
 // DummySetup is used when a test requires no setup.
@@ -37,7 +42,7 @@ type TestCase[D any, I any] struct {
 	client      *amizone.Client
 	setup       func(g *WithT)
 	input       I
-	dataMatcher func(date D, g *WithT)
+	dataMatcher func(data D, g *WithT)
 	errMatcher  func(err error, g *WithT)
 }
 
@@ -46,6 +51,15 @@ func (c *TestCase[D, I]) sanityCheck(g *WithT) {
 	g.Expect(c.setup).ToNot(BeNil(), "setup function must not be nil")
 	g.Expect(c.dataMatcher).ToNot(BeNil(), "data matcher function must not be nil")
 	g.Expect(c.errMatcher).ToNot(BeNil(), "error matcher function must not be nil")
+}
+
+// === Test helpers ===
+
+// toJSON converts a struct to a JSON string.
+func toJSON[T any](t T, g *WithT) string {
+	s, err := json.Marshal(t)
+	g.Expect(err).ToNot(HaveOccurred(), "marshall json")
+	return string(s)
 }
 
 // @todo: implement test cases to test behavior when:
@@ -450,7 +464,7 @@ func TestClient_GetWifiMacInfo(t *testing.T) {
 		errMatcher  func(g *WithT, err error)
 	}{
 		{
-			name:   "qkweq",
+			name:   "amizone returns macs as usual",
 			client: loggedInClient,
 			setup: func(g *WithT) {
 				g.Expect(mock.GockRegisterWifiInfo()).ToNot(HaveOccurred())
@@ -458,6 +472,7 @@ func TestClient_GetWifiMacInfo(t *testing.T) {
 			infoMatcher: func(g *WithT, info *models.WifiMacInfo) {
 				g.Expect(info).ToNot(BeNil())
 				g.Expect(info.RegisteredAddresses).To(HaveLen(2))
+				g.Expect(toJSON(info, g)).To(MatchJSON(`{"RegisteredAddresses":["VQQt576k","/dUUGAyL"],"Slots":2,"FreeSlots":0}`))
 			},
 			errMatcher: func(g *WithT, err error) {
 				g.Expect(err).ToNot(HaveOccurred())
@@ -507,7 +522,7 @@ func TestClient_RegisterWifiMac(t *testing.T) {
 				g.Expect(mock.GockRegisterWifiInfo()).ToNot(HaveOccurred())
 			},
 			input:       RegisterMacArgs{A: net.HardwareAddr{}, O: false},
-			dataMatcher: DummyMatcher,
+			dataMatcher: DummyMatcher[Empty],
 			errMatcher: func(err error, g *WithT) {
 				g.Expect(err).To(HaveOccurred())
 				g.Expect(err.Error()).To(ContainSubstring(amizone.ErrInvalidMac))
@@ -516,7 +531,7 @@ func TestClient_RegisterWifiMac(t *testing.T) {
 		{
 			name:        "client: logged in; mac: valid; free_slots: none; bypass: false",
 			client:      loggedInClient,
-			dataMatcher: DummyMatcher,
+			dataMatcher: DummyMatcher[Empty],
 			errMatcher: func(err error, g *WithT) {
 				g.Expect(err).To(HaveOccurred())
 				g.Expect(err.Error()).To(ContainSubstring(amizone.ErrNoMacSlots))
@@ -529,7 +544,7 @@ func TestClient_RegisterWifiMac(t *testing.T) {
 		{
 			name:        "client: logged in; mac: valid; free_slots: none; bypass: true",
 			client:      loggedInClient,
-			dataMatcher: DummyMatcher,
+			dataMatcher: DummyMatcher[Empty],
 			errMatcher:  NoError,
 			input:       RegisterMacArgs{A: macNew, O: true},
 			setup: func(g *WithT) {
@@ -547,7 +562,7 @@ func TestClient_RegisterWifiMac(t *testing.T) {
 			name:        "client: logged in; mac: valid; free slots: 1, bypass: false",
 			client:      loggedInClient,
 			input:       RegisterMacArgs{A: macNew, O: false},
-			dataMatcher: DummyMatcher,
+			dataMatcher: DummyMatcher[Empty],
 			errMatcher:  NoError,
 			setup: func(g *WithT) {
 				g.Expect(mock.GockRegisterWifiInfoOneSlot()).ToNot(HaveOccurred())
@@ -564,7 +579,7 @@ func TestClient_RegisterWifiMac(t *testing.T) {
 			name:        "client: logged in; mac: valid; free_slots: 1; bypass: true",
 			client:      loggedInClient,
 			input:       RegisterMacArgs{A: macNew, O: true},
-			dataMatcher: DummyMatcher,
+			dataMatcher: DummyMatcher[Empty],
 			errMatcher:  NoError,
 			setup: func(g *WithT) {
 				g.Expect(mock.GockRegisterWifiInfoOneSlot()).ToNot(HaveOccurred())
@@ -581,7 +596,7 @@ func TestClient_RegisterWifiMac(t *testing.T) {
 			name:        "client is logged in, mac already exists",
 			client:      loggedInClient,
 			input:       RegisterMacArgs{A: macStringtoMac(mock.ValidMac2, g), O: false},
-			dataMatcher: DummyMatcher,
+			dataMatcher: DummyMatcher[Empty],
 			errMatcher:  NoError,
 			setup: func(g *WithT) {
 				g.Expect(mock.GockRegisterWifiInfo()).ToNot(HaveOccurred())
@@ -597,7 +612,7 @@ func TestClient_RegisterWifiMac(t *testing.T) {
 				g.Expect(mock.GockRegisterUnauthenticatedGet("/Home")).ToNot(HaveOccurred())
 				g.Expect(mock.GockRegisterUnauthenticatedGet("RegisterForWifi/mac/MacRegistration")).ToNot(HaveOccurred())
 			},
-			dataMatcher: DummyMatcher,
+			dataMatcher: DummyMatcher[Empty],
 			errMatcher: func(err error, g *WithT) {
 				g.Expect(err).To(HaveOccurred())
 				g.Expect(err.Error()).To(ContainSubstring(amizone.ErrFailedLogin))
@@ -640,7 +655,7 @@ func TestClient_RemoveWifiMac(t *testing.T) {
 				g.Expect(err).To(HaveOccurred())
 				g.Expect(err.Error()).To(ContainSubstring(amizone.ErrInvalidMac))
 			},
-			dataMatcher: DummyMatcher,
+			dataMatcher: DummyMatcher[Empty],
 		},
 		{
 			name:   "amizone is unreachable",
@@ -651,7 +666,7 @@ func TestClient_RemoveWifiMac(t *testing.T) {
 				g.Expect(err).To(HaveOccurred())
 				g.Expect(err.Error()).To(ContainSubstring(amizone.ErrFailedToVisitPage))
 			},
-			dataMatcher: DummyMatcher,
+			dataMatcher: DummyMatcher[Empty],
 		},
 		{
 			name:   "client is not logged in",
@@ -662,7 +677,7 @@ func TestClient_RemoveWifiMac(t *testing.T) {
 				g.Expect(err).To(HaveOccurred())
 				g.Expect(err.Error()).To(ContainSubstring(amizone.ErrFailedLogin))
 			},
-			dataMatcher: DummyMatcher,
+			dataMatcher: DummyMatcher[Empty],
 		},
 		{
 			name:   "parser breaks when amizone changes something",
@@ -685,7 +700,7 @@ func TestClient_RemoveWifiMac(t *testing.T) {
 				g.Expect(err).To(HaveOccurred())
 				g.Expect(err.Error()).To(ContainSubstring(amizone.ErrFailedToParsePage))
 			},
-			dataMatcher: DummyMatcher,
+			dataMatcher: DummyMatcher[Empty],
 		},
 		{
 			name:   "everything goes ok",
@@ -704,7 +719,7 @@ func TestClient_RemoveWifiMac(t *testing.T) {
 			},
 			input:       RemoveWifiArgs{A: macStringtoMac(mock.ValidMac2, g)},
 			errMatcher:  NoError,
-			dataMatcher: DummyMatcher,
+			dataMatcher: DummyMatcher[Empty],
 		},
 	}
 
@@ -717,6 +732,102 @@ func TestClient_RemoveWifiMac(t *testing.T) {
 			testCase.setup(g)
 			err := testCase.client.RemoveWifiMac(testCase.input.A)
 			testCase.errMatcher(err, g)
+		})
+	}
+}
+
+// Test out amizone.GetClassSchedule in the style of the other tests written
+func TestClient_GetClassSchedule(t *testing.T) {
+	setupNetworking()
+	t.Cleanup(teardown)
+	g := NewWithT(t)
+
+	type GetClassScheduleArgs = struct {
+		year  int
+		month time.Month
+		day   int
+	}
+
+	loggedInClient := getLoggedInClient(g)
+	nonLoggedInClient := getNonLoggedInClient(g)
+
+	standardDate := GetClassScheduleArgs{year: 2023, month: time.April, day: 1}
+	standardDatePlusOne := GetClassScheduleArgs{year: 2023, month: time.April, day: 2}
+	fmtDate := func(args GetClassScheduleArgs) string {
+		return fmt.Sprintf("%02d-%02d-%02d", args.year, args.month, args.day)
+	}
+
+	testCases := []TestCase[models.ClassSchedule, GetClassScheduleArgs]{
+		{
+			name:   "client is not logged in",
+			client: nonLoggedInClient,
+			input:  standardDate,
+			errMatcher: func(err error, g *WithT) {
+				g.Expect(err).To(HaveOccurred())
+				g.Expect(err.Error()).To(ContainSubstring(amizone.ErrFailedLogin))
+			},
+			dataMatcher: DummyMatcher[models.ClassSchedule],
+			setup:       DummySetup,
+		},
+		{
+			name:   "amizone doesn't send back any events",
+			client: loggedInClient,
+			input:  standardDate,
+			errMatcher: func(err error, g *WithT) {
+				g.Expect(err).ToNot(HaveOccurred())
+			},
+			dataMatcher: func(data models.ClassSchedule, g *WithT) {
+				g.Expect(data).To(BeEmpty())
+			},
+			setup: func(g *WithT) {
+				g.Expect(mock.GockRegisterCalendarEndpoint(fmtDate(standardDate), fmtDate(standardDatePlusOne), mock.DiaryEventsNone)).ToNot(HaveOccurred())
+			},
+		},
+		{
+			name:   "amizone's response cannot be parsed (no longer json)",
+			client: loggedInClient,
+			input:  standardDate,
+			errMatcher: func(err error, g *WithT) {
+				g.Expect(err).To(HaveOccurred())
+				g.Expect(err.Error()).To(ContainSubstring(amizone.ErrFailedToParsePage))
+			},
+			dataMatcher: DummyMatcher[models.ClassSchedule],
+			setup: func(g *WithT) {
+				g.Expect(mock.GockRegisterCalendarEndpoint(fmtDate(standardDate), fmtDate(standardDatePlusOne), mock.CoursesPage)).ToNot(HaveOccurred())
+			},
+		},
+		{
+			name:   "amizone sends back response with events",
+			client: loggedInClient,
+			input:  standardDate,
+			errMatcher: func(err error, g *WithT) {
+				g.Expect(err).ToNot(HaveOccurred())
+			},
+			dataMatcher: func(schedule models.ClassSchedule, g *WithT) {
+				g.Expect(schedule).To(HaveLen(3))
+				sb := strings.Builder{}
+				_ = json.NewEncoder(&sb).Encode(schedule)
+				g.Expect(sb.String()).To(MatchJSON(`[{"Course":{"Code":"IT414","Name":"SS"},"StartTime":"2023-04-01T12:15:00Z","EndTime":"2023-04-01T13:10:00Z","Faculty":"DRS[2434]","Room":"E1-309","Attended":2},{"Course":{"Code":"IT301","Name":"SE"},"StartTime":"2023-04-01T12:15:00Z","EndTime":"2023-04-01T13:10:00Z","Faculty":"DRG[2397],DSKD[2436]","Room":"E1-000","Attended":1},{"Course":{"Code":"CSE304","Name":"CC"},"StartTime":"2023-04-01T13:15:00Z","EndTime":"2023-04-01T14:10:00Z","Faculty":"DAG[307870]","Room":"E1-000","Attended":0}]`))
+				g.Expect(schedule[0].Attended).To(Equal(models.AttendanceStateAbsent))
+				g.Expect(schedule[1].Attended).To(Equal(models.AttendanceStatePresent))
+				g.Expect(schedule[2].Attended).To(Equal(models.AttendanceStatePending))
+			},
+			setup: func(g *WithT) {
+				g.Expect(mock.GockRegisterCalendarEndpoint(fmtDate(standardDate), fmtDate(standardDatePlusOne), mock.DiaryEventsSmallJSON)).ToNot(HaveOccurred())
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Cleanup(setupNetworking)
+			g := NewWithT(t)
+
+			testCase.sanityCheck(g)
+			testCase.setup(g)
+			classes, err := testCase.client.ClassSchedule(testCase.input.year, testCase.input.month, testCase.input.day)
+			testCase.errMatcher(err, g)
+			testCase.dataMatcher(classes, g)
 		})
 	}
 }

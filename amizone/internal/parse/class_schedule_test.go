@@ -19,7 +19,7 @@ func TestClassSchedule(t *testing.T) {
 		{
 			name:     "valid diary events json",
 			bodyFile: mock.DiaryEventsJSON,
-			scheduleMatcher: func(g *GomegaWithT, schedule models.ClassSchedule) {
+			scheduleMatcher: func(g *WithT, schedule models.ClassSchedule) {
 				g.Expect(schedule).ToNot(BeNil())
 				g.Expect(schedule).To(HaveLen(10))
 			},
@@ -35,7 +35,7 @@ func TestClassSchedule(t *testing.T) {
 			},
 			errorMatcher: func(g *GomegaWithT, err error) {
 				g.Expect(err).To(HaveOccurred())
-				g.Expect(err.Error()).To(ContainSubstring(parse.ErrFailedToParse))
+				g.Expect(err.Error()).To(ContainSubstring("JSON decode"))
 			},
 		},
 	}

@@ -434,6 +434,17 @@
       },
       "description": "AttendanceRecords is a list of attendance records, usually representing attendance records for all\ncourses in a semester."
     },
+    "v1AttendanceState": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "PRESENT",
+        "ABSENT",
+        "NA",
+        "INVALID"
+      ],
+      "default": "PENDING"
+    },
     "v1Course": {
       "type": "object",
       "properties": {
@@ -574,6 +585,9 @@
         },
         "room": {
           "type": "string"
+        },
+        "attendance": {
+          "$ref": "#/definitions/v1AttendanceState"
         }
       },
       "description": "ScheduledClass represents a scheduled class."
