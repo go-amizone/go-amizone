@@ -19,10 +19,12 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
+// === Test setup helpers ===
+
 type Empty struct{}
 
-// / DummyMatcher is a matcher for the Empty datatype that does exactly nothing,
-// / for when the function to be tested returns nothing.
+// DummyMatcher is a matcher for the Empty datatype that does exactly nothing,
+// for when the function to be tested returns nothing.
 func DummyMatcher[T any](_ T, _ *WithT) {
 }
 
@@ -49,6 +51,15 @@ func (c *TestCase[D, I]) sanityCheck(g *WithT) {
 	g.Expect(c.setup).ToNot(BeNil(), "setup function must not be nil")
 	g.Expect(c.dataMatcher).ToNot(BeNil(), "data matcher function must not be nil")
 	g.Expect(c.errMatcher).ToNot(BeNil(), "error matcher function must not be nil")
+}
+
+// === Test helpers ===
+
+// toJSON converts a struct to a JSON string.
+func toJSON[T any](t T, g *WithT) string {
+	s, err := json.Marshal(t)
+	g.Expect(err).ToNot(HaveOccurred(), "marshall json")
+	return string(s)
 }
 
 // @todo: implement test cases to test behavior when:
@@ -453,7 +464,7 @@ func TestClient_GetWifiMacInfo(t *testing.T) {
 		errMatcher  func(g *WithT, err error)
 	}{
 		{
-			name:   "qkweq",
+			name:   "amizone returns macs as usual",
 			client: loggedInClient,
 			setup: func(g *WithT) {
 				g.Expect(mock.GockRegisterWifiInfo()).ToNot(HaveOccurred())
@@ -461,6 +472,7 @@ func TestClient_GetWifiMacInfo(t *testing.T) {
 			infoMatcher: func(g *WithT, info *models.WifiMacInfo) {
 				g.Expect(info).ToNot(BeNil())
 				g.Expect(info.RegisteredAddresses).To(HaveLen(2))
+				g.Expect(toJSON(info, g)).To(MatchJSON(`{"RegisteredAddresses":["VQQt576k","/dUUGAyL"],"Slots":2,"FreeSlots":0}`))
 			},
 			errMatcher: func(g *WithT, err error) {
 				g.Expect(err).ToNot(HaveOccurred())
