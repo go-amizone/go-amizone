@@ -2,11 +2,11 @@
   "swagger": "2.0",
   "info": {
     "title": "Amizone API",
-    "version": "0.2",
+    "version": "0.5.1",
     "contact": {
       "name": "ditsuke",
-      "url": "https://github.com/ditsuke",
-      "email": "ditsuke@pm.me"
+      "url": "https://ditsuke.com",
+      "email": "hello@ditsuke.com"
     },
     "license": {
       "name": "GPL-2.0",
