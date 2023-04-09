@@ -200,10 +200,10 @@ func (a *Client) GetAttendance() (models.AttendanceRecords, error) {
 	return models.AttendanceRecords(attendanceRecord), nil
 }
 
-// Getmodels.ClassSchedule retrieves, parses and returns class schedule data from Amizone.
+// GetClassSchedule retrieves, parses and returns class schedule data from Amizone.
 // The date parameter is used to determine which schedule to retrieve, but Amizone imposes arbitrary limits on the
 // date range, so we have no way of knowing if a request will succeed.
-func (a *Client) ClassSchedule(year int, month time.Month, date int) (models.ClassSchedule, error) {
+func (a *Client) GetClassSchedule(year int, month time.Month, date int) (models.ClassSchedule, error) {
 	timeFrom := time.Date(year, month, date, 0, 0, 0, 0, time.UTC)
 	timeTo := timeFrom.Add(time.Hour * 24)
 

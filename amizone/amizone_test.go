@@ -36,7 +36,7 @@ func NoError(err error, g *WithT) {
 	g.Expect(err).ToNot(HaveOccurred())
 }
 
-// / TestCase is a generic type to reduce test boilerplate
+// TestCase is a generic type to reduce test boilerplate
 type TestCase[D any, I any] struct {
 	name        string
 	client      *amizone.Client
@@ -825,7 +825,7 @@ func TestClient_GetClassSchedule(t *testing.T) {
 
 			testCase.sanityCheck(g)
 			testCase.setup(g)
-			classes, err := testCase.client.ClassSchedule(testCase.input.year, testCase.input.month, testCase.input.day)
+			classes, err := testCase.client.GetClassSchedule(testCase.input.year, testCase.input.month, testCase.input.day)
 			testCase.errMatcher(err, g)
 			testCase.dataMatcher(classes, g)
 		})

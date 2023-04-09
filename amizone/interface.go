@@ -11,7 +11,7 @@ import (
 type ClientInterface interface {
 	DidLogin() bool
 	GetAttendance() (models.AttendanceRecords, error)
-	ClassSchedule(year int, month time.Month, date int) (models.ClassSchedule, error)
+	GetClassSchedule(year int, month time.Month, date int) (models.ClassSchedule, error)
 	GetExamSchedule() (*models.ExaminationSchedule, error)
 }
 
