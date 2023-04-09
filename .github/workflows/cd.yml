@@ -1,0 +1,50 @@
+name: Release
+
+permissions:
+  contents: write
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    outputs:
+      id: ${{ steps.release.outputs.id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Release
+        id: release
+        uses: softprops/action-gh-release@v1
+  build:
+    needs: [release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup go
+        uses: actions/setup-go@v4
+      - name: Build
+        env:
+          INPUT_OSARCH: >-
+            windows/amd64
+            windows/arm64
+            linux/amd64
+            linux/arm64
+            darwin/amd64
+            darwin/arm64
+        run: |
+          go install github.com/mitchellh/gox@latest
+          mkdir dist && cd dist
+          gox -osarch "${INPUT_OSARCH}" ../cmd/amizone-api-server
+          cd ..
+      - name: Upload artifacts
+        uses: skx/github-action-publish-binaries@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          releaseId: ${{ needs.release.outputs.id }}
+          args: 'dist/*'
