@@ -10,9 +10,9 @@ import (
 	"github.com/ditsuke/go-amizone/amizone/models"
 )
 
-// TODO: check if it works as expected
-func isFacultyFeedbackPage(dom *goquery.Document) bool {
-	return dom.Find("i[title='Please click here to give faculty feedback']").Length() > 0
+func isFacultyPage(dom *goquery.Document) bool {
+	const FacultyPageBreadcrumb = "My Faculty"
+	return cleanString(dom.Find(selectorActiveBreadcrumb).Text()) == FacultyPageBreadcrumb
 }
 
 func FacultyFeedback(body io.Reader) (models.FacultyFeedbackSpecs, error) {
@@ -25,7 +25,7 @@ func FacultyFeedback(body io.Reader) (models.FacultyFeedbackSpecs, error) {
 		return nil, errors.New(ErrNotLoggedIn)
 	}
 
-	if !isFacultyFeedbackPage(dom) {
+	if !isFacultyPage(dom) {
 		return nil, fmt.Errorf("%s: Not Faculty Feedback Page", ErrFailedToParse)
 	}
 
