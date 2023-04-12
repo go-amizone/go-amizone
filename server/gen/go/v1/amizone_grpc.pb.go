@@ -39,7 +39,7 @@ type AmizoneServiceClient interface {
 	GetWifiMacInfo(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*WifiMacInfo, error)
 	RegisterWifiMac(ctx context.Context, in *RegisterWifiMacRequest, opts ...grpc.CallOption) (*EmptyMessage, error)
 	DeregisterWifiMac(ctx context.Context, in *DeregisterWifiMacRequest, opts ...grpc.CallOption) (*EmptyMessage, error)
-	FillFacultyFeedback(ctx context.Context, in *FillFacultyFeedbackRequest, opts ...grpc.CallOption) (*EmptyMessage, error)
+	FillFacultyFeedback(ctx context.Context, in *FillFacultyFeedbackRequest, opts ...grpc.CallOption) (*FillFacultyFeedbackResponse, error)
 }
 
 type amizoneServiceClient struct {
@@ -140,8 +140,8 @@ func (c *amizoneServiceClient) DeregisterWifiMac(ctx context.Context, in *Deregi
 	return out, nil
 }
 
-func (c *amizoneServiceClient) FillFacultyFeedback(ctx context.Context, in *FillFacultyFeedbackRequest, opts ...grpc.CallOption) (*EmptyMessage, error) {
-	out := new(EmptyMessage)
+func (c *amizoneServiceClient) FillFacultyFeedback(ctx context.Context, in *FillFacultyFeedbackRequest, opts ...grpc.CallOption) (*FillFacultyFeedbackResponse, error) {
+	out := new(FillFacultyFeedbackResponse)
 	err := c.cc.Invoke(ctx, "/go_amizone.server.proto.v1.AmizoneService/FillFacultyFeedback", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -170,7 +170,7 @@ type AmizoneServiceServer interface {
 	GetWifiMacInfo(context.Context, *EmptyMessage) (*WifiMacInfo, error)
 	RegisterWifiMac(context.Context, *RegisterWifiMacRequest) (*EmptyMessage, error)
 	DeregisterWifiMac(context.Context, *DeregisterWifiMacRequest) (*EmptyMessage, error)
-	FillFacultyFeedback(context.Context, *FillFacultyFeedbackRequest) (*EmptyMessage, error)
+	FillFacultyFeedback(context.Context, *FillFacultyFeedbackRequest) (*FillFacultyFeedbackResponse, error)
 	mustEmbedUnimplementedAmizoneServiceServer()
 }
 
@@ -208,7 +208,7 @@ func (UnimplementedAmizoneServiceServer) RegisterWifiMac(context.Context, *Regis
 func (UnimplementedAmizoneServiceServer) DeregisterWifiMac(context.Context, *DeregisterWifiMacRequest) (*EmptyMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeregisterWifiMac not implemented")
 }
-func (UnimplementedAmizoneServiceServer) FillFacultyFeedback(context.Context, *FillFacultyFeedbackRequest) (*EmptyMessage, error) {
+func (UnimplementedAmizoneServiceServer) FillFacultyFeedback(context.Context, *FillFacultyFeedbackRequest) (*FillFacultyFeedbackResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FillFacultyFeedback not implemented")
 }
 func (UnimplementedAmizoneServiceServer) mustEmbedUnimplementedAmizoneServiceServer() {}

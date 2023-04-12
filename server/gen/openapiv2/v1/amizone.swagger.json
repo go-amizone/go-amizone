@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Amizone API",
-    "version": "0.5.1",
+    "version": "0.6.0",
     "contact": {
       "name": "ditsuke",
       "url": "https://ditsuke.com",
@@ -204,7 +204,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1EmptyMessage"
+              "$ref": "#/definitions/v1FillFacultyFeedbackResponse"
             }
           },
           "403": {
@@ -551,6 +551,15 @@
           "items": {
             "$ref": "#/definitions/v1ScheduledExam"
           }
+        }
+      }
+    },
+    "v1FillFacultyFeedbackResponse": {
+      "type": "object",
+      "properties": {
+        "filledFor": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },

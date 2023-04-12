@@ -439,25 +439,49 @@ func (a *Client) RemoveWifiMac(addr net.HardwareAddr) error {
 	return nil
 }
 
-func (a *Client) SubmitFacultyFeedbackHack(rating int32, queryRating int32, comment string) error {
+// SubmitFacultyFeedbackHack submits feedback for *all* faculties, giving the same ratings and comments to all.
+// This is a hack because we're not allowing fine-grained control over feedback points or individual faculties. This is
+// because the form is a pain to parse, and the feedback system is a pain to work with in general.
+// Returns: the number of faculties for which feedback was submitted. Note that this number would be zero
+// if the feedback was already submitted or is not open.
+func (a *Client) SubmitFacultyFeedbackHack(rating int32, queryRating int32, comment string) (int32, error) {
+	// Validate
+	if rating > 5 || rating < 1 {
+		return 0, errors.New("invalid rating")
+	}
+	if queryRating > 3 || queryRating < 1 {
+		return 0, errors.New("invalid query rating")
+	}
+	if comment == "" {
+		return 0, errors.New("comment cannot be empty")
+	}
+
+	// Transform queryRating for "higher number is higher rating" semantics (it's the opposite in the form 😭)
+	if queryRating == 1 {
+		queryRating = 3
+	} else if queryRating == 3 {
+		queryRating = 1
+	}
+
 	facultyPage, err := a.doRequest(true, http.MethodGet, facultyBaseEndpoint, nil)
 	if err != nil {
 		klog.Errorf("request (faculty page): %s", err.Error())
-		return fmt.Errorf("%s: %s", ErrFailedToFetchPage, err.Error())
+		return 0, fmt.Errorf("%s: %s", ErrFailedToFetchPage, err.Error())
 	}
 
 	feedbackSpecs, err := parse.FacultyFeedback(facultyPage.Body)
 	if err != nil {
 		klog.Errorf("parse (faculty feedback): %s", err.Error())
-		return errors.New(ErrFailedToParsePage)
+		return 0, errors.New(ErrFailedToParsePage)
 	}
 
 	payloadTemplate, err := template.New("facultyFeedback").Parse(facultyFeedbackTpl)
 	if err != nil {
 		klog.Errorf("Error parsing faculty feedback template: %s", err.Error())
-		return errors.New(ErrInternalFailure)
+		return 0, errors.New(ErrInternalFailure)
 	}
 
+	// Parallelize feedback submission for max gains 📈
 	wg := sync.WaitGroup{}
 	for _, spec := range feedbackSpecs {
 		spec.Set__Rating = fmt.Sprint(rating)
@@ -468,7 +492,7 @@ func (a *Client) SubmitFacultyFeedbackHack(rating int32, queryRating int32, comm
 		err = payloadTemplate.Execute(&payload, spec)
 		if err != nil {
 			klog.Errorf("Error executing faculty feedback template: %s", err.Error())
-			return fmt.Errorf("%s: error marshalling feedback request: ", err)
+			return 0, fmt.Errorf("%s: error marshalling feedback request: ", err)
 		}
 		klog.Infof("payload for faculty id: %s :: %+v", spec.FacultyId, payload.String())
 		wg.Add(1)
@@ -485,5 +509,5 @@ func (a *Client) SubmitFacultyFeedbackHack(rating int32, queryRating int32, comm
 	}
 
 	wg.Wait()
-	return nil
+	return int32(len(feedbackSpecs)), nil
 }

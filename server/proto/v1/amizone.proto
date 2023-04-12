@@ -11,7 +11,7 @@ option go_package = "github.com/ditsuke/go-amizone/server/gen/go/api_v1";
 option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
   info: {
     title: "Amizone API";
-    version: "0.5.1";
+    version: "0.6.0";
     contact: {
       name: "ditsuke";
       url: "https://ditsuke.com";
@@ -100,7 +100,7 @@ service AmizoneService {
   rpc DeregisterWifiMac(DeregisterWifiMacRequest) returns (EmptyMessage) {
     option (google.api.http) = {delete: "/api/v1/wifi_mac/{address}"};
   }
-  rpc FillFacultyFeedback(FillFacultyFeedbackRequest) returns (EmptyMessage) {
+  rpc FillFacultyFeedback(FillFacultyFeedbackRequest) returns (FillFacultyFeedbackResponse) {
     option (google.api.http) = {post: "/api/v1/faculty/feedback/submit"};
   }
 }
@@ -250,4 +250,8 @@ message FillFacultyFeedbackRequest {
   int32 rating = 1;
   int32 query_rating = 2;
   string comment = 3;
+}
+
+message FillFacultyFeedbackResponse {
+  int32 filled_for = 1;
 }
