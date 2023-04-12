@@ -16,6 +16,7 @@ require (
 	google.golang.org/protobuf v1.28.0
 	gopkg.in/h2non/gock.v1 v1.1.2
 	k8s.io/klog/v2 v2.60.1
+	github.com/microcosm-cc/bluemonday v1.0.23
 )
 
 require (
@@ -24,7 +25,6 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/h2non/parth v0.0.0-20190131123155-b4df798d6542 // indirect
-	github.com/microcosm-cc/bluemonday v1.0.23 // indirect
 	golang.org/x/sys v0.6.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

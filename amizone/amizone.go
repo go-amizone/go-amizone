@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"strings"
 	"sync"
+	"text/template"
 	"time"
 
 	"github.com/ditsuke/go-amizone/amizone/internal"
@@ -37,6 +38,9 @@ const (
 	// deleteWifiMacEndpoint is peculiar in that it requires the user's ID as a parameter.
 	// This _might_ open doors for an exploit (spoiler: indeed it does)
 	removeWifiMacEndpoint = macBaseEndpoint + "/Mac1RegistrationDelete?username=%s&Amizone_Id=%s"
+
+	facultyBaseEndpoint           = "/FacultyFeeback/FacultyFeedback"
+	facultyEndpointSubmitEndpoint = facultyBaseEndpoint + "/SaveFeedbackRating"
 )
 
 // Miscellaneous
@@ -432,5 +436,61 @@ func (a *Client) RemoveWifiMac(addr net.HardwareAddr) error {
 		return errors.New("failed to remove mac address")
 	}
 
+	return nil
+}
+
+func (a *Client) SubmitFacultyFeedbackHack(rating int32, comment string) error {
+	facultyPage, err := a.doRequest(true, http.MethodGet, facultyBaseEndpoint, nil)
+	if err != nil {
+		klog.Errorf("request (faculty page): %s", err.Error())
+		return fmt.Errorf("%s: %s", ErrFailedToFetchPage, err.Error())
+	}
+
+	feedbackSpecs, err := parse.FacultyFeedback(facultyPage.Body)
+	if err != nil {
+		klog.Errorf("parse (faculty feedback): %s", err.Error())
+		return errors.New(ErrFailedToParsePage)
+	}
+
+	payloadTemplate, err := template.New("facultyFeedback").Parse(facultyFeedbackTpl)
+	if err != nil {
+		klog.Errorf("Error parsing faculty feedback template: %s", err.Error())
+		return errors.New(ErrInternalFailure)
+	}
+
+	wg := sync.WaitGroup{}
+	for _, spec := range feedbackSpecs {
+		// specWithSetValues := func(spec models.FacultyFeedbackSpec) models.FacultyFeedbackSpec {
+		// 	spec.Set__Rating = fmt.Sprint(rating)
+		// 	spec.Set__Comment = url.QueryEscape(comment)
+		// 	spec.Set__RatingQ = fmt.Sprint(1) // TODO: to var
+		// 	return spec
+		// }(spec)
+		spec.Set__Rating = fmt.Sprint(rating)
+		spec.Set__Comment = url.QueryEscape(comment)
+		spec.Set__QRating = fmt.Sprint(1)
+
+		payload := strings.Builder{}
+		err = payloadTemplate.Execute(&payload, spec)
+		if err != nil {
+			klog.Errorf("Error executing faculty feedback template: %s", err.Error())
+			return fmt.Errorf("%s: error marshalling feedback request: ", err)
+		}
+		klog.Infof("payload for faculty id: %s :: %+v", spec.FacultyId, payload.String())
+		wg.Add(1)
+		go func(payload string) {
+			response, err := a.doRequest(true, http.MethodPost, facultyEndpointSubmitEndpoint, strings.NewReader(payload))
+			if err != nil {
+				klog.Errorf("error submitting a faculty feedback: %s", err.Error())
+			}
+			if response.StatusCode != http.StatusOK {
+				klog.Errorf("Non-200 status from faculty feedback submission: %d", response.StatusCode)
+			}
+			wg.Done()
+		}(payload.String())
+
+	}
+
+	wg.Wait()
 	return nil
 }
