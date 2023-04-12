@@ -439,7 +439,7 @@ func (a *Client) RemoveWifiMac(addr net.HardwareAddr) error {
 	return nil
 }
 
-func (a *Client) SubmitFacultyFeedbackHack(rating int32, comment string) error {
+func (a *Client) SubmitFacultyFeedbackHack(rating int32, queryRating int32, comment string) error {
 	facultyPage, err := a.doRequest(true, http.MethodGet, facultyBaseEndpoint, nil)
 	if err != nil {
 		klog.Errorf("request (faculty page): %s", err.Error())
@@ -460,15 +460,9 @@ func (a *Client) SubmitFacultyFeedbackHack(rating int32, comment string) error {
 
 	wg := sync.WaitGroup{}
 	for _, spec := range feedbackSpecs {
-		// specWithSetValues := func(spec models.FacultyFeedbackSpec) models.FacultyFeedbackSpec {
-		// 	spec.Set__Rating = fmt.Sprint(rating)
-		// 	spec.Set__Comment = url.QueryEscape(comment)
-		// 	spec.Set__RatingQ = fmt.Sprint(1) // TODO: to var
-		// 	return spec
-		// }(spec)
 		spec.Set__Rating = fmt.Sprint(rating)
 		spec.Set__Comment = url.QueryEscape(comment)
-		spec.Set__QRating = fmt.Sprint(1)
+		spec.Set__QRating = fmt.Sprint(queryRating)
 
 		payload := strings.Builder{}
 		err = payloadTemplate.Execute(&payload, spec)
@@ -488,7 +482,6 @@ func (a *Client) SubmitFacultyFeedbackHack(rating int32, comment string) error {
 			}
 			wg.Done()
 		}(payload.String())
-
 	}
 
 	wg.Wait()
