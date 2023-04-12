@@ -178,3 +178,17 @@ func (serviceServer) DeregisterWifiMac(ctx context.Context, req *v1.DeregisterWi
 
 	return &v1.EmptyMessage{}, nil
 }
+
+func (serviceServer) FillFacultyFeedback(ctx context.Context, req *v1.FillFacultyFeedbackRequest) (*v1.EmptyMessage, error) {
+	amizoneClient, ok := ctx.Value(ContextAmizoneClientKey).(*amizone.Client)
+	if !ok {
+		return nil, status.Errorf(codes.Internal, "failed to authenticate")
+	}
+
+	err := amizoneClient.SubmitFacultyFeedbackHack(req.Rating, req.QueryRating, req.Comment)
+	if err != nil {
+		return nil, status.Errorf(codes.Unknown, "failed submission: %s", err.Error())
+	}
+
+	return &v1.EmptyMessage{}, nil
+}

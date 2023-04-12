@@ -197,6 +197,54 @@
         ]
       }
     },
+    "/api/v1/faculty/feedback/submit": {
+      "post": {
+        "operationId": "AmizoneService_FillFacultyFeedback",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1EmptyMessage"
+            }
+          },
+          "403": {
+            "description": "Returned when the user does not have permission to access the resource.",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "rating",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "queryRating",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "comment",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "AmizoneService"
+        ]
+      }
+    },
     "/api/v1/semesters": {
       "get": {
         "summary": "GetSemesters returns a list of semesters that include past semesters and the current semester.\nThese semesters can be used in other RPCs that consume them, for example GetCourses.",

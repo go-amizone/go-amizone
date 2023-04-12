@@ -100,6 +100,9 @@ service AmizoneService {
   rpc DeregisterWifiMac(DeregisterWifiMacRequest) returns (EmptyMessage) {
     option (google.api.http) = {delete: "/api/v1/wifi_mac/{address}"};
   }
+  rpc FillFacultyFeedback(FillFacultyFeedbackRequest) returns (EmptyMessage) {
+    option (google.api.http) = {post: "/api/v1/faculty/feedback/submit"};
+  }
 }
 
 message EmptyMessage {}
@@ -241,4 +244,10 @@ message DeregisterWifiMacRequest {
 message RegisterWifiMacRequest {
   string address = 1;
   bool override_limit = 2;
+}
+
+message FillFacultyFeedbackRequest {
+  int32 rating = 1;
+  int32 query_rating = 2;
+  string comment = 3;
 }
