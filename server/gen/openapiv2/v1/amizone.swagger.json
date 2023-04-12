@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Amizone API",
-    "version": "0.5.1",
+    "version": "0.6.0",
     "contact": {
       "name": "ditsuke",
       "url": "https://ditsuke.com",
@@ -192,6 +192,54 @@
             }
           }
         },
+        "tags": [
+          "AmizoneService"
+        ]
+      }
+    },
+    "/api/v1/faculty/feedback/submit": {
+      "post": {
+        "operationId": "AmizoneService_FillFacultyFeedback",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1FillFacultyFeedbackResponse"
+            }
+          },
+          "403": {
+            "description": "Returned when the user does not have permission to access the resource.",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "rating",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "queryRating",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "comment",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
         "tags": [
           "AmizoneService"
         ]
@@ -503,6 +551,15 @@
           "items": {
             "$ref": "#/definitions/v1ScheduledExam"
           }
+        }
+      }
+    },
+    "v1FillFacultyFeedbackResponse": {
+      "type": "object",
+      "properties": {
+        "filledFor": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },

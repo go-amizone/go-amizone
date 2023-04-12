@@ -30,4 +30,16 @@ const (
 	IDCardPage           File = "testdata/id_card_page.html"
 	WifiPage             File = "testdata/wifi_mac_registration.html"
 	WifiPageOneSlot      File = "testdata/wifi_mac_registration_one_empty.html"
+	FacultyPage          File = "testdata/faculty_page.html"
+)
+
+type ExpectedJSON string
+
+// Open returns a fs.File interface to the file in filesystem, the mock filesystem.
+func (f ExpectedJSON) Open() (fs.File, error) {
+	return filesystem.Open(string(f))
+}
+
+const (
+	ExpectedFacultyFeedbackSpec ExpectedJSON = "testdata/expected__faculty_feedback_spec.json"
 )
