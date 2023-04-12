@@ -1,0 +1,537 @@
+<!-- TODO: Sanitize! -->
+<script>
+    function FnFeedBackAgian(CourseName, FacultyName, StaffCode, FacultyId, iSRNO, SType, iDetId) {
+        $.ajax({
+            url: '/FacultyFeeback/FacultyFeedback/_FeedbackRating',
+            type: "POST", async: false, dataType: "html",
+            data: ({ "CourseName": CourseName, "FacultyName": FacultyName, "StaffCode": StaffCode, "FacultyId": FacultyId, "iSRNO": iSRNO, "sType": SType, "iDetId": iDetId, }),
+            success: function (data) {
+                $("#Div_Partial").html(data);
+            },
+            error: function (aa) {
+                alertify.set('notifier', 'position', 'top-center'); alertify.success(aa.error);
+
+            },
+        });
+    }
+</script>
+
+<input name="__RequestVerificationToken" type="hidden" value="2oaN2tuDVcdxvIA-H5mN3GMXWywrDHL41076y01r9_TQZGixPRhLfcAEQs9lHxfYh9JJeNLJxKg4rX_6e_vvbxfEymmlsGh2WFc1" />
+
+
+
+
+<style>
+    /* ul-timeline
+     **************************************************/
+    ul.timeline {
+        border-left: 8px solid #FFF;
+        list-style: none;
+        padding: 1px 0;
+        margin-left: 100px;
+    }
+
+        ul.timeline li .date {
+            float: left;
+            padding: 10px 15px 10px 10px;
+            margin-top: 10px;
+            margin-left: -115px;
+            font-size: 15px;
+            width: 110px;
+            text-align: center;
+            background: #0D4F92;
+            color: #fff;
+        }
+
+        ul.timeline li.open .data {
+            background: #0D4F92;
+        }
+
+        ul.timeline li .circle {
+            float: left;
+            margin: 20px 0;
+            margin-left: -14px;
+            width: 20px;
+            height: 20px;
+            border: 4px solid #FFFFFF;
+            border-radius: 50%;
+            background-color: #d5d5d5;
+        }
+
+        ul.timeline li.open .circle {
+            background-color: #0D4F92;
+            -webkit-box-shadow: 0px 2px 6px -3px rgba(68, 68, 68, 0.5);
+            box-shadow: 0px 2px 6px -3px rgba(68, 68, 68, 0.5);
+        }
+
+        ul.timeline li .data {
+            background: #fdfdfd;
+            margin: 10px 0px 10px 20px;
+            border-left: 10px solid #FBB503;
+            padding: 18px 20px;
+            font-size: 16px;
+            -webkit-box-shadow: 0px 3px 3px -3px #ccc;
+            box-shadow: 0px 3px 3px -3px #ccc;
+            border-radius: 3px;
+        }
+
+        ul.timeline li.open .data {
+            /*border-color: #03bb7a;*/
+            background: #fff;
+        }
+
+        ul.timeline li .data .subject {
+            cursor: pointer;
+            color: #777;
+            font-size: 18px;
+            background: url('../../../../assets/images/diag.svg');
+            background-size: 6px;
+        }
+
+            ul.timeline li .data .subject h4 {
+                background-color: #FBB503;
+                color: #fff;
+                padding: .5rem 1rem .5rem .3rem;
+                display: inline-block;
+                margin: 0;
+            }
+
+        ul.timeline li .data .text {
+            display: none;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+    .circle-image {
+        width: 75px;
+        height: 75px;
+        border-radius: 50%;
+        overflow: hidden;
+    }
+
+    .post-message-btn {
+        text-align: right;
+    }
+
+    .faculty-name {
+        margin: 0;
+    }
+
+    @media (max-width: 500px) {
+        ul.timeline {
+            margin: 0;
+            border-left: none;
+        }
+
+            ul.timeline .circle {
+                display: none;
+            }
+
+            ul.timeline .data {
+                margin: 0 !important;
+                margin-bottom: 10px !important;
+                padding-top: 65px !important;
+            }
+
+            ul.timeline .date {
+                margin-left: 0 !important;
+            }
+
+            ul.timeline li .data .subject {
+                font-size: 14px;
+            }
+
+        .panel-heading {
+            padding: 5px;
+        }
+
+        .panel-body {
+            padding: 0;
+        }
+
+        .faculty-name {
+            font-size: 14px;
+            margin: 2px 0px;
+        }
+
+        .post-message-btn {
+            text-align: center;
+        }
+    }
+</style>
+<div class="main-content">
+    <div class="main-content-inner">
+        <div class="breadcrumbs" id="breadcrumbs">
+            <script type="text/javascript">
+                try { ace.settings.check('breadcrumbs', 'fixed') } catch (e) { }
+            </script>
+            <ul class="breadcrumb">
+                <li>
+                    <a data-ajax="true" data-ajax-loading="#lodingDiv" data-ajax-mode="replace" data-ajax-update="#Div_Partial" href="/Home/_Home" id="0" rel="0">  <i class='menu-icon fa fa-home'></i><span class='menu-text'>Home</span> </a><b class="arrow"></b>
+                </li>
+
+                <li class="active">My Faculty</li>
+            </ul>
+
+            <!-- /.breadcrumb -->
+            <!-- /.nav-search -->
+        </div>
+        <div class="page-content">
+            <div class="row text-center">
+                <span class="text-primary text-center ">
+                </span>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <ul class="timeline">
+                            <li class="open">
+                                <div class="date">[CSE401]</div>
+                                <div class="circle"></div>
+                                    <div class="data">
+                                        <div class="subject"><h4> Artificial Intelligence [CSE401] </h4></div>
+                                        <div class="text row">
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading panel-heading-gray">
+                                                    <div class="row">
+                                                        <div class="col-md-2 col-xs-4 col-sm-2">
+                                                            <div class="circle-image">
+
+                                                                <img alt="image" class="img-responsive" src="https://amizone.net/sfile/AWSImage.ashx?type=3&id=DEA18EA9-12F0-49FB-9395-E52EA5A">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-10 col-xs-8">
+                                                            <div class="panel-body">
+                                                                <div class="row">
+                                                                    <div class="col-sm-4 col-xs-12"><h4 class="faculty-name">DSM</h4></div>
+                                                                    <div class="col-sm-4 text-center ">
+
+                                                                            <img src="/Images/right.gif" />
+                                                                    </div>
+                                                                    <div class="col-sm-4 post-message-btn ">
+                                                                        <a class="btn btn-primary btn-minier" data-ajax="true" data-ajax-method="POST" data-ajax-mode="replace" data-ajax-success=" $(&#39;#FormModal&#39;).modal(&#39;show&#39;);" data-ajax-update="#DivForm" href="/FacultyFeeback/FacultyFeedback/_GetPostMessage?CourseName=Artificial%20Intelligence%20%5BCSE401%5D&amp;FacultyName=Dr%20Shi%20%20Mala&amp;StaffCode=302015" rel="0"><i class='fa fa-envelope' title='Please click here to Post faculty message'></i> Post Message</a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                            </li>
+                            <li class="open">
+                                <div class="date">[CSE304]</div>
+                                <div class="circle"></div>
+                                    <div class="data">
+                                        <div class="subject"><h4> Compiler Construction [CSE304] </h4></div>
+                                        <div class="text row">
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading panel-heading-gray">
+                                                    <div class="row">
+                                                        <div class="col-md-2 col-xs-4 col-sm-2">
+                                                            <div class="circle-image">
+
+                                                                <img alt="image" class="img-responsive" src="https://amizone.net/sfile/AWSImage.ashx?type=3&id=AA5AC77F-B91F-4208-9C67-B3D494A">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-10 col-xs-8">
+                                                            <div class="panel-body">
+                                                                <div class="row">
+                                                                    <div class="col-sm-4 col-xs-12"><h4 class="faculty-name">DAG</h4></div>
+                                                                    <div class="col-sm-4 text-center ">
+
+                                                                            <img src="/Images/right.gif" />
+                                                                    </div>
+                                                                    <div class="col-sm-4 post-message-btn ">
+                                                                        <a class="btn btn-primary btn-minier" data-ajax="true" data-ajax-method="POST" data-ajax-mode="replace" data-ajax-success=" $(&#39;#FormModal&#39;).modal(&#39;show&#39;);" data-ajax-update="#DivForm" href="/FacultyFeeback/FacultyFeedback/_GetPostMessage?CourseName=Compiler%20Construction%20%5BCSE304%5D&amp;FacultyName=Dr%20nshi%20%20pta&amp;StaffCode=307870" rel="0"><i class='fa fa-envelope' title='Please click here to Post faculty message'></i> Post Message</a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                            </li>
+                            <li class="open">
+                                <div class="date">[FREN115]</div>
+                                <div class="circle"></div>
+                                    <div class="data">
+                                        <div class="subject"><h4> French Written Expression and Comprehension – II [FREN115] </h4></div>
+                                        <div class="text row">
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading panel-heading-gray">
+                                                    <div class="row">
+                                                        <div class="col-md-2 col-xs-4 col-sm-2">
+                                                            <div class="circle-image">
+
+                                                                <img alt="image" class="img-responsive" src="https://amizone.net/sfile/AWSImage.ashx?type=3&id=FDECB27F-924A-4134-AF7E-3A410D0">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-10 col-xs-8">
+                                                            <div class="panel-body">
+                                                                <div class="row">
+                                                                    <div class="col-sm-4 col-xs-12"><h4 class="faculty-name">Ms SS</h4></div>
+                                                                    <div class="col-sm-4 text-center ">
+
+<a class="btn btn-primary btn-minier" data-ajax="true" data-ajax-method="POST" data-ajax-mode="replace" data-ajax-update="#Div_Partial" href="/FacultyFeeback/FacultyFeedback/_FeedbackRating?TypeID=2&amp;CourseType=Open%2FDomain%2FFBL&amp;DetID=94480&amp;FacultyStaffID=121242&amp;SrNo=1730207&amp;FeedbackID=0" rel="0"><i class='fa fa-comment' title='Please click here to give faculty feedback'></i> Feedback</a>                                                                    </div>
+                                                                    <div class="col-sm-4 post-message-btn ">
+                                                                        <a class="btn btn-primary btn-minier" data-ajax="true" data-ajax-method="POST" data-ajax-mode="replace" data-ajax-success=" $(&#39;#FormModal&#39;).modal(&#39;show&#39;);" data-ajax-update="#DivForm" href="/FacultyFeeback/FacultyFeedback/_GetPostMessage?CourseName=French%20Written%20Expression%20and%20Comprehension%20%E2%80%93%20II%20%5BFREN115%5D&amp;FacultyName=Ms%20a%20%20Saa&amp;StaffCode=309035" rel="0"><i class='fa fa-envelope' title='Please click here to Post faculty message'></i> Post Message</a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                            </li>
+                            <li class="open">
+                                <div class="date">[SW102]</div>
+                                <div class="circle"></div>
+                                    <div class="data">
+                                        <div class="subject"><h4> Human Values and Community Outreach [SW102] </h4></div>
+                                        <div class="text row">
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading panel-heading-gray">
+                                                    <div class="row">
+                                                        <div class="col-md-2 col-xs-4 col-sm-2">
+                                                            <div class="circle-image">
+
+                                                                <img alt="image" class="img-responsive" src="https://amizone.net/sfile/AWSImage.ashx?type=3&id=30AB21EA-2C05-44E8-98D4-6F88B781E">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-10 col-xs-8">
+                                                            <div class="panel-body">
+                                                                <div class="row">
+                                                                    <div class="col-sm-4 col-xs-12"><h4 class="faculty-name">Dr LS</h4></div>
+                                                                    <div class="col-sm-4 text-center ">
+
+<a class="btn btn-primary btn-minier" data-ajax="true" data-ajax-method="POST" data-ajax-mode="replace" data-ajax-update="#Div_Partial" href="/FacultyFeeback/FacultyFeedback/_FeedbackRating?TypeID=2&amp;CourseType=Open%2FDomain%2FFBL&amp;DetID=94480&amp;FacultyStaffID=120530&amp;SrNo=1730207&amp;FeedbackID=0" rel="0"><i class='fa fa-comment' title='Please click here to give faculty feedback'></i> Feedback</a>                                                                    </div>
+                                                                    <div class="col-sm-4 post-message-btn ">
+                                                                        <a class="btn btn-primary btn-minier" data-ajax="true" data-ajax-method="POST" data-ajax-mode="replace" data-ajax-success=" $(&#39;#FormModal&#39;).modal(&#39;show&#39;);" data-ajax-update="#DivForm" href="/FacultyFeeback/FacultyFeedback/_GetPostMessage?CourseName=Human%20Values%20and%20Community%20Outreach%20%5BSW102%5D&amp;FacultyName=Dr%20Le%20%20&amp;StaffCode=307867" rel="0"><i class='fa fa-envelope' title='Please click here to Post faculty message'></i> Post Message</a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                            </li>
+                            <li class="open">
+                                <div class="date">[SW102]</div>
+                                <div class="circle"></div>
+                                    <div class="data">
+                                        <div class="subject"><h4> Human Values and Community Outreach [SW102] </h4></div>
+                                        <div class="text row">
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading panel-heading-gray">
+                                                    <div class="row">
+                                                        <div class="col-md-2 col-xs-4 col-sm-2">
+                                                            <div class="circle-image">
+
+                                                                <img alt="image" class="img-responsive" src="https://amizone.net/sfile/AWSImage.ashx?type=3&id=2B5758D1-7A0C-4089-9A71-0C9EC71CC">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-10 col-xs-8">
+                                                            <div class="panel-body">
+                                                                <div class="row">
+                                                                    <div class="col-sm-4 col-xs-12"><h4 class="faculty-name">Dr AKY</h4></div>
+                                                                    <div class="col-sm-4 text-center ">
+
+<a class="btn btn-primary btn-minier" data-ajax="true" data-ajax-method="POST" data-ajax-mode="replace" data-ajax-update="#Div_Partial" href="/FacultyFeeback/FacultyFeedback/_FeedbackRating?TypeID=2&amp;CourseType=Open%2FDomain%2FFBL&amp;DetID=94480&amp;FacultyStaffID=124614&amp;SrNo=1730207&amp;FeedbackID=0" rel="0"><i class='fa fa-comment' title='Please click here to give faculty feedback'></i> Feedback</a>                                                                    </div>
+                                                                    <div class="col-sm-4 post-message-btn ">
+                                                                        <a class="btn btn-primary btn-minier" data-ajax="true" data-ajax-method="POST" data-ajax-mode="replace" data-ajax-success=" $(&#39;#FormModal&#39;).modal(&#39;show&#39;);" data-ajax-update="#DivForm" href="/FacultyFeeback/FacultyFeedback/_GetPostMessage?CourseName=Human%20Values%20and%20Community%20Outreach%20%5BSW102%5D&amp;FacultyName=Dr%20Ashumar%20Yadav&amp;StaffCode=307891" rel="0"><i class='fa fa-envelope' title='Please click here to Post faculty message'></i> Post Message</a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                            </li>
+                            <li class="open">
+                                <div class="date">[PFE301]</div>
+                                <div class="circle"></div>
+                                    <div class="data">
+                                        <div class="subject"><h4> Professional Ethics and Social Responsibility [PFE301] </h4></div>
+                                        <div class="text row">
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading panel-heading-gray">
+                                                    <div class="row">
+                                                        <div class="col-md-2 col-xs-4 col-sm-2">
+                                                            <div class="circle-image">
+
+                                                                <img alt="image" class="img-responsive" src="https://amizone.net/sfile/AWSImage.ashx?type=3&id=09B4ED43-F852-4A85-8E0F-9AD284B04">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-10 col-xs-8">
+                                                            <div class="panel-body">
+                                                                <div class="row">
+                                                                    <div class="col-sm-4 col-xs-12"><h4 class="faculty-name">DRM</h4></div>
+                                                                    <div class="col-sm-4 text-center ">
+
+<a class="btn btn-primary btn-minier" data-ajax="true" data-ajax-method="POST" data-ajax-mode="replace" data-ajax-update="#Div_Partial" href="/FacultyFeeback/FacultyFeedback/_FeedbackRating?TypeID=2&amp;CourseType=General&amp;DetID=94480&amp;FacultyStaffID=1248875&amp;SrNo=1730207&amp;FeedbackID=0" rel="0"><i class='fa fa-comment' title='Please click here to give faculty feedback'></i> Feedback</a>                                                                    </div>
+                                                                    <div class="col-sm-4 post-message-btn ">
+                                                                        <a class="btn btn-primary btn-minier" data-ajax="true" data-ajax-method="POST" data-ajax-mode="replace" data-ajax-success=" $(&#39;#FormModal&#39;).modal(&#39;show&#39;);" data-ajax-update="#DivForm" href="/FacultyFeeback/FacultyFeedback/_GetPostMessage?CourseName=Professional%20Ethics%20and%20Social%20Responsibility%20%5BPFE301%5D&amp;FacultyName=Dr%20R%20%20Paul&amp;StaffCode=307881" rel="0"><i class='fa fa-envelope' title='Please click here to Post faculty message'></i> Post Message</a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                            </li>
+                            <li class="open">
+                                <div class="date">[SKE309]</div>
+                                <div class="circle"></div>
+                                    <div class="data">
+                                        <div class="subject"><h4> Programming &amp; Employability Skills for Computer Engineers [SKE309] </h4></div>
+                                        <div class="text row">
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading panel-heading-gray">
+                                                    <div class="row">
+                                                        <div class="col-md-2 col-xs-4 col-sm-2">
+                                                            <div class="circle-image">
+
+                                                                <img alt="image" class="img-responsive" src="https://amizone.net/sfile/AWSImage.ashx?type=3&id=1BC8772A-052B-4538-804A-C466666">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-10 col-xs-8">
+                                                            <div class="panel-body">
+                                                                <div class="row">
+                                                                    <div class="col-sm-4 col-xs-12"><h4 class="faculty-name">DSKD</h4></div>
+                                                                    <div class="col-sm-4 text-center ">
+
+<a class="btn btn-primary btn-minier" data-ajax="true" data-ajax-method="POST" data-ajax-mode="replace" data-ajax-update="#Div_Partial" href="/FacultyFeeback/FacultyFeedback/_FeedbackRating?TypeID=2&amp;CourseType=General&amp;DetID=94480&amp;FacultyStaffID=1248913&amp;SrNo=1730207&amp;FeedbackID=0" rel="0"><i class='fa fa-comment' title='Please click here to give faculty feedback'></i> Feedback</a>                                                                    </div>
+                                                                    <div class="col-sm-4 post-message-btn ">
+                                                                        <a class="btn btn-primary btn-minier" data-ajax="true" data-ajax-method="POST" data-ajax-mode="replace" data-ajax-success=" $(&#39;#FormModal&#39;).modal(&#39;show&#39;);" data-ajax-update="#DivForm" href="/FacultyFeeback/FacultyFeedback/_GetPostMessage?CourseName=Programming%20%26%20Employability%20Skills%20for%20Computer%20Engineers%20%5BSKE309%5D&amp;FacultyName=Dr%20Say%20Kumar%20Dubey&amp;StaffCode=2436" rel="0"><i class='fa fa-envelope' title='Please click here to Post faculty message'></i> Post Message</a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                            </li>
+                            <li class="open">
+                                <div class="date">[IT301 ]</div>
+                                <div class="circle"></div>
+                                    <div class="data">
+                                        <div class="subject"><h4> Software Engineering [IT301 ] </h4></div>
+                                        <div class="text row">
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading panel-heading-gray">
+                                                    <div class="row">
+                                                        <div class="col-md-2 col-xs-4 col-sm-2">
+                                                            <div class="circle-image">
+
+                                                                <img alt="image" class="img-responsive" src="https://amizone.net/sfile/AWSImage.ashx?type=3&id=1BC8772A-052B-4538-804A-4666665F8">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-10 col-xs-8">
+                                                            <div class="panel-body">
+                                                                <div class="row">
+                                                                    <div class="col-sm-4 col-xs-12"><h4 class="faculty-name">DSKD</h4></div>
+                                                                    <div class="col-sm-4 text-center ">
+
+<a class="btn btn-primary btn-minier" data-ajax="true" data-ajax-method="POST" data-ajax-mode="replace" data-ajax-update="#Div_Partial" href="/FacultyFeeback/FacultyFeedback/_FeedbackRating?TypeID=2&amp;CourseType=General&amp;DetID=94480&amp;FacultyStaffID=1248826&amp;SrNo=1730207&amp;FeedbackID=0" rel="0"><i class='fa fa-comment' title='Please click here to give faculty feedback'></i> Feedback</a>                                                                    </div>
+                                                                    <div class="col-sm-4 post-message-btn ">
+                                                                        <a class="btn btn-primary btn-minier" data-ajax="true" data-ajax-method="POST" data-ajax-mode="replace" data-ajax-success=" $(&#39;#FormModal&#39;).modal(&#39;show&#39;);" data-ajax-update="#DivForm" href="/FacultyFeeback/FacultyFeedback/_GetPostMessage?CourseName=Software%20Engineering%20%5BIT301%20%5D&amp;FacultyName=Dr%20Say%20Kumar%20Dubey&amp;StaffCode=2436" rel="0"><i class='fa fa-envelope' title='Please click here to Post faculty message'></i> Post Message</a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                            </li>
+                            <li class="open">
+                                <div class="date">[IT414        ]</div>
+                                <div class="circle"></div>
+                                    <div class="data">
+                                        <div class="subject"><h4> Software Testing and Quality Assurance [IT414        ] </h4></div>
+                                        <div class="text row">
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading panel-heading-gray">
+                                                    <div class="row">
+                                                        <div class="col-md-2 col-xs-4 col-sm-2">
+                                                            <div class="circle-image">
+
+                                                                <img alt="image" class="img-responsive" src="https://amizone.net/sfile/AWSImage.ashx?type=3&id=08E09279-BFC0-4A20-B215-F2510B5EB">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-10 col-xs-8">
+                                                            <div class="panel-body">
+                                                                <div class="row">
+                                                                    <div class="col-sm-4 col-xs-12"><h4 class="faculty-name">DRS</h4></div>
+                                                                    <div class="col-sm-4 text-center ">
+
+<a class="btn btn-primary btn-minier" data-ajax="true" data-ajax-method="POST" data-ajax-mode="replace" data-ajax-update="#Div_Partial" href="/FacultyFeeback/FacultyFeedback/_FeedbackRating?TypeID=2&amp;CourseType=General&amp;DetID=94480&amp;FacultyStaffID=1249901&amp;SrNo=1730207&amp;FeedbackID=0" rel="0"><i class='fa fa-comment' title='Please click here to give faculty feedback'></i> Feedback</a>                                                                    </div>
+                                                                    <div class="col-sm-4 post-message-btn ">
+                                                                        <a class="btn btn-primary btn-minier" data-ajax="true" data-ajax-method="POST" data-ajax-mode="replace" data-ajax-success=" $(&#39;#FormModal&#39;).modal(&#39;show&#39;);" data-ajax-update="#DivForm" href="/FacultyFeeback/FacultyFeedback/_GetPostMessage?CourseName=Software%20Testing%20and%20Quality%20Assurance%20%5BIT414%20%20%20%20%20%20%20%20%5D&amp;FacultyName=Dr%20ni%20Sehgal%20Kaushik&amp;StaffCode=2434" rel="0"><i class='fa fa-envelope' title='Please click here to Post faculty message'></i> Post Message</a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                            </li>
+                    </ul>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+<script>
+    /*++++++++++++++++++++++++++++++++++++
+    click event on ul.timeline titles
+++++++++++++++++++++++++++++++++++++++*/
+    $("ul.timeline").children().eq(0)
+		.find(".text").slideDown()
+		.addClass("open");
+
+    $("ul.timeline").on("click", "li", function () {
+        $this = $(this);
+        $this.find(".text").slideDown();
+        $this.addClass("open");
+        $this.siblings('li.open').find(".text").slideUp();
+        $this.siblings('li').removeClass("open");
+    }).on('mouseenter', 'li', function () {
+        $this = $(this);
+        var anim = new TweenLite($(this).find(".subject"), 0.4, { 'padding-left': 20, paused: true });
+        ($this.hasClass('open')) || anim.play();
+    }).on('mouseleave', 'li', function () {
+        var anim = new TweenLite($(this).find(".subject"), 0.2, { 'padding-left': 0 });
+    });
+
+
+</script>
