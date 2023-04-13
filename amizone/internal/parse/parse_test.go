@@ -2,9 +2,12 @@ package parse_test
 
 import (
 	"encoding/json"
+	"html"
 	"io"
+	"testing"
 
 	"github.com/ditsuke/go-amizone/amizone/internal/mock"
+	"github.com/ditsuke/go-amizone/amizone/internal/parse"
 	. "github.com/onsi/gomega"
 )
 
@@ -26,4 +29,12 @@ func ReadExpectedFile(file mock.ExpectedJSON, g *WithT) []byte {
 	b, err := io.ReadAll(f)
 	g.Expect(err).ToNot(HaveOccurred(), "read expected data file")
 	return b
+}
+
+// === Tests ===
+func TestCleanString(t *testing.T) {
+	g := NewWithT(t)
+	const TestString = "&lt;b&gt;Fac Name&lt;/b&gt;"
+	println("After html.Unescape: ", html.UnescapeString(TestString))
+	g.Expect(parse.CleanString(TestString)).To(Equal("Fac Name"))
 }

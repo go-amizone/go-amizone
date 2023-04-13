@@ -40,13 +40,13 @@ func ClassSchedule(body io.Reader) (models.ClassSchedule, error) {
 
 		class := models.ScheduledClass{
 			Course: models.CourseRef{
-				Code: cleanString(entry.CourseCode),
-				Name: cleanString(entry.CourseName),
+				Code: CleanString(entry.CourseCode),
+				Name: CleanString(entry.CourseName),
 			},
 			StartTime: parseTime(entry.Start),
 			EndTime:   parseTime(entry.End),
-			Faculty:   cleanString(entry.Faculty),
-			Room:      cleanString(entry.Room),
+			Faculty:   CleanString(entry.Faculty),
+			Room:      CleanString(entry.Room),
 			Attended:  entry.AttendanceState(),
 		}
 

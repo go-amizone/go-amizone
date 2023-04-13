@@ -77,17 +77,17 @@ func Courses(body io.Reader) (models.Courses, error) {
 	courseEntries.Each(func(i int, row *goquery.Selection) {
 		course := models.Course{
 			CourseRef: models.CourseRef{
-				Name: cleanString(row.Find(fmt.Sprintf(selectorTplDataCell, dtName)).Text()),
-				Code: cleanString(row.Find(fmt.Sprintf(selectorTplDataCell, dtCode)).Text()),
+				Name: CleanString(row.Find(fmt.Sprintf(selectorTplDataCell, dtName)).Text()),
+				Code: CleanString(row.Find(fmt.Sprintf(selectorTplDataCell, dtCode)).Text()),
 			},
-			Type: cleanString(row.Find(fmt.Sprintf(selectorTplDataCell, dtType)).Text()),
+			Type: CleanString(row.Find(fmt.Sprintf(selectorTplDataCell, dtType)).Text()),
 			Attendance: func() models.Attendance {
 				raw := row.Find(fmt.Sprintf(selectorTplDataCell, dtAttendance)).Text()
 				// go std regex doesn't have lookarounds :(
 				attendedStr := regexp.MustCompile(`\d{1,2}/`).FindString(raw)
-				attended, err1 := strconv.Atoi(cleanString(attendedStr, '/'))
+				attended, err1 := strconv.Atoi(CleanString(attendedStr, '/'))
 				totalStr := regexp.MustCompile(`/\d{1,2}`).FindString(raw)
-				total, err2 := strconv.Atoi(cleanString(totalStr, '/'))
+				total, err2 := strconv.Atoi(CleanString(totalStr, '/'))
 				if err1 != nil || err2 != nil {
 					klog.Warning("parse(courses): attendance string has unexpected format")
 					return models.Attendance{}
@@ -100,9 +100,9 @@ func Courses(body io.Reader) (models.Courses, error) {
 			InternalMarks: func() models.Marks {
 				raw := row.Find(fmt.Sprintf(selectorTplDataCell, dtInternals)).Text()
 				gotStr := regexp.MustCompile(`\d{1,2}(\.\d{1,2})?[\[/]`).FindString(raw)
-				got, err1 := strconv.ParseFloat(cleanString(gotStr, '[', '/'), 32)
+				got, err1 := strconv.ParseFloat(CleanString(gotStr, '[', '/'), 32)
 				maxStr := regexp.MustCompile(`/\d{1,2}(\.\d{1,2})?`).FindString(raw)
-				max, err2 := strconv.ParseFloat(cleanString(maxStr, '/'), 32)
+				max, err2 := strconv.ParseFloat(CleanString(maxStr, '/'), 32)
 				// @todo make allowances if marks aren't there!??
 				if err1 != nil || err2 != nil {
 					klog.Warning("parse(courses): error in parsing marks")
