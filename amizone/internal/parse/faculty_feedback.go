@@ -12,7 +12,7 @@ import (
 
 func isFacultyPage(dom *goquery.Document) bool {
 	const FacultyPageBreadcrumb = "My Faculty"
-	return cleanString(dom.Find(selectorActiveBreadcrumb).Text()) == FacultyPageBreadcrumb
+	return CleanString(dom.Find(selectorActiveBreadcrumb).Text()) == FacultyPageBreadcrumb
 }
 
 func FacultyFeedback(body io.Reader) (models.FacultyFeedbackSpecs, error) {

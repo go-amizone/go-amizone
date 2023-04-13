@@ -27,7 +27,7 @@ func Semesters(body io.Reader) (models.SemesterList, error) {
 	dom.Find("#CurrentSemesterInfo option").Each(func(_ int, opt *goquery.Selection) {
 		if value := opt.AttrOr("value", ""); value != "" {
 			sem := models.Semester{
-				Name: cleanString(opt.Text()),
+				Name: CleanString(opt.Text()),
 				Ref:  value,
 			}
 			semesters = append(semesters, sem)

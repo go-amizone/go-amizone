@@ -37,7 +37,7 @@ func Profile(body io.Reader) (*models.Profile, error) {
 		conDiv := dom.Find(selectorCardFront)
 		// Replace <br>'s with newlines to make the semantic soup parsable
 		conDiv.Find("br").ReplaceWithHtml("\n")
-		all := cleanString(conDiv.Text())
+		all := CleanString(conDiv.Text())
 		allSlice := strings.Split(all, "\n")
 		if len(allSlice) != 3 {
 			klog.Error("failed to parse out name, course and batch from the ID page")
@@ -45,7 +45,7 @@ func Profile(body io.Reader) (*models.Profile, error) {
 		}
 
 		for i, s := range allSlice {
-			allSlice[i] = cleanString(s)
+			allSlice[i] = CleanString(s)
 		}
 
 		return allSlice[0], allSlice[1], allSlice[2]
@@ -87,7 +87,7 @@ func Profile(body io.Reader) (*models.Profile, error) {
 	// replace <br>'s with newlines
 	backDiv.Find("br").ReplaceWithHtml("\n")
 	everything := strings.Split(
-		cleanString(backDiv.Text()),
+		CleanString(backDiv.Text()),
 		"\n",
 	)
 
@@ -95,8 +95,8 @@ func Profile(body io.Reader) (*models.Profile, error) {
 	valueRegexp := regexp.MustCompile(`:( )?.*$`)
 
 	for _, line := range everything {
-		lbl := cleanString(labelRegexp.FindString(line), ':')
-		value := cleanString(valueRegexp.FindString(line), ':')
+		lbl := CleanString(labelRegexp.FindString(line), ':')
+		value := CleanString(valueRegexp.FindString(line), ':')
 		switch lbl {
 		case lblEnrollmentNo:
 			profile.EnrollmentNumber = value
@@ -126,5 +126,5 @@ func Profile(body io.Reader) (*models.Profile, error) {
 
 func isIDCardPage(dom *goquery.Document) bool {
 	const IDCardPageBreadcrumb = "ID Card View"
-	return cleanString(dom.Find(selectorActiveBreadcrumb).Text()) == IDCardPageBreadcrumb
+	return CleanString(dom.Find(selectorActiveBreadcrumb).Text()) == IDCardPageBreadcrumb
 }

@@ -40,9 +40,9 @@ func UnescapeUnicode(s string) string {
 	return uq_str
 }
 
-// cleanString trims off whitespace and additional runes passed.
-func cleanString(s string, set ...rune) string {
-	p := bluemonday.UGCPolicy()
+// CleanString trims off whitespace and additional runes passed.
+func CleanString(s string, set ...rune) string {
+	p := bluemonday.NewPolicy()
 	// amizone (sometimes) sends certain some utf8 characters encoded
 	unicode := UnescapeUnicode(s)
 	// amizone sometimes sends markup mixed with strings
