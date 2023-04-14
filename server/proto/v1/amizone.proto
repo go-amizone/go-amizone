@@ -101,7 +101,10 @@ service AmizoneService {
     option (google.api.http) = {delete: "/api/v1/wifi_mac/{address}"};
   }
   rpc FillFacultyFeedback(FillFacultyFeedbackRequest) returns (FillFacultyFeedbackResponse) {
-    option (google.api.http) = {post: "/api/v1/faculty/feedback/submit"};
+    option (google.api.http) = {
+      post: "/api/v1/faculty/feedback/submit",
+      body: "*"
+    };
   }
 }
 
