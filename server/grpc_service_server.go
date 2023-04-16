@@ -122,7 +122,7 @@ func (serviceServer) GetUserProfile(ctx context.Context, _ *v1.EmptyMessage) (*v
 		return nil, status.Errorf(codes.Internal, "failed to authenticate")
 	}
 
-	profile, err := amizoneClient.GetProfile()
+	profile, err := amizoneClient.GetUserProfile()
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to retrieve user-profile: %v", err)
 	}
@@ -135,7 +135,7 @@ func (serviceServer) GetWifiMacInfo(ctx context.Context, _ *v1.EmptyMessage) (*v
 		return nil, status.Errorf(codes.Internal, "failed to authenticate")
 	}
 
-	macInfo, err := amizoneClient.GetWifiMacInfo()
+	macInfo, err := amizoneClient.GetWiFiMacInformation()
 	if err != nil {
 		// TODO: ! reevalute these error codes, I get the feeling they shouldn't just be codes.Internal
 		return nil, status.Errorf(codes.Internal, "failed to retrieve mac info")

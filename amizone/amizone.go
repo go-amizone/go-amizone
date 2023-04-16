@@ -45,7 +45,7 @@ const (
 
 // Miscellaneous
 const (
-	scheduleEndpointTimeFormat = "2006-01-02"
+	classScheduleEndpointDateFormat = "2006-01-02"
 
 	verificationTokenName = "__RequestVerificationToken"
 )
@@ -61,7 +61,7 @@ const (
 	ErrInternalFailure        = "internal failure"
 	ErrFailedToComposeRequest = ErrInternalFailure + ": failed to compose request"
 	ErrFailedToParsePage      = ErrInternalFailure + ": failed to parse page"
-	ErrInvalidMac             = "invalid mac address passed"
+	ErrInvalidMac             = "invalid MAC address passed"
 	ErrNoMacSlots             = "no free wifi mac slots"
 	ErrFailedToRegisterMac    = "failed to register mac address"
 )
@@ -75,9 +75,10 @@ type Credentials struct {
 // for the portal as implemented here. The struct must always be initialised through a public
 // constructor like NewClient()
 type Client struct {
-	client      *http.Client
+	httpClient  *http.Client
 	credentials *Credentials
-	muLogin     struct {
+	// muLogin is a mutex that protects the lastAttempt and didLogin fields from concurrent access.
+	muLogin struct {
 		sync.Mutex
 		lastAttempt time.Time
 		didLogin    bool
@@ -98,23 +99,22 @@ func NewClient(cred Credentials, httpClient *http.Client) (*Client, error) {
 	if httpClient == nil {
 		jar, err := cookiejar.New(nil)
 		if err != nil {
-			klog.Error("failed to create cookiejar for the amizone client. this is a bug, please report it.")
+			klog.Error("failed to create cookiejar for the amizone client. this is a bug.")
 			return nil, errors.New(ErrInternalFailure)
 		}
 		httpClient = &http.Client{Jar: jar}
 	}
 
 	if jar := httpClient.Jar; jar == nil {
-		klog.Error("amizone.NewClient called with a jar-less http client")
+		klog.Error("amizone.NewClient called with a jar-less http client. please pass a client with a non-nil cookie jar")
 		return nil, errors.New(ErrBadClient)
 	}
 
 	client := &Client{
-		client:      httpClient,
+		httpClient:  httpClient,
 		credentials: &cred,
 	}
 
-	// We don't try to log in if empty credentials were passed
 	if cred == (Credentials{}) {
 		return client, nil
 	}
@@ -132,11 +132,11 @@ func (a *Client) login() error {
 		return nil
 	}
 
-	// Our last attempt is NOW
+	// Record our last login attempt so that we can avoid trying again for some time.
 	a.muLogin.lastAttempt = time.Now()
 
 	// Amizone uses a "verification" token for logins -- we try to retrieve this from the login form page
-	verToken := func() string {
+	getVerificationTokenFromLoginPage := func() string {
 		response, err := a.doRequest(false, http.MethodGet, "/", nil)
 		if err != nil {
 			klog.Errorf("login: %s", err.Error())
@@ -145,14 +145,14 @@ func (a *Client) login() error {
 		return parse.VerificationToken(response.Body)
 	}()
 
-	if verToken == "" {
+	if getVerificationTokenFromLoginPage == "" {
 		klog.Error("login: failed to retrieve verification token from the login page")
 		return fmt.Errorf("%s: %s", ErrFailedLogin, ErrFailedToParsePage)
 	}
 
 	loginRequestData := func() (v url.Values) {
 		v = url.Values{}
-		v.Set(verificationTokenName, verToken)
+		v.Set(verificationTokenName, getVerificationTokenFromLoginPage)
 		v.Set("_UserName", a.credentials.Username)
 		v.Set("_Password", a.credentials.Password)
 		v.Set("_QString", "")
@@ -161,7 +161,7 @@ func (a *Client) login() error {
 
 	loginResponse, err := a.doRequest(false, http.MethodPost, loginRequestEndpoint, strings.NewReader(loginRequestData.Encode()))
 	if err != nil {
-		klog.Warningf("Something went wrong while making the login request: ", err.Error())
+		klog.Warningf("error while making HTTP request to the amizone login page: %s", err.Error())
 		return fmt.Errorf("%s: %w", ErrFailedLogin, err)
 	}
 
@@ -172,18 +172,18 @@ func (a *Client) login() error {
 	}
 
 	if loggedIn := parse.IsLoggedIn(loginResponse.Body); !loggedIn {
-		klog.Error("Login failed. Possible reasons: something broke.")
+		klog.Error("login attempt failed as indicated by parsing the page returned after the login request, while the redirect indicated that it passed." +
+			" this failure indicates that something broke between Amizone and go-amizone.")
 		return errors.New(ErrFailedLogin)
 	}
 
-	// We need to check if the right tokens are here in the cookie jar to make sure we're logged in
-	if !internal.IsLoggedIn(a.client) {
-		klog.Error("Login failed. Possible reasons: something broke.")
+	if !internal.IsLoggedIn(a.httpClient) {
+		klog.Error("login attempt failed as indicated by checking the cookies in the http client's cookie jar. this failure indicates that something has broken between" +
+			" Amizone and go-amizone, possibly the cookies used by amizone for authentication.")
 		return errors.New(ErrFailedLogin)
 	}
 
 	a.muLogin.didLogin = true
-
 	return nil
 }
 
@@ -206,13 +206,13 @@ func (a *Client) GetAttendance() (models.AttendanceRecords, error) {
 }
 
 // GetClassSchedule retrieves, parses and returns class schedule data from Amizone.
-// The date parameter is used to determine which schedule to retrieve, but Amizone imposes arbitrary limits on the
-// date range, so we have no way of knowing if a request will succeed.
+// The date parameter is used to determine which schedule to retrieve, however as Amizone imposes arbitrary limits on the
+// date range, as in scheduled for dates older than some months are not stored by Amizone, we have no way of knowing if a request will succeed.
 func (a *Client) GetClassSchedule(year int, month time.Month, date int) (models.ClassSchedule, error) {
 	timeFrom := time.Date(year, month, date, 0, 0, 0, 0, time.UTC)
 	timeTo := timeFrom.Add(time.Hour * 24)
 
-	endpoint := fmt.Sprintf(scheduleEndpointTemplate, timeFrom.Format(scheduleEndpointTimeFormat), timeTo.Format(scheduleEndpointTimeFormat))
+	endpoint := fmt.Sprintf(scheduleEndpointTemplate, timeFrom.Format(classScheduleEndpointDateFormat), timeTo.Format(classScheduleEndpointDateFormat))
 
 	response, err := a.doRequest(true, http.MethodGet, endpoint, nil)
 	if err != nil {
@@ -225,9 +225,10 @@ func (a *Client) GetClassSchedule(year int, month time.Month, date int) (models.
 		klog.Errorf("parse (schedule): %s", err.Error())
 		return nil, fmt.Errorf("%s: %w", ErrFailedToParsePage, err)
 	}
-	filteredSchedule := classSchedule.FilterByDate(timeFrom)
+	// Filter classes by start date, since might also return classes for the dates before/after the target date.
+	scheduledClassesForTargetDate := classSchedule.FilterByDate(timeFrom)
 
-	return models.ClassSchedule(filteredSchedule), nil
+	return models.ClassSchedule(scheduledClassesForTargetDate), nil
 }
 
 // GetExamSchedule retrieves, parses and returns exam schedule data from Amizone.
@@ -307,8 +308,8 @@ func (a *Client) GetCurrentCourses() (models.Courses, error) {
 	return models.Courses(courses), nil
 }
 
-// GetProfile retrieves, parsed and returns the current user's profile from Amizone.
-func (a *Client) GetProfile() (*models.Profile, error) {
+// GetUserProfile retrieves, parsed and returns the current user's profile from Amizone.
+func (a *Client) GetUserProfile() (*models.Profile, error) {
 	response, err := a.doRequest(true, http.MethodGet, profileEndpoint, nil)
 	if err != nil {
 		klog.Warningf("request (get profile): %s", err.Error())
@@ -324,7 +325,7 @@ func (a *Client) GetProfile() (*models.Profile, error) {
 	return (*models.Profile)(profile), nil
 }
 
-func (a *Client) GetWifiMacInfo() (*models.WifiMacInfo, error) {
+func (a *Client) GetWiFiMacInformation() (*models.WifiMacInfo, error) {
 	response, err := a.doRequest(true, http.MethodGet, getWifiMacsEndpoint, nil)
 	if err != nil {
 		klog.Warningf("request (get wifi macs): %s", err.Error())
@@ -334,7 +335,7 @@ func (a *Client) GetWifiMacInfo() (*models.WifiMacInfo, error) {
 	info, err := parse.WifiMacInfo(response.Body)
 	if err != nil {
 		klog.Errorf("parse (wifi macs): %s", err.Error())
-		return nil, errors.New(ErrFailedToParsePage)
+		return nil, fmt.Errorf("%s: %w", ErrInternalFailure, err)
 	}
 
 	return (*models.WifiMacInfo)(info), nil
@@ -351,7 +352,7 @@ func (a *Client) RegisterWifiMac(addr net.HardwareAddr, bypassLimit bool) error 
 	if err != nil {
 		return errors.New(ErrInvalidMac)
 	}
-	wifiInfo, err := a.GetWifiMacInfo()
+	wifiInfo, err := a.GetWiFiMacInformation()
 	if err != nil {
 		klog.Warningf("failure while getting wifi mac info: %s", err.Error())
 		return err
@@ -363,10 +364,6 @@ func (a *Client) RegisterWifiMac(addr net.HardwareAddr, bypassLimit bool) error 
 	}
 
 	if !wifiInfo.HasFreeSlot() {
-		klog.Infof("wifi does not have free slot")
-		// but the limitation is artificial so... we do nothing?
-		// we shouldn't be defaulting to the bypass-style behaviour, though
-		// TODO: flag or param to enable the bypass behavior
 		if !bypassLimit {
 			return errors.New(ErrNoMacSlots)
 		}
@@ -386,29 +383,16 @@ func (a *Client) RegisterWifiMac(addr net.HardwareAddr, bypassLimit bool) error 
 	payload.Set("Name", "DoesntMatter")
 
 	payload.Set("Mac1", marshaller.Mac(wifis[0]))
-	payload.Set("Mac2", func() string {
-		if len(wifis) == 2 {
-			return marshaller.Mac(wifis[1])
-		}
-		return ""
-	}())
 	if len(wifis) == 2 {
 		payload.Set("Mac2", marshaller.Mac(wifis[1]))
 	}
-
-	// here we make a POST form submission to the form
-	// open question: does the endpoint necessarility need extranneous userinfo (name, admission number (probably yes for this one))
-
-	// Open question: _should_ we be verifying the response? We _could_ parse out the updated mac list and verify that it has our new mac,
-	// but the failure modes are many and the only thing we can do (as of now) is move on. Especially since we're already verifying the
-	// validity of the mac addresses before we even enter this function.
 
 	res, err := a.doRequest(true, http.MethodPost, registerWifiMacsEndpoint, strings.NewReader(payload.Encode()))
 	if err != nil {
 		klog.Errorf("request (register wifi mac): %s", err.Error())
 		return fmt.Errorf("%s: %s", ErrFailedToFetchPage, err.Error())
 	}
-	// We attempt to verify if the mac was set successfully, but its futile if bypassLimit was used.
+	// We attempt to verify if the mac was set successfully, but its futile if bypassLimit was used since Amizone only exposes
 	if bypassLimit {
 		return nil
 	}
@@ -503,13 +487,12 @@ func (a *Client) SubmitFacultyFeedbackHack(rating int32, queryRating int32, comm
 		spec.Set__Comment = url.QueryEscape(comment)
 		spec.Set__QRating = fmt.Sprint(queryRating)
 
-		payload := strings.Builder{}
-		err = payloadTemplate.Execute(&payload, spec)
+		payloadBuilder := strings.Builder{}
+		err = payloadTemplate.Execute(&payloadBuilder, spec)
 		if err != nil {
 			klog.Errorf("Error executing faculty feedback template: %s", err.Error())
-			return 0, fmt.Errorf("%s: error marshalling feedback request: ", err)
+			return 0, fmt.Errorf("error marshalling feedback request: %s", err)
 		}
-		klog.Infof("payload for faculty id: %s :: %+v", spec.FacultyId, payload.String())
 		wg.Add(1)
 		go func(payload string) {
 			response, err := a.doRequest(true, http.MethodPost, facultyEndpointSubmitEndpoint, strings.NewReader(payload))
@@ -517,10 +500,10 @@ func (a *Client) SubmitFacultyFeedbackHack(rating int32, queryRating int32, comm
 				klog.Errorf("error submitting a faculty feedback: %s", err.Error())
 			}
 			if response.StatusCode != http.StatusOK {
-				klog.Errorf("Non-200 status from faculty feedback submission: %d", response.StatusCode)
+				klog.Errorf("Unexpected non-200 status code from faculty feedback submission: %d", response.StatusCode)
 			}
 			wg.Done()
-		}(payload.String())
+		}(payloadBuilder.String())
 	}
 
 	wg.Wait()
