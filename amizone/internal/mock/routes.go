@@ -112,7 +112,7 @@ func GockRegisterWifiInfo() error {
 }
 
 func GockRegisterWifiInfoOneSlot() error {
-	return GockRegisterAuthenticatedGet("/RegisterForWifi/mac/MacRegistration", WifiPageOneSlot)
+	return GockRegisterAuthenticatedGet("/RegisterForWifi/mac/MacRegistration", WifiPageOneSlotPopulated)
 }
 
 func GockRegisterCalendarEndpoint(start, end string, file File) error {

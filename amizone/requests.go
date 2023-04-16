@@ -49,7 +49,7 @@ func (a *Client) doRequest(tryLogin bool, method string, endpoint string, body i
 	}
 
 	// TODO: check error handling logic following here
-	response, err := a.client.Do(req)
+	response, err := a.httpClient.Do(req)
 	if err != nil {
 		klog.Errorf("Failed to visit endpoint '%s': %s", endpoint, err)
 		return nil, fmt.Errorf("%s: %w", ErrFailedToVisitPage, err)
