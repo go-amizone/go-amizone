@@ -3,6 +3,8 @@ package models
 import (
 	"sort"
 	"time"
+
+	"github.com/samber/lo"
 )
 
 type AttendanceState int
@@ -37,14 +39,10 @@ func (s *ClassSchedule) Sort() {
 }
 
 func (s *ClassSchedule) FilterByDate(t time.Time) ClassSchedule {
-	var filtered ClassSchedule
-	for _, class := range *s {
-		// Truncate the time to a day.
-		tDate := t.Truncate(time.Hour * 24)
-
-		if difference := class.StartTime.Sub(tDate).Hours(); difference > 0 && difference < 24 {
-			filtered = append(filtered, class)
-		}
-	}
-	return filtered
+	// Truncate the time to a day.
+	targetDate := t.Truncate(time.Hour * 24)
+	return lo.Filter(*s, func(class ScheduledClass, _ int) bool {
+		timeDelta := class.StartTime.Sub(targetDate).Hours()
+		return timeDelta > 0 && timeDelta < 24
+	})
 }

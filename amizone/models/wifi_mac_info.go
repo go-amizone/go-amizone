@@ -1,6 +1,10 @@
 package models
 
-import "net"
+import (
+	"net"
+
+	"github.com/samber/lo"
+)
 
 type WifiMacInfo struct {
 	RegisteredAddresses []net.HardwareAddr
@@ -26,10 +30,7 @@ func (i *WifiMacInfo) HasFreeSlot() bool {
 }
 
 func (i *WifiMacInfo) IsRegistered(mac net.HardwareAddr) bool {
-	for _, m := range i.RegisteredAddresses {
-		if m.String() == mac.String() {
-			return true
-		}
-	}
-	return false
+	return lo.SomeBy(i.RegisteredAddresses, func(addr net.HardwareAddr) bool {
+		return addr.String() == mac.String()
+	})
 }
