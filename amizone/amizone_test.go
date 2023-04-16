@@ -690,8 +690,8 @@ func TestClient_RemoveWifiMac(t *testing.T) {
 				g.Expect(
 					mock.GockRegisterWifiMacDeletion(
 						map[string]string{
-							"username":   mock.ValidUser,
-							"Amizone_Id": mock.ValidMac2,
+							"Amizone_Id": mock.ValidUser,
+							"username":   mock.ValidMac2,
 						},
 						// Send some unexpected page back
 						mock.CoursesPage,
@@ -713,8 +713,8 @@ func TestClient_RemoveWifiMac(t *testing.T) {
 				g.Expect(
 					mock.GockRegisterWifiMacDeletion(
 						map[string]string{
-							"username":   mock.ValidUser,
-							"Amizone_Id": mock.ValidMac2,
+							"username":   mock.ValidMac2,
+							"Amizone_Id": mock.ValidUser,
 						},
 						mock.WifiPageOneSlotPopulated,
 					),

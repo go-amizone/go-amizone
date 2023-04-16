@@ -37,7 +37,7 @@ const (
 
 	// deleteWifiMacEndpoint is peculiar in that it requires the user's ID as a parameter.
 	// This _might_ open doors for an exploit (spoiler: indeed it does)
-	removeWifiMacEndpoint = macBaseEndpoint + "/Mac1RegistrationDelete?username=%s&Amizone_Id=%s"
+	removeWifiMacEndpoint = macBaseEndpoint + "/Mac1RegistrationDelete?Amizone_Id=%s&username=%s&X-Requested-With=XMLHttpRequest"
 
 	facultyBaseEndpoint           = "/FacultyFeeback/FacultyFeedback"
 	facultyEndpointSubmitEndpoint = facultyBaseEndpoint + "/SaveFeedbackRating"
@@ -382,9 +382,8 @@ func (a *Client) RegisterWifiMac(addr net.HardwareAddr, bypassLimit bool) error 
 	// I suspect this might go straight into the DB.
 	payload.Set("Name", "DoesntMatter")
 
-	payload.Set("Mac1", marshaller.Mac(wifis[0]))
-	if len(wifis) == 2 {
-		payload.Set("Mac2", marshaller.Mac(wifis[1]))
+	for i, mac := range wifis {
+		payload.Set(fmt.Sprintf("Mac%d", i+1), marshaller.Mac(mac))
 	}
 
 	res, err := a.doRequest(true, http.MethodPost, registerWifiMacsEndpoint, strings.NewReader(payload.Encode()))
