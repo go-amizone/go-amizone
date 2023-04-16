@@ -507,6 +507,7 @@ func TestClient_RegisterWifiMac(t *testing.T) {
 	nonLoggedInClient := getNonLoggedInClient(g)
 
 	macNew := macStringtoMac(mock.ValidMacNew, g)
+	mac2 := macStringtoMac(mock.ValidMac2, g)
 
 	infoOneShot, err := mock.WifiPageOneSlot.Open()
 	g.Expect(err).ToNot(HaveOccurred())
@@ -561,7 +562,7 @@ func TestClient_RegisterWifiMac(t *testing.T) {
 		{
 			name:        "client: logged in; mac: valid; free slots: 1, bypass: false",
 			client:      loggedInClient,
-			input:       RegisterMacArgs{A: macNew, O: false},
+			input:       RegisterMacArgs{A: mac2, O: false},
 			dataMatcher: DummyMatcher[Empty],
 			errMatcher:  NoError,
 			setup: func(g *WithT) {
@@ -570,7 +571,7 @@ func TestClient_RegisterWifiMac(t *testing.T) {
 					"__RequestVerificationToken": {verificationToken},
 					"Amizone_Id":                 {mock.ValidUser},
 					"Mac1":                       {mock.ValidMac1},
-					"Mac2":                       {mock.ValidMacNew},
+					"Mac2":                       {mock.ValidMac2},
 					"Name":                       {"DoesntMatter"},
 				}))
 			},

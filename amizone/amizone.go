@@ -63,6 +63,7 @@ const (
 	ErrFailedToParsePage      = ErrInternalFailure + ": failed to parse page"
 	ErrInvalidMac             = "invalid mac address passed"
 	ErrNoMacSlots             = "no free wifi mac slots"
+	ErrFailedToRegisterMac    = "failed to register mac address"
 )
 
 type Credentials struct {
@@ -402,10 +403,24 @@ func (a *Client) RegisterWifiMac(addr net.HardwareAddr, bypassLimit bool) error 
 	// but the failure modes are many and the only thing we can do (as of now) is move on. Especially since we're already verifying the
 	// validity of the mac addresses before we even enter this function.
 
-	_, err = a.doRequest(true, http.MethodPost, registerWifiMacsEndpoint, strings.NewReader(payload.Encode()))
+	res, err := a.doRequest(true, http.MethodPost, registerWifiMacsEndpoint, strings.NewReader(payload.Encode()))
 	if err != nil {
 		klog.Errorf("request (register wifi mac): %s", err.Error())
 		return fmt.Errorf("%s: %s", ErrFailedToFetchPage, err.Error())
+	}
+	// We attempt to verify if the mac was set successfully, but its futile if bypassLimit was used.
+	if bypassLimit {
+		return nil
+	}
+
+	macs, err := parse.WifiMacInfo(res.Body)
+	if err != nil {
+		klog.Errorf("parse (wifi macs): %s", err.Error())
+		return errors.New(ErrFailedToParsePage)
+	}
+	if !macs.IsRegistered(addr) {
+		klog.Errorf("mac not registered: %s", addr.String())
+		return errors.New(ErrFailedToRegisterMac)
 	}
 
 	return nil
