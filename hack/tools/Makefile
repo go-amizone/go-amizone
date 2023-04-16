@@ -16,3 +16,4 @@ tools:
 	"google.golang.org/grpc/cmd/protoc-gen-go-grpc" \
 	"google.golang.org/protobuf/cmd/protoc-gen-go" \
 	"github.com/rakyll/gotest"
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b ${GOBIN} v1.50.1

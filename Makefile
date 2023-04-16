@@ -46,3 +46,11 @@ tools: ## Install tools required for development
 .PHONY: generate-proto
 generate-proto: ## Generate code from protobuf files
 	cd server && buf generate
+
+.PHONY: lint
+lint:
+	golangci-lint run
+
+.PHONY: lint-fix
+lint-fix:
+	golangci-lint run --fix
