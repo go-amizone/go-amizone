@@ -4,41 +4,41 @@ kill_timeout = 5
 processes = []
 
 [build]
-  dockerfile = "prod.Dockerfile"
+dockerfile = "prod.Dockerfile"
 
 [env]
-  PORT = "8081"
+PORT = "8081"
 
 [experimental]
-  allowed_public_ports = []
-  auto_rollback = true
+allowed_public_ports = []
+auto_rollback = true
 
 [[services]]
-  internal_port = 8081
-  protocol = "tcp"
-  script_checks = []
-  [services.concurrency]
-    hard_limit = 25
-    soft_limit = 20
-    type = "connections"
+internal_port = 8081
+protocol = "tcp"
+script_checks = []
+[services.concurrency]
+hard_limit = 25
+soft_limit = 20
+type = "connections"
 
-  [[services.ports]]
-    force_https = false
-    handlers = ["http"]
-    port = 80
+[[services.ports]]
+force_https = false
+handlers = ["http"]
+port = 80
 
-  [[services.ports]]
-    handlers = ["tls"]
-    port = 443
+[[services.ports]]
+handlers = ["tls"]
+port = 443
 
-#  [services.ports.tls_options]
-#    alpn = ["h2"]
+[services.ports.tls_options]
+alpn = ["h2"]
 
-  [[services.tcp_checks]]
-    grace_period = "1s"
-    interval = "15s"
-    restart_limit = 0
-    timeout = "2s"
+[[services.tcp_checks]]
+grace_period = "1s"
+interval = "15s"
+restart_limit = 0
+timeout = "2s"
 
 #  [[services.http_checks]]
 #    interval = "2s"
