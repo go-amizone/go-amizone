@@ -24,3 +24,6 @@ go.work
 /covprofile
 /coverage.html
 
+/openapi-clients
+
+/hack/tools/bin

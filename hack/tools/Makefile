@@ -1,10 +1,11 @@
 SHELL := /usr/bin/env bash
+
+MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
+
 GO ?= go
 GOPATH := $(shell $(GO) env GOPATH)
 
-PROTOC ?= protoc
-GOGOPROTO_VERSION ?= v1.3.2
-GOGOPROTOPATH ?= $(GOPATH)/pkg/mod/github.com/gogo/protobuf@$(GOGOPROTO_VERSION)
+export GOBIN := $(dir ${MKFILE_PATH})bin
 
 .PHONY: tools
 tools:
@@ -14,3 +15,4 @@ tools:
 	"github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2" \
 	"google.golang.org/grpc/cmd/protoc-gen-go-grpc" \
 	"google.golang.org/protobuf/cmd/protoc-gen-go" \
+	"github.com/rakyll/gotest"
