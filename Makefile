@@ -4,6 +4,11 @@ SHELL := /usr/bin/env bash
 # Help by default
 .DEFAULT_GOAL:=help
 
+export PATH := $(PATH):hack/tools/bin
+
+GO := "go"
+GOTEST := "gotest"
+
 # Load .env file if possible
 ifneq (,$(wildcard ./.env))
 	include .env
@@ -18,18 +23,18 @@ help: ## Get help on available targets
 .PHONY: test
 test-unit: ## Run unit tests
 	@echo "Running tests..."
-	go test -v ./...
+	${GOTEST} -v ./...
 
 .PHONY: coverage
 coverage: ## Generate coverage report
 	@echo "Generating coverage report..."
-	go test -coverprofile=covprofile ./...
-	go tool cover -html=covprofile -o coverage.html
+	${GOTEST} -coverprofile=covprofile ./...
+	${GO} tool cover -html=covprofile -o coverage.html
 
 .PHONY: test-integration
 test-integration: ## Run integration tests
 	@echo "Running integration tests..."
-	go test -v ./... -tags=integration -run '^\QTestIntegrate'
+	${GOTEST} -v ./... -tags=integration -run '^\QTestIntegrate'
 
 .PHONY: test-all
 test-all: test-unit test-integration ## Run all tests
