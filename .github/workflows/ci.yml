@@ -36,6 +36,7 @@ jobs:
       - name: Install dependencies
         run: |
           go mod download
+          make tools
 
       - name: Run unit tests
         run: |
