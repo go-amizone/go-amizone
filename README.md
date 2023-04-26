@@ -46,7 +46,7 @@ The API Server offers a RESTful API through a single Go binary. It is intended t
 like [Heroku][heroku], but I'll have a central deployment up soon so everyone can try out! To try locally, run:
 
 ```shell
-go install github.com/ditsuke/amizone-go/cmd/amizone-api-server@latest # installs the binary
+go install github.com/ditsuke/go-amizone/cmd/amizone-api-server@latest # installs the binary
 amizone-api-server # runs the server
 ```
 
