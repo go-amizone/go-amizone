@@ -77,9 +77,10 @@ func ExamSchedule(a models.ExaminationSchedule) *v1.ExaminationSchedule {
 
 	for i, c := range a.Exams {
 		arr[i] = &v1.ScheduledExam{
-			Course: CourseRef(models.CourseRef(c.Course)),
-			Time:   TimeToProtoTS(c.Time),
-			Mode:   c.Mode,
+			Course:   CourseRef(models.CourseRef(c.Course)),
+			Time:     TimeToProtoTS(c.Time),
+			Mode:     c.Mode,
+			Location: c.Location,
 		}
 	}
 

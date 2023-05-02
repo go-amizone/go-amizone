@@ -3,9 +3,10 @@ package models
 import "time"
 
 type ScheduledExam struct {
-	Course CourseRef
-	Time   time.Time
-	Mode   string
+	Course   CourseRef
+	Time     time.Time
+	Mode     string
+	Location string
 }
 
 // ExaminationSchedule is a model for representing exam schedule from the portal.
