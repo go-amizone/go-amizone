@@ -11,12 +11,13 @@ import (
 	"testing"
 	"time"
 
+	. "github.com/onsi/gomega"
+	"gopkg.in/h2non/gock.v1"
+
 	"github.com/ditsuke/go-amizone/amizone"
 	"github.com/ditsuke/go-amizone/amizone/internal/mock"
 	"github.com/ditsuke/go-amizone/amizone/internal/parse"
 	"github.com/ditsuke/go-amizone/amizone/models"
-	. "github.com/onsi/gomega"
-	"gopkg.in/h2non/gock.v1"
 )
 
 // === Test setup helpers ===
@@ -418,7 +419,7 @@ func TestClient_GetProfile(t *testing.T) {
 		{
 			name:   "amizone client is not logged in and returns the login page",
 			client: nonLoggedInClient,
-			setup: func(g *WithT) {
+			setup: func(_ *WithT) {
 				_ = mock.GockRegisterUnauthenticatedGet("/IDCard")
 			},
 			profileMatcher: func(g *WithT, profile *models.Profile) {

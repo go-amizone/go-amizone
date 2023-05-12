@@ -45,7 +45,6 @@ func TestExaminationSchedule(t *testing.T) {
 				g.Expect(toJSON(schedule, g)).To(MatchJSON(expected))
 			},
 			errorMatcher: func(g *GomegaWithT, err error) {
-
 			},
 		},
 	}
