@@ -202,6 +202,7 @@ message ScheduledExam {
   CourseRef course = 1;
   google.protobuf.Timestamp time = 2;
   string mode = 3;
+  optional string location = 4;
 }
 
 message ExaminationSchedule {

@@ -1,0 +1,77 @@
+{
+  "Title": "End Semester Examination , Even Semester 2022 (Academic Session 2021-2022)",
+  "Exams": [
+    {
+      "Course": {
+        "Code": "FREN144",
+        "Name": "French Through Communicative Approach"
+      },
+      "Time": "2022-05-11T10:00:00Z",
+      "Mode": "MCQ",
+      "Location": ""
+    },
+    {
+      "Course": {
+        "Code": "BS207",
+        "Name": "Self-Reliance and Socialization"
+      },
+      "Time": "2022-05-13T10:00:00Z",
+      "Mode": "MCQ",
+      "Location": ""
+    },
+    {
+      "Course": {
+        "Code": "MATH242",
+        "Name": "Applied Mathematics-IV"
+      },
+      "Time": "2022-05-14T10:00:00Z",
+      "Mode": "Regular",
+      "Location": ""
+    },
+    {
+      "Course": {
+        "Code": "CSE208",
+        "Name": "Discrete Mathematical Structures"
+      },
+      "Time": "2022-05-17T10:00:00Z",
+      "Mode": "Regular",
+      "Location": "Block - E3 , Second Floor , Room No -211"
+    },
+    {
+      "Course": {
+        "Code": "CSE202",
+        "Name": "Operating System"
+      },
+      "Time": "2022-05-18T10:00:00Z",
+      "Mode": "Regular",
+      "Location": "Block - E1 , Fourth Floor , Room No -412"
+    },
+    {
+      "Course": {
+        "Code": "IT201",
+        "Name": "Java Programming"
+      },
+      "Time": "2022-05-20T10:00:00Z",
+      "Mode": "Regular",
+      "Location": ""
+    },
+    {
+      "Course": {
+        "Code": "CSE204",
+        "Name": "Theory of Computation"
+      },
+      "Time": "2022-05-23T10:00:00Z",
+      "Mode": "Regular",
+      "Location": ""
+    },
+    {
+      "Course": {
+        "Code": "MATS201",
+        "Name": "Material Science"
+      },
+      "Time": "2022-05-25T10:00:00Z",
+      "Mode": "Regular",
+      "Location": ""
+    }
+  ]
+}

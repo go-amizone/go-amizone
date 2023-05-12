@@ -35,7 +35,7 @@ func (a *Client) doRequest(tryLogin bool, method string, endpoint string, body i
 		tryLogin = false // We don't want to attempt another login.
 	}
 
-	req, err := http.NewRequest(method, BaseUrl+endpoint, body)
+	req, err := http.NewRequest(method, BaseURL+endpoint, body)
 	if err != nil {
 		klog.Errorf("%s: %s", ErrFailedToComposeRequest, err)
 		return nil, errors.New(ErrFailedToComposeRequest)
@@ -43,7 +43,7 @@ func (a *Client) doRequest(tryLogin bool, method string, endpoint string, body i
 
 	req.Header.Set("User-Agent", internal.Firefox99UserAgent)
 	// Amizone uses the referrer to authenticate requests on top of the actual AUTH/session cookies.
-	req.Header.Set("Referer", BaseUrl+"/")
+	req.Header.Set("Referer", BaseURL+"/")
 	if method == http.MethodPost { // We assume a POST request means submitting a form.
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	}

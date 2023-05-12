@@ -12,17 +12,18 @@ import (
 	"text/template"
 	"time"
 
+	"k8s.io/klog/v2"
+
 	"github.com/ditsuke/go-amizone/amizone/internal"
 	"github.com/ditsuke/go-amizone/amizone/internal/marshaller"
 	"github.com/ditsuke/go-amizone/amizone/internal/parse"
 	"github.com/ditsuke/go-amizone/amizone/internal/validator"
 	"github.com/ditsuke/go-amizone/amizone/models"
-	"k8s.io/klog/v2"
 )
 
 // Endpoints
 const (
-	BaseUrl = "https://" + internal.AmizoneDomain
+	BaseURL = "https://" + internal.AmizoneDomain
 
 	loginRequestEndpoint     = "/"
 	attendancePageEndpoint   = "/Home"
@@ -159,7 +160,12 @@ func (a *Client) login() error {
 		return
 	}()
 
-	loginResponse, err := a.doRequest(false, http.MethodPost, loginRequestEndpoint, strings.NewReader(loginRequestData.Encode()))
+	loginResponse, err := a.doRequest(
+		false,
+		http.MethodPost,
+		loginRequestEndpoint,
+		strings.NewReader(loginRequestData.Encode()),
+	)
 	if err != nil {
 		klog.Warningf("error while making HTTP request to the amizone login page: %s", err.Error())
 		return fmt.Errorf("%s: %w", ErrFailedLogin, err)
@@ -172,14 +178,18 @@ func (a *Client) login() error {
 	}
 
 	if loggedIn := parse.IsLoggedIn(loginResponse.Body); !loggedIn {
-		klog.Error("login attempt failed as indicated by parsing the page returned after the login request, while the redirect indicated that it passed." +
-			" this failure indicates that something broke between Amizone and go-amizone.")
+		klog.Error(
+			"login attempt failed as indicated by parsing the page returned after the login request, while the redirect indicated that it passed." +
+				" this failure indicates that something broke between Amizone and go-amizone.",
+		)
 		return errors.New(ErrFailedLogin)
 	}
 
 	if !internal.IsLoggedIn(a.httpClient) {
-		klog.Error("login attempt failed as indicated by checking the cookies in the http client's cookie jar. this failure indicates that something has broken between" +
-			" Amizone and go-amizone, possibly the cookies used by amizone for authentication.")
+		klog.Error(
+			"login attempt failed as indicated by checking the cookies in the http client's cookie jar. this failure indicates that something has broken between" +
+				" Amizone and go-amizone, possibly the cookies used by amizone for authentication.",
+		)
 		return errors.New(ErrFailedLogin)
 	}
 
@@ -212,7 +222,11 @@ func (a *Client) GetClassSchedule(year int, month time.Month, date int) (models.
 	timeFrom := time.Date(year, month, date, 0, 0, 0, 0, time.UTC)
 	timeTo := timeFrom.Add(time.Hour * 24)
 
-	endpoint := fmt.Sprintf(scheduleEndpointTemplate, timeFrom.Format(classScheduleEndpointDateFormat), timeTo.Format(classScheduleEndpointDateFormat))
+	endpoint := fmt.Sprintf(
+		scheduleEndpointTemplate,
+		timeFrom.Format(classScheduleEndpointDateFormat),
+		timeTo.Format(classScheduleEndpointDateFormat),
+	)
 
 	response, err := a.doRequest(true, http.MethodGet, endpoint, nil)
 	if err != nil {
@@ -418,7 +432,12 @@ func (a *Client) RemoveWifiMac(addr net.HardwareAddr) error {
 	}
 
 	// ! VULN: remove mac addresses registered by anyone if you know the mac/username pair.
-	response, err := a.doRequest(true, http.MethodGet, fmt.Sprintf(removeWifiMacEndpoint, a.credentials.Username, marshaller.Mac(addr)), nil)
+	response, err := a.doRequest(
+		true,
+		http.MethodGet,
+		fmt.Sprintf(removeWifiMacEndpoint, a.credentials.Username, marshaller.Mac(addr)),
+		nil,
+	)
 	if err != nil {
 		klog.Errorf("request (remove wifi mac): %s", err.Error())
 		return fmt.Errorf("%s: %s", ErrFailedToFetchPage, err.Error())
@@ -455,9 +474,10 @@ func (a *Client) SubmitFacultyFeedbackHack(rating int32, queryRating int32, comm
 	}
 
 	// Transform queryRating for "higher number is higher rating" semantics (it's the opposite in the form 😭)
-	if queryRating == 1 {
+	switch queryRating {
+	case 1:
 		queryRating = 3
-	} else if queryRating == 3 {
+	case 3:
 		queryRating = 1
 	}
 
