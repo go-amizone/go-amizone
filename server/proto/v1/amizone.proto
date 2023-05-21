@@ -11,7 +11,7 @@ option go_package = "github.com/ditsuke/go-amizone/server/gen/go/api_v1";
 option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
   info: {
     title: "Amizone API";
-    version: "0.6.0";
+    version: "0.7.0";
     contact: {
       name: "ditsuke";
       url: "https://ditsuke.com";
