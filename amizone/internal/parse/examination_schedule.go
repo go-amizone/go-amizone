@@ -74,8 +74,8 @@ func ExaminationSchedule(body io.Reader) (*models.ExaminationSchedule, error) {
 	scheduleEntries.Each(func(i int, row *goquery.Selection) {
 		exam := models.ScheduledExam{
 			Course: models.CourseRef{
-				Code: row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleCode)).Text(),
-				Name: row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleName)).Text(),
+				Code: CleanString(row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleCode)).Text()),
+				Name: CleanString(row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleName)).Text()),
 			},
 			Time: func() time.Time {
 				rawDate := row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleDate)).Text()
