@@ -80,6 +80,14 @@ func ExamSchedule(a models.ExaminationSchedule) *v1.ExaminationSchedule {
 			Course: CourseRef(models.CourseRef(c.Course)),
 			Time:   TimeToProtoTS(c.Time),
 			Mode:   c.Mode,
+			Location: func() *string {
+				if c.Location != "" {
+					copy := c.Location
+					return &copy
+				} else {
+					return nil
+				}
+			}(),
 		}
 	}
 

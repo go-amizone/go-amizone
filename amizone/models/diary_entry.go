@@ -9,6 +9,7 @@ import (
 const (
 	ColorAttendanceAbsent  = "#F00"
 	ColorAttendancePending = "#3A87AD"
+	// TODO: add "not yet marked" state (orange)
 	ColorAttendancePresent = "#4FCC4F"
 	ColorAttendanceNA      = ""
 )

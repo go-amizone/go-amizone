@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Amizone API",
-    "version": "0.6.0",
+    "version": "0.7.0",
     "contact": {
       "name": "ditsuke",
       "url": "https://ditsuke.com",
@@ -220,24 +220,12 @@
         },
         "parameters": [
           {
-            "name": "rating",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "queryRating",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "comment",
-            "in": "query",
-            "required": false,
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1FillFacultyFeedbackRequest"
+            }
           }
         ],
         "tags": [
@@ -554,6 +542,22 @@
         }
       }
     },
+    "v1FillFacultyFeedbackRequest": {
+      "type": "object",
+      "properties": {
+        "rating": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "queryRating": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "comment": {
+          "type": "string"
+        }
+      }
+    },
     "v1FillFacultyFeedbackResponse": {
       "type": "object",
       "properties": {
@@ -672,6 +676,9 @@
           "format": "date-time"
         },
         "mode": {
+          "type": "string"
+        },
+        "location": {
           "type": "string"
         }
       }

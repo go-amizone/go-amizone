@@ -8,10 +8,12 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/ditsuke/go-amizone/amizone/models"
+	"github.com/samber/lo"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"k8s.io/klog/v2"
+
+	"github.com/ditsuke/go-amizone/amizone/models"
 )
 
 const ExamTitleUnknown = "Unknown Exam"
@@ -72,8 +74,8 @@ func ExaminationSchedule(body io.Reader) (*models.ExaminationSchedule, error) {
 	scheduleEntries.Each(func(i int, row *goquery.Selection) {
 		exam := models.ScheduledExam{
 			Course: models.CourseRef{
-				Code: row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleCode)).Text(),
-				Name: row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleName)).Text(),
+				Code: CleanString(row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleCode)).Text()),
+				Name: CleanString(row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleName)).Text()),
 			},
 			Time: func() time.Time {
 				rawDate := row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleDate)).Text()
@@ -85,11 +87,27 @@ func ExaminationSchedule(body io.Reader) (*models.ExaminationSchedule, error) {
 				return parsedTime
 			}(),
 			Mode: func() string {
-				raw := row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleType)).Text()
+				raw := row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleType)).Find("b").First().Text()
+				if split := lo.Slice(strings.Split(raw, ":"), 1, 2); len(split) != 0 {
+					return CleanString(split[0])
+				}
+				klog.Warningf("Failed to parse exam mode: %s (split: %+v)", raw, strings.Split(raw, ":"))
 				return strings.TrimSpace(raw)
 			}(),
+			Location: func() string {
+				liveInfo := row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleType)).Find("b[style='color:red']")
+				liveInfo.Find("br").ReplaceWithHtml("\n")
+				raw := CleanString(liveInfo.Text())
+				if raw == "" {
+					return ""
+				}
+				if split := lo.Slice(strings.Split(raw, ":"), 1, 2); len(split) != 0 {
+					return CleanString(strings.Split(split[0], "\n")[0], '-')
+				}
+				klog.Warningf("Failed to parse exam location: %s (split: %+v)", raw, strings.Split(raw, ":\n"))
+				return ""
+			}(),
 		}
-
 		exams[i] = exam
 	})
 

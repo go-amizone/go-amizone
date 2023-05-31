@@ -3,10 +3,11 @@ package parse_test
 import (
 	"testing"
 
+	. "github.com/onsi/gomega"
+
 	"github.com/ditsuke/go-amizone/amizone/internal/mock"
 	"github.com/ditsuke/go-amizone/amizone/internal/parse"
 	"github.com/ditsuke/go-amizone/amizone/models"
-	. "github.com/onsi/gomega"
 )
 
 func TestExaminationSchedule(t *testing.T) {
@@ -34,6 +35,16 @@ func TestExaminationSchedule(t *testing.T) {
 			},
 			errorMatcher: func(g *GomegaWithT, err error) {
 				g.Expect(err).To(HaveOccurred())
+			},
+		},
+		{
+			name:     "examination schedule with location",
+			bodyFile: mock.ExaminationScheduleWithLocation,
+			scheduleMatcher: func(g *GomegaWithT, schedule *models.ExaminationSchedule) {
+				expected := ReadExpectedFile(mock.ExpectedExamScheduleWithRoom, g)
+				g.Expect(toJSON(schedule, g)).To(MatchJSON(expected))
+			},
+			errorMatcher: func(g *GomegaWithT, err error) {
 			},
 		},
 	}
