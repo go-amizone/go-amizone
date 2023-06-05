@@ -25,16 +25,18 @@ import (
 const (
 	BaseURL = "https://" + internal.AmizoneDomain
 
-	loginRequestEndpoint     = "/"
-	attendancePageEndpoint   = "/Home"
-	scheduleEndpointTemplate = "/Calendar/home/GetDiaryEvents?start=%s&end=%s"
-	examScheduleEndpoint     = "/Examination/ExamSchedule"
-	currentCoursesEndpoint   = "/Academics/MyCourses"
-	coursesEndpoint          = currentCoursesEndpoint + "/CourseListSemWise"
-	profileEndpoint          = "/IDCard"
-	macBaseEndpoint          = "/RegisterForWifi/mac"
-	getWifiMacsEndpoint      = macBaseEndpoint + "/MacRegistration"
-	registerWifiMacsEndpoint = macBaseEndpoint + "/MacRegistrationSave"
+	loginRequestEndpoint             = "/"
+	attendancePageEndpoint           = "/Home"
+	scheduleEndpointTemplate         = "/Calendar/home/GetDiaryEvents?start=%s&end=%s"
+	examScheduleEndpoint             = "/Examination/ExamSchedule"
+	currentCoursesEndpoint           = "/Academics/MyCourses"
+	coursesEndpoint                  = currentCoursesEndpoint + "/CourseListSemWise"
+	profileEndpoint                  = "/IDCard"
+	macBaseEndpoint                  = "/RegisterForWifi/mac"
+	currentExaminationResultEndpoint = "/Examination/Examination"
+	examinationResultEndpoint        = currentExaminationResultEndpoint + "/ExaminationListSemWise"
+	getWifiMacsEndpoint              = macBaseEndpoint + "/MacRegistration"
+	registerWifiMacsEndpoint         = macBaseEndpoint + "/MacRegistrationSave"
 
 	// deleteWifiMacEndpoint is peculiar in that it requires the user's ID as a parameter.
 	// This _might_ open doors for an exploit (spoiler: indeed it does)
@@ -213,6 +215,47 @@ func (a *Client) GetAttendance() (models.AttendanceRecords, error) {
 	}
 
 	return models.AttendanceRecords(attendanceRecord), nil
+}
+
+// GetExaminationResult retrieves, parses and returns a ExaminationResultRecords from Amizone for their latest semester
+// for which the result is available
+func (a *Client) GetCurrentExaminationResult() (*models.ExamResultRecords, error) {
+	response, err := a.doRequest(true, http.MethodGet, currentExaminationResultEndpoint, nil)
+	if err != nil {
+		klog.Warningf("request (examinationresult): %s", err.Error())
+		return nil, fmt.Errorf("%s: %s", ErrFailedToFetchPage, err.Error())
+	}
+
+	examinationResultRecords, err := parse.ExaminationResult(response.Body)
+	if err != nil {
+		klog.Errorf("parse (examinationresult): %s", err.Error())
+		return nil, fmt.Errorf("%s: %w", ErrInternalFailure, err)
+	}
+
+	return examinationResultRecords, nil
+}
+
+// GetExaminationResult retrieves, parses and returns a ExaminationResultRecords from Amizone for the semester referred by
+// semesterRef. Semester references should be retrieved through GetSemesters, which returns a list of valid
+// semesters with names and references.
+func (a *Client) GetExaminationResult(semesterRef string) (*models.ExamResultRecords, error) {
+	payload := url.Values{
+		"sem": []string{semesterRef},
+	}.Encode()
+
+	response, err := a.doRequest(true, http.MethodPost, examinationResultEndpoint, strings.NewReader(payload))
+	if err != nil {
+		klog.Warningf("request (examinationresult): %s", err.Error())
+		return nil, fmt.Errorf("%s: %s", ErrFailedToFetchPage, err.Error())
+	}
+
+	examinationResultRecords, err := parse.ExaminationResult(response.Body)
+	if err != nil {
+		klog.Errorf("parse (examinationresult): %s", err.Error())
+		return nil, fmt.Errorf("%s: %w", ErrInternalFailure, err)
+	}
+
+	return examinationResultRecords, nil
 }
 
 // GetClassSchedule retrieves, parses and returns class schedule data from Amizone.
