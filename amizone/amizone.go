@@ -75,7 +75,7 @@ type Credentials struct {
 }
 
 // Client is the main struct for the amizone package, exposing the entire API surface
-// for the portal as implemented here. The struct must always be initialised through a public
+// for the portal as implemented here. The struct must always be initialized through a public
 // constructor like NewClient()
 type Client struct {
 	httpClient  *http.Client
@@ -222,13 +222,13 @@ func (a *Client) GetAttendance() (models.AttendanceRecords, error) {
 func (a *Client) GetCurrentExaminationResult() (*models.ExamResultRecords, error) {
 	response, err := a.doRequest(true, http.MethodGet, currentExaminationResultEndpoint, nil)
 	if err != nil {
-		klog.Warningf("request (examinationresult): %s", err.Error())
+		klog.Warningf("request (examination-result): %s", err.Error())
 		return nil, fmt.Errorf("%s: %s", ErrFailedToFetchPage, err.Error())
 	}
 
 	examinationResultRecords, err := parse.ExaminationResult(response.Body)
 	if err != nil {
-		klog.Errorf("parse (examinationresult): %s", err.Error())
+		klog.Errorf("parse (examination-result): %s", err.Error())
 		return nil, fmt.Errorf("%s: %w", ErrInternalFailure, err)
 	}
 
@@ -245,13 +245,13 @@ func (a *Client) GetExaminationResult(semesterRef string) (*models.ExamResultRec
 
 	response, err := a.doRequest(true, http.MethodPost, examinationResultEndpoint, strings.NewReader(payload))
 	if err != nil {
-		klog.Warningf("request (examinationresult): %s", err.Error())
+		klog.Warningf("request (examination-result): %s", err.Error())
 		return nil, fmt.Errorf("%s: %s", ErrFailedToFetchPage, err.Error())
 	}
 
 	examinationResultRecords, err := parse.ExaminationResult(response.Body)
 	if err != nil {
-		klog.Errorf("parse (examinationresult): %s", err.Error())
+		klog.Errorf("parse (examination-result): %s", err.Error())
 		return nil, fmt.Errorf("%s: %w", ErrInternalFailure, err)
 	}
 

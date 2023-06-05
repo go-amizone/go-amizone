@@ -6,29 +6,37 @@ import (
 
 type ExamResultRecord struct {
 	Course CourseRef
-	Result CourseResult
+	CourseResult
 }
 
 // CourseResult is a model to represent the course wise result in the examinations result page
 type CourseResult struct {
-	MaxTotal             int
-	AquiredCreditUnits   int
-	GradeObtained        string
-	GradePoint           int
-	CreditPoints         int
-	EffectiveCreditUnits int
-	PublishDate          time.Time
+	Score       Score
+	Credits     Credits
+	PublishDate time.Time
 }
 
-// OverlallResult is a model to represent the semester result, with the GPA etc in the examination result page
+type Score struct {
+	Max        int
+	Grade      string
+	GradePoint int
+}
+
+type Credits struct {
+	Acquired  int
+	Effective int
+	Points    int
+}
+
+// OverallResult is a model to represent the semester result, with the GPA etc in the examination result page
 type OverallResult struct {
-	Semester                       Semester
-	SemesterGradePointAverage      float32
-	CummulatitiveGradePointAverage float32
+	Semester                    Semester
+	SemesterGradePointAverage   float32
+	CumulativeGradePointAverage float32
 }
 
 // ExamResultRecords includes the result for every course in an array and the
-// overall result of every semester upto that point
+// overall result of every semester up to that point
 type ExamResultRecords struct {
 	CourseWise []ExamResultRecord
 	Overall    []OverallResult

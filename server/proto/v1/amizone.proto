@@ -84,6 +84,16 @@ service AmizoneService {
     option (google.api.http) = {get: "/api/v1/courses"};
   }
 
+  // GetExamResult returns the exam result for the given semester.
+  rpc GetExamResult(SemesterRef) returns (ExamResultRecords) {
+    option (google.api.http) = {get: "/api/v1/exam_result/{semester_ref}"};
+  }
+
+  // GetCurrentExamResult returns the exam result for the "current" semester.
+  rpc GetCurrentExamResult(EmptyMessage) returns (ExamResultRecords) {
+    option (google.api.http) = {get: "/api/v1/exam_result"};
+  }
+
   // GetUserProfile returns the user's profile.
   rpc GetUserProfile(EmptyMessage) returns (Profile) {
     option (google.api.http) = {get: "/api/v1/user_profile"};
@@ -136,6 +146,43 @@ message Attendance {
 message Marks {
   float have = 1;
   float max = 2;
+}
+
+// ResultRecord represents a course's result (a grade, credit, etc.) in a semester.
+message ExamResultRecord {
+  CourseRef course = 1;
+  Score score = 2;
+  Credits credits = 3;
+  google.type.Date publish_date = 4;
+}
+
+// Score is a general message representing the grade in a result
+message Score {
+  int32 max = 1;
+  string grade = 2;
+  int32 grade_point = 3;
+}
+
+// Credits is a general message representing the credit Information in a result
+message Credits {
+  int32 acquired = 1;
+  int32 effective = 2;
+  int32 points = 3;
+}
+
+// OverallResult message represents the result for a semester (SGPA, CGPA), this is also returned as an
+// array containing the result for every semester
+message OverallResult {
+  SemesterRef semester = 1;
+  float semester_grade_point_average = 2;
+  float cumulative_grade_point_average = 3;
+}
+
+// ExamResultRecords is returned by GetExamResult and GetCurrentExamResult and contains two arrays
+// one for the course wise result and the other for semester wise gpa
+message ExamResultRecords {
+  repeated ExamResultRecord course_wise  = 1;
+  repeated OverallResult overall  = 2;
 }
 
 // Course represents a course on Amizone.

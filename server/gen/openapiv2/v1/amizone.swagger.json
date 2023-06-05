@@ -170,6 +170,68 @@
         ]
       }
     },
+    "/api/v1/exam_result": {
+      "get": {
+        "summary": "GetCurrentExamResult returns the exam result for the \"current\" semester.",
+        "operationId": "AmizoneService_GetCurrentExamResult",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ExamResultRecords"
+            }
+          },
+          "403": {
+            "description": "Returned when the user does not have permission to access the resource.",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "AmizoneService"
+        ]
+      }
+    },
+    "/api/v1/exam_result/{semesterRef}": {
+      "get": {
+        "summary": "GetExamResult returns the exam result for the given semester.",
+        "operationId": "AmizoneService_GetExamResult",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ExamResultRecords"
+            }
+          },
+          "403": {
+            "description": "Returned when the user does not have permission to access the resource.",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "semesterRef",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "AmizoneService"
+        ]
+      }
+    },
     "/api/v1/exam_schedule": {
       "get": {
         "summary": "GetExamSchedule returns exam schedule. Amizone only allows access to schedules for the ongoing semester\nand only close to the exam dates, so we don't take any parameters.",
@@ -525,8 +587,62 @@
       },
       "description": "Courses are a list of courses, usually used to group together courses for a semester."
     },
+    "v1Credits": {
+      "type": "object",
+      "properties": {
+        "acquired": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "effective": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "points": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "Credits is a general message representing the credit Information in a result"
+    },
     "v1EmptyMessage": {
       "type": "object"
+    },
+    "v1ExamResultRecord": {
+      "type": "object",
+      "properties": {
+        "course": {
+          "$ref": "#/definitions/v1CourseRef"
+        },
+        "score": {
+          "$ref": "#/definitions/v1Score"
+        },
+        "credits": {
+          "$ref": "#/definitions/v1Credits"
+        },
+        "publishDate": {
+          "$ref": "#/definitions/typeDate"
+        }
+      },
+      "description": "ResultRecord represents a course's result (a grade, credit, etc.) in a semester."
+    },
+    "v1ExamResultRecords": {
+      "type": "object",
+      "properties": {
+        "courseWise": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1ExamResultRecord"
+          }
+        },
+        "overall": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1OverallResult"
+          }
+        }
+      },
+      "title": "ExamResultRecords is returned by GetExamResult and GetCurrentExamResult and contains two arrays\none for the course wise result and the other for semester wise gpa"
     },
     "v1ExaminationSchedule": {
       "type": "object",
@@ -580,6 +696,23 @@
         }
       },
       "description": "Marks is a general message representing a student's marks (internal, external, total, etc). in a course or otherwise.\nIt is embedded in other messages and its meaning is context-dependent."
+    },
+    "v1OverallResult": {
+      "type": "object",
+      "properties": {
+        "semester": {
+          "$ref": "#/definitions/v1SemesterRef"
+        },
+        "semesterGradePointAverage": {
+          "type": "number",
+          "format": "float"
+        },
+        "cumulativeGradePointAverage": {
+          "type": "number",
+          "format": "float"
+        }
+      },
+      "title": "OverallResult message represents the result for a semester (SGPA, CGPA), this is also returned as an\narray containing the result for every semester"
     },
     "v1Profile": {
       "type": "object",
@@ -683,6 +816,23 @@
         }
       }
     },
+    "v1Score": {
+      "type": "object",
+      "properties": {
+        "max": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "grade": {
+          "type": "string"
+        },
+        "gradePoint": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "Score is a general message representing the grade in a result"
+    },
     "v1Semester": {
       "type": "object",
       "properties": {
@@ -705,6 +855,15 @@
           }
         }
       }
+    },
+    "v1SemesterRef": {
+      "type": "object",
+      "properties": {
+        "semesterRef": {
+          "type": "string"
+        }
+      },
+      "description": "SemesterRef is a reference to a semester. References are used to avoid coupling the semester's name to the semester's ID.\nReferences can be retrieved through the GetSemesters RPC."
     },
     "v1WifiMacInfo": {
       "type": "object",

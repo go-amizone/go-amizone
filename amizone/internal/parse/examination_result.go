@@ -37,8 +37,8 @@ func ExaminationResult(body io.Reader) (*models.ExamResultRecords, error) {
 		dTitleDate = "PublishDate"
 
 		dTitleSem  = "Semester"
-		dTitleSgpa = "SGPA"
-		dTitleCgpa = "CGPA"
+		dTitleSGPA = "SGPA"
+		dTitleCGPA = "CGPA"
 		dTitleBack = "Back Papers"
 	)
 
@@ -48,7 +48,6 @@ func ExaminationResult(body io.Reader) (*models.ExamResultRecords, error) {
 	)
 
 	dom, err := goquery.NewDocumentFromReader(body)
-
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", ErrFailedToParseDOM, err)
 	}
@@ -74,11 +73,11 @@ func ExaminationResult(body io.Reader) (*models.ExamResultRecords, error) {
 	overallResultEntries.Each(func(i int, row *goquery.Selection) {
 		result := models.OverallResult{
 			Semester: models.Semester{
-				Name: row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleSem)).Text(),
-				Ref:  row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleSem)).Text(),
+				Name: CleanString(row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleSem)).Text()),
+				Ref:  CleanString(row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleSem)).Text()),
 			},
-			SemesterGradePointAverage:      float32(parseToFloat(CleanString(row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleSgpa)).Text()))),
-			CummulatitiveGradePointAverage: float32(parseToFloat((CleanString(row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleCgpa)).Text())))),
+			SemesterGradePointAverage:   float32(parseToFloat(CleanString(row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleSGPA)).Text()))),
+			CumulativeGradePointAverage: float32(parseToFloat((CleanString(row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleCGPA)).Text())))),
 		}
 		overallResult[i] = result
 	})
@@ -89,16 +88,20 @@ func ExaminationResult(body io.Reader) (*models.ExamResultRecords, error) {
 	courseWiseResultEntries.Each(func(i int, row *goquery.Selection) {
 		result := models.ExamResultRecord{
 			Course: models.CourseRef{
-				Code: row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleCode)).Text(),
-				Name: row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleName)).Text(),
+				Code: CleanString(row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleCode)).Text()),
+				Name: CleanString(row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleName)).Text()),
 			},
-			Result: models.CourseResult{
-				MaxTotal:             parseToInt(row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleMax)).Text()),
-				AquiredCreditUnits:   parseToInt(row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleAcu)).Text()),
-				GradeObtained:        row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleGo)).Text(),
-				GradePoint:           parseToInt(row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleGp)).Text()),
-				CreditPoints:         parseToInt(row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleCp)).Text()),
-				EffectiveCreditUnits: parseToInt(row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleEcu)).Text()),
+			CourseResult: models.CourseResult{
+				Score: models.Score{
+					Max:        parseToInt(row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleMax)).Text()),
+					Grade:      CleanString(row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleGo)).Text()),
+					GradePoint: parseToInt(row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleGp)).Text()),
+				},
+				Credits: models.Credits{
+					Acquired:  parseToInt(row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleAcu)).Text()),
+					Points:    parseToInt(row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleCp)).Text()),
+					Effective: parseToInt(row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleEcu)).Text()),
+				},
 				PublishDate: func() time.Time {
 					parsedTime, nil := time.Parse(tableDateFormat, row.Find(fmt.Sprintf(dataCellSelectorTpl, dTitleDate)).Text())
 					if err != nil {
