@@ -103,6 +103,26 @@ func GockRegisterProfilePage() error {
 	return GockRegisterAuthenticatedGet("/IDCard", IDCardPage)
 }
 
+func GockRegisterExamResultPage() error {
+	return GockRegisterAuthenticatedGet("/Examination/Examination", ExaminationResultPage)
+}
+
+func GockRegisterExamResultRequest(semesterRef string) error {
+	return GockRegisterAuthenticatedPost("/Examination/Examination/ExaminationListSemWise",
+		func(r1 *http.Request, r2 *gock.Request) (bool, error) {
+			r, err := io.ReadAll(r1.Body)
+			if err != nil {
+				return false, fmt.Errorf("error checking request body: %s", err.Error())
+			}
+			if string(r) == (url.Values{"sem": []string{semesterRef}}.Encode()) {
+				return true, nil
+			}
+			return false, nil
+		},
+		ExaminationResultPage,
+	)
+}
+
 func GockRegisterSemWiseCoursesPage() error {
 	return GockRegisterAuthenticatedGet("/Academics/MyCourses", CoursesPageSemWise)
 }
