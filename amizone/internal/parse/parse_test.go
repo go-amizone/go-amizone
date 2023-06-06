@@ -8,6 +8,7 @@ import (
 
 	"github.com/ditsuke/go-amizone/amizone/internal/mock"
 	"github.com/ditsuke/go-amizone/amizone/internal/parse"
+	"github.com/microcosm-cc/bluemonday"
 	. "github.com/onsi/gomega"
 )
 
@@ -37,4 +38,10 @@ func TestCleanString(t *testing.T) {
 	const TestString = "&lt;b&gt;Fac Name&lt;/b&gt;"
 	println("After html.Unescape: ", html.UnescapeString(TestString))
 	g.Expect(parse.CleanString(TestString)).To(Equal("Fac Name"))
+
+	const TestString2 = "A&B"
+	p := bluemonday.NewPolicy()
+	println("After bluemonday.Sanitize: ", p.Sanitize(TestString2))
+	println("After html.Unescape: ", html.UnescapeString(TestString2))
+	g.Expect(parse.CleanString(TestString2)).To(Equal("A&B"))
 }
