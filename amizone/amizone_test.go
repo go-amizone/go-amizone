@@ -376,6 +376,165 @@ func TestClient_GetCurrentCourses(t *testing.T) {
 	}
 }
 
+func TestClient_GetExaminationResult(t *testing.T) {
+	g := NewWithT(t)
+
+	setupNetworking()
+	t.Cleanup(teardown)
+
+	loggedInClient := createLoggedInClient(g)
+	nonLoggedInClient := createNonLoggedInClient(g)
+
+	testCases := []struct {
+		name          string
+		client        *amizone.Client
+		semesterRef   string
+		setup         func(g *WithT)
+		resultMatcher func(g *WithT, courses *models.ExamResultRecords)
+		errMatcher    func(g *WithT, err error)
+	}{
+		{
+			name:        "amizone client is logged in, we ask for the result of semester 1, return mock result page on expected POST",
+			client:      loggedInClient,
+			semesterRef: "1",
+			setup: func(g *WithT) {
+				err := mock.GockRegisterExamResultRequest("1")
+				g.Expect(err).ToNot(HaveOccurred())
+			},
+			resultMatcher: func(g *WithT, result *models.ExamResultRecords) {
+				g.Expect(result.Overall).To(HaveLen(3))
+				g.Expect(result.CourseWise).To(HaveLen(8))
+			},
+			errMatcher: func(g *WithT, err error) {
+				g.Expect(err).ToNot(HaveOccurred())
+			},
+		},
+		{
+			name:        "amizone client is logged in, we ask for the result of semester 2, return mock result page on expected POST",
+			client:      loggedInClient,
+			semesterRef: "2",
+			setup: func(g *WithT) {
+				err := mock.GockRegisterExamResultRequest("2")
+				g.Expect(err).ToNot(HaveOccurred())
+			},
+			resultMatcher: func(g *WithT, result *models.ExamResultRecords) {
+				g.Expect(result.Overall).To(HaveLen(3))
+				g.Expect(result.CourseWise).To(HaveLen(8))
+			},
+			errMatcher: func(g *WithT, err error) {
+				g.Expect(err).ToNot(HaveOccurred())
+			},
+		},
+		{
+			name:        "amizone client is not logged in, returns login page on request",
+			client:      nonLoggedInClient,
+			semesterRef: "3",
+			setup: func(g *WithT) {
+				//err := mock.GockRegisterLoginPage()
+				//g.Expect(err).ToNot(HaveOccurred())
+				err := mock.GockRegisterUnauthenticatedGet("/")
+				g.Expect(err).ToNot(HaveOccurred())
+				mock.GockRegisterUnauthenticatedPost("/Examination/Examination/ExaminationListSemWise", url.Values{"sem": []string{"3"}}.Encode(), strings.NewReader("<no></no>"))
+			},
+			resultMatcher: func(g *WithT, result *models.ExamResultRecords) {
+				g.Expect(result).To(BeNil())
+			},
+			errMatcher: func(g *WithT, err error) {
+				g.Expect(err).To(HaveOccurred())
+				// TODO: verify against error string "not logged in" or something
+				g.Expect(err.Error()).ToNot(ContainSubstring(amizone.ErrFailedToVisitPage))
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			g := NewWithT(t)
+			t.Cleanup(setupNetworking)
+			testCase.setup(g)
+
+			result, err := testCase.client.GetExaminationResult(testCase.semesterRef)
+			testCase.errMatcher(g, err)
+			testCase.resultMatcher(g, result)
+		})
+	}
+}
+
+func TestClient_GetCurrentExaminationResult(t *testing.T) {
+	g := NewWithT(t)
+
+	setupNetworking()
+	t.Cleanup(teardown)
+
+	loggedInClient := createLoggedInClient(g)
+	nonLoggedInClient := createNonLoggedInClient(g)
+
+	testCases := []struct {
+		name          string
+		client        *amizone.Client
+		setup         func(g *WithT)
+		resultMatcher func(g *WithT, result *models.ExamResultRecords)
+		errMatcher    func(g *WithT, err error)
+	}{
+		{
+			name:   "amizone client is logged in and returns the (mock) exam result page",
+			client: loggedInClient,
+			setup: func(g *WithT) {
+				err := mock.GockRegisterExamResultPage()
+				g.Expect(err).ToNot(HaveOccurred())
+			},
+			resultMatcher: func(g *WithT, result *models.ExamResultRecords) {
+				g.Expect(result.Overall).To(HaveLen(3))
+				g.Expect(result.CourseWise).To(HaveLen(8))
+			},
+			errMatcher: func(g *WithT, err error) {
+				g.Expect(err).ToNot(HaveOccurred())
+			},
+		},
+		{
+			name:   "amizone client is logged is and returns the (mock) sem-wise courses page",
+			client: loggedInClient,
+			setup: func(g *WithT) {
+				err := mock.GockRegisterExamResultPage()
+				g.Expect(err).ToNot(HaveOccurred())
+			},
+			resultMatcher: func(g *WithT, result *models.ExamResultRecords) {
+				g.Expect(result.Overall).To(HaveLen(3))
+				g.Expect(result.CourseWise).To(HaveLen(8))
+			},
+			errMatcher: func(g *WithT, err error) {
+				g.Expect(err).ToNot(HaveOccurred())
+			},
+		},
+		{
+			name:   "amizone client is not logged in and returns the login page",
+			client: nonLoggedInClient,
+			setup: func(g *WithT) {
+				err := mock.GockRegisterUnauthenticatedGet("/")
+				g.Expect(err).ToNot(HaveOccurred())
+			},
+			resultMatcher: func(g *WithT, result *models.ExamResultRecords) {
+				g.Expect(result).To(BeNil())
+			},
+			errMatcher: func(g *WithT, err error) {
+				g.Expect(err).To(HaveOccurred())
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			g := NewWithT(t)
+			t.Cleanup(setupNetworking)
+			testCase.setup(g)
+
+			result, err := testCase.client.GetCurrentExaminationResult()
+			testCase.errMatcher(g, err)
+			testCase.resultMatcher(g, result)
+		})
+	}
+}
+
 func TestClient_GetProfile(t *testing.T) {
 	g := NewWithT(t)
 

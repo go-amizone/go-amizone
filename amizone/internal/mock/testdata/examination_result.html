@@ -1,0 +1,491 @@
+<div class="main-content">
+  <div class="main-content-inner">
+    <div class="breadcrumbs" id="breadcrumbs">
+      <script type="text/javascript">
+        try {
+          ace.settings.check("breadcrumbs", "fixed");
+        } catch (e) {}
+      </script>
+      <ul class="breadcrumb">
+        <li>
+          <i class="ace-icon fa fa-home home-icon"></i><a href="/home">Home</a>
+        </li>
+        <li class="active">Examination</li>
+      </ul>
+      <!-- /.breadcrumb -->
+      <!-- /.nav-search -->
+    </div>
+
+    <div class="page-content">
+      <div class="row">
+        <div class="col-md-12" align="center">
+          <h4>
+            Guidelines for computation of marks
+            <a
+              href="/Images/popup/Guidelines_For_Computation_of_Marks.pdf"
+              target="_blank"
+              ><span style="color: #ff0000"> click here</span></a
+            >
+          </h4>
+        </div>
+      </div>
+
+      <div class="page-header">
+        <h1>Examination</h1>
+      </div>
+      <ol class="notice-list notice-list-in-box">
+        <li>Name <b>Mr John Doe </b></li>
+        <li>Enrollment No. <b>A2305225632</b></li>
+      </ol>
+
+      <!-- /.ace-settings-container -->
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="panel-group" id="accordion">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="text-right">
+                      <form class="form-inline">
+                        <div class="form-group">
+                          <span class="pull-right" style="font-size: 14px">
+                            Semester/Year(s) Exam Result :
+
+                            <select
+                              class="form-control required"
+                              data-val="true"
+                              data-val-number="The field CurrentSemesterInfo must be a number."
+                              data-val-required="The CurrentSemesterInfo field is required."
+                              id="CurrentSemesterInfo"
+                              name="CurrentSemesterInfo"
+                              onchange="getCourseDetails()"
+                              style="
+                                height: 25px;
+                                width: 100px;
+                                padding: 1px 6px;
+                              "
+                            >
+                              <option value="">Semester/Year</option>
+                              <option selected="selected" value="3">3</option>
+                              <option value="2">2</option>
+                              <option value="1">1</option>
+                            </select>
+                          </span>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div id="collapse1" class="panel-collapse collapse in">
+                <div class="panel-body">
+                  <div class="col register-div">
+                    <div id="CourseListSemWise">
+                      <div id="no-more-tables">
+                        <table
+                          class="table table-bordered table-striped table-condensed"
+                        >
+                          <thead class="cf">
+                            <tr>
+                              <th>Sno</th>
+                              <th>Course Code</th>
+                              <th>Course Title</th>
+                              <th>Max Total</th>
+                              <th>ACU</th>
+                              <th>Go</th>
+                              <th>GP</th>
+                              <th>CP</th>
+                              <th>ECU</th>
+                              <th>PublishDate</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td data-title="Sno">1</td>
+                              &nbsp;
+                              <td data-title="Course Code">CSE207</td>
+                              &nbsp;
+                              <td data-title="Course Title">
+                                Digital Electronics and Computer Organization
+                              </td>
+                              &nbsp;
+                              <td data-title="Max Total">100</td>
+                              &nbsp;
+                              <td data-title="ACU">5</td>
+                              &nbsp;
+                              <td data-title="Go">A-</td>
+                              &nbsp;
+                              <td data-title="GP">8</td>
+                              &nbsp;
+                              <td data-title="CP">40</td>
+                              &nbsp;
+                              <td data-title="ECU">5</td>
+                              &nbsp;
+                              <td data-title="PublishDate">31/01/2023</td>
+                              &nbsp;
+                            </tr>
+                            <tr>
+                              <td data-title="Sno">2</td>
+                              &nbsp;
+                              <td data-title="Course Code">CSIT124</td>
+                              &nbsp;
+                              <td data-title="Course Title">
+                                Data Structures Using C
+                              </td>
+                              &nbsp;
+                              <td data-title="Max Total">100</td>
+                              &nbsp;
+                              <td data-title="ACU">5</td>
+                              &nbsp;
+                              <td data-title="Go">A</td>
+                              &nbsp;
+                              <td data-title="GP">9</td>
+                              &nbsp;
+                              <td data-title="CP">45</td>
+                              &nbsp;
+                              <td data-title="ECU">5</td>
+                              &nbsp;
+                              <td data-title="PublishDate">31/01/2023</td>
+                              &nbsp;
+                            </tr>
+                            <tr>
+                              <td data-title="Sno">3</td>
+                              &nbsp;
+                              <td data-title="Course Code">ES201</td>
+                              &nbsp;
+                              <td data-title="Course Title">
+                                Basic Electronics Engineering
+                              </td>
+                              &nbsp;
+                              <td data-title="Max Total">100</td>
+                              &nbsp;
+                              <td data-title="ACU">4</td>
+                              &nbsp;
+                              <td data-title="Go">A</td>
+                              &nbsp;
+                              <td data-title="GP">9</td>
+                              &nbsp;
+                              <td data-title="CP">36</td>
+                              &nbsp;
+                              <td data-title="ECU">4</td>
+                              &nbsp;
+                              <td data-title="PublishDate">31/01/2023</td>
+                              &nbsp;
+                            </tr>
+                            <tr>
+                              <td data-title="Sno">4</td>
+                              &nbsp;
+                              <td data-title="Course Code">ES203</td>
+                              &nbsp;
+                              <td data-title="Course Title">
+                                Object Oriented Programming Using C++
+                              </td>
+                              &nbsp;
+                              <td data-title="Max Total">100</td>
+                              &nbsp;
+                              <td data-title="ACU">4</td>
+                              &nbsp;
+                              <td data-title="Go">A+</td>
+                              &nbsp;
+                              <td data-title="GP">10</td>
+                              &nbsp;
+                              <td data-title="CP">40</td>
+                              &nbsp;
+                              <td data-title="ECU">4</td>
+                              &nbsp;
+                              <td data-title="PublishDate">31/01/2023</td>
+                              &nbsp;
+                            </tr>
+                            <tr>
+                              <td data-title="Sno">5</td>
+                              &nbsp;
+                              <td data-title="Course Code">ETTP100</td>
+                              &nbsp;
+                              <td data-title="Course Title">Term Paper</td>
+                              &nbsp;
+                              <td data-title="Max Total">100</td>
+                              &nbsp;
+                              <td data-title="ACU">1</td>
+                              &nbsp;
+                              <td data-title="Go">A</td>
+                              &nbsp;
+                              <td data-title="GP">9</td>
+                              &nbsp;
+                              <td data-title="CP">9</td>
+                              &nbsp;
+                              <td data-title="ECU">1</td>
+                              &nbsp;
+                              <td data-title="PublishDate">31/01/2023</td>
+                              &nbsp;
+                            </tr>
+                            <tr>
+                              <td data-title="Sno">6</td>
+                              &nbsp;
+                              <td data-title="Course Code">MATH211</td>
+                              &nbsp;
+                              <td data-title="Course Title">
+                                Applied Mathematics- III
+                              </td>
+                              &nbsp;
+                              <td data-title="Max Total">100</td>
+                              &nbsp;
+                              <td data-title="ACU">4</td>
+                              &nbsp;
+                              <td data-title="Go">A-</td>
+                              &nbsp;
+                              <td data-title="GP">8</td>
+                              &nbsp;
+                              <td data-title="CP">32</td>
+                              &nbsp;
+                              <td data-title="ECU">4</td>
+                              &nbsp;
+                              <td data-title="PublishDate">31/01/2023</td>
+                              &nbsp;
+                            </tr>
+                            <tr>
+                              <td data-title="Sno">7</td>
+                              &nbsp;
+                              <td data-title="Course Code">MATS201</td>
+                              &nbsp;
+                              <td data-title="Course Title">
+                                Material Science
+                              </td>
+                              &nbsp;
+                              <td data-title="Max Total">100</td>
+                              &nbsp;
+                              <td data-title="ACU">2</td>
+                              &nbsp;
+                              <td data-title="Go">A-</td>
+                              &nbsp;
+                              <td data-title="GP">8</td>
+                              &nbsp;
+                              <td data-title="CP">16</td>
+                              &nbsp;
+                              <td data-title="ECU">2</td>
+                              &nbsp;
+                              <td data-title="PublishDate">31/01/2023</td>
+                              &nbsp;
+                            </tr>
+                            <tr>
+                              <td data-title="Sno">8</td>
+                              &nbsp;
+                              <td data-title="Course Code">SPAN146</td>
+                              &nbsp;
+                              <td data-title="Course Title">
+                                Written Expression & Comprehension in Spanish -
+                                I
+                              </td>
+                              &nbsp;
+                              <td data-title="Max Total">100</td>
+                              &nbsp;
+                              <td data-title="ACU">2</td>
+                              &nbsp;
+                              <td data-title="Go">A-</td>
+                              &nbsp;
+                              <td data-title="GP">8</td>
+                              &nbsp;
+                              <td data-title="CP">16</td>
+                              &nbsp;
+                              <td data-title="ECU">2</td>
+                              &nbsp;
+                              <td data-title="PublishDate">31/01/2023</td>
+                              &nbsp;
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div id="no-more-tables">
+                        <table
+                          class="table table-bordered table-striped table-condensed"
+                        >
+                          <thead class="cf">
+                            <tr>
+                              <th>Semester</th>
+                              <th>SGPA</th>
+                              <th>CGPA</th>
+                              <th>Back Papers</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td data-title="Semester">1&nbsp;</td>
+                              <td data-title="SGPA">8.21&nbsp;</td>
+                              <td data-title="CGPA">&nbsp;</td>
+                              <td data-title="Back Papers">0&nbsp;</td>
+                            </tr>
+                            <tr>
+                              <td data-title="Semester">2&nbsp;</td>
+                              <td data-title="SGPA">8.18&nbsp;</td>
+                              <td data-title="CGPA">8.19&nbsp;</td>
+                              <td data-title="Back Papers">0&nbsp;</td>
+                            </tr>
+                            <tr>
+                              <td data-title="Semester">3&nbsp;</td>
+                              <td data-title="SGPA">8.46&nbsp;</td>
+                              <td data-title="CGPA">8.32&nbsp;</td>
+                              <td data-title="Back Papers">0&nbsp;</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div class="row">
+                        <div class="col-sm-6">
+                          <div class="responsive">
+                            <table
+                              class="table table-bordered table-striped table-condensed table_new"
+                            >
+                              <tbody>
+                                <tr>
+                                  <td
+                                    colspan="2"
+                                    style="border-top: solid 1px #ddd"
+                                  >
+                                    * Mandatory Course. Passing is Mandatory.
+                                    Credit is not counted for calculation of
+                                    SGPA.<br />
+                                    - For indicative purpose only.<br />
+                                    No one is responsible for any inadvertent
+                                    error that may have crept in the results
+                                    being published on NET. The results
+                                    published on net are for immediate
+                                    information to the examinees. These cannot
+                                    be treated as original mark sheets. Original
+                                    mark sheets are issued by the University.
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td colspan="2"><b>Abbreviation :</b></td>
+                                </tr>
+
+                                <tr>
+                                  <td>AB</td>
+                                  <td>Absent</td>
+                                </tr>
+                                <tr>
+                                  <td>DE/DC</td>
+                                  <td>Debarred</td>
+                                </tr>
+                                <tr>
+                                  <td>UFM</td>
+                                  <td nowrap="nowrap">Unfair Means</td>
+                                </tr>
+                                <tr>
+                                  <td>RL</td>
+                                  <td nowrap="nowrap">Result Later</td>
+                                </tr>
+                                <tr>
+                                  <td>I</td>
+                                  <td>Incomplete</td>
+                                </tr>
+                                <tr>
+                                  <td>EC</td>
+                                  <td>Exam Cancelled</td>
+                                </tr>
+                                <tr>
+                                  <td>IE</td>
+                                  <td>Incomplete Examination</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                        <div class="col-sm-6">
+                          <div class="responsive">
+                            <table
+                              class="table table-bordered table-striped table-condensed"
+                            >
+                              <tbody>
+                                <tr>
+                                  <td style="border-top: solid 1px #ddd">
+                                    Column
+                                  </td>
+                                  <td style="border-top: solid 1px #ddd">
+                                    Description
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td>Sem</td>
+                                  <td>Semester</td>
+                                </tr>
+                                <tr>
+                                  <td>CE</td>
+                                  <td>Continuous Evaluation Marks Obtained</td>
+                                </tr>
+                                <tr>
+                                  <td>MaxCE</td>
+                                  <td>Continuous Evaluation Maximum Marks</td>
+                                </tr>
+                                <tr>
+                                  <td>EE</td>
+                                  <td>Endterm Examinatioin Marks Obtained</td>
+                                </tr>
+                                <tr>
+                                  <td>MaxEE</td>
+                                  <td>Endterm Examination Maximum Marks</td>
+                                </tr>
+
+                                <tr>
+                                  <td>Total</td>
+                                  <td>Total Marks Obtained</td>
+                                </tr>
+                                <tr>
+                                  <td>MaxTotal</td>
+                                  <td>Total Maximum Marks</td>
+                                </tr>
+                                <tr>
+                                  <td>ACU</td>
+                                  <td>Associated Credit Units</td>
+                                </tr>
+                                <tr>
+                                  <td>GO</td>
+                                  <td>Grade Obtained</td>
+                                </tr>
+                                <tr>
+                                  <td>GP</td>
+                                  <td>Grade Points</td>
+                                </tr>
+                                <tr>
+                                  <td>CP</td>
+                                  <td>Credit Points</td>
+                                </tr>
+                                <tr>
+                                  <td>ECU</td>
+                                  <td>Earned Credit Units</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                      <script src="/Scripts/M060620154/Examination.js"></script>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- /.col -->
+    </div>
+    <!-- /.row -->
+  </div>
+
+  <!-- /.page-content -->
+</div>
+<!-- /.main-content -->
+<a href="#" id="btn-scroll-up" class="btn-scroll-up btn btn-sm btn-inverse">
+  <i class="ace-icon fa fa-angle-double-up icon-only bigger-110"> </i>
+</a>
+<script>
+  function getCourseDetails() {
+    $.post(
+      "/Examination/Examination/ExaminationListSemWise",
+      { sem: $("#CurrentSemesterInfo").val() },
+      function (data) {
+        $("#CourseListSemWise").html(data);
+      }
+    );
+  }
+</script>

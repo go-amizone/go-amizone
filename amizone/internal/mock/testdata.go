@@ -32,6 +32,7 @@ const (
 	WifiPage                        File = "testdata/wifi_mac_registration.html"
 	WifiPageOneSlotPopulated        File = "testdata/wifi_mac_registration_one_empty.html"
 	FacultyPage                     File = "testdata/faculty_page.html"
+	ExaminationResultPage           File = "testdata/examination_result.html"
 )
 
 type ExpectedJSON string
