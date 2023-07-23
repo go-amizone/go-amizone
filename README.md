@@ -52,6 +52,10 @@ amizone-api-server # runs the server
 
 A docker image will be made available soon to make deployments easier.
 
+## Postman collection
+
+Check out this [Postman collection](postman.com/ditsuke/workspace/ditsuke/) to test out our endpoints.
+
 ## Contributing
 
 Contributions to go-amizone are welcome! If you have a bug or feature request, please open an issue on the
