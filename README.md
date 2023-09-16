@@ -54,7 +54,7 @@ A docker image will be made available soon to make deployments easier.
 
 ## Postman collection
 
-Check out this [Postman collection](https://www.postman.com/ditsuke/workspace/ditsuke/collection/18984451-db4fa2f9-184b-4451-a9f4-cf345ad3ec0a?action=share&creator=19742634) to test out our endpoints.
+Check out this [Postman collection](https://www.postman.com/ditsuke/workspace/ditsuke) to test out our endpoints.
 
 ## Contributing
 
