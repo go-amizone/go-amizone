@@ -12,31 +12,28 @@ import (
 	"text/template"
 	"time"
 
-	"k8s.io/klog/v2"
-
 	"github.com/ditsuke/go-amizone/amizone/internal"
 	"github.com/ditsuke/go-amizone/amizone/internal/marshaller"
 	"github.com/ditsuke/go-amizone/amizone/internal/parse"
 	"github.com/ditsuke/go-amizone/amizone/internal/validator"
 	"github.com/ditsuke/go-amizone/amizone/models"
+	"k8s.io/klog/v2"
 )
 
 // Endpoints
 const (
 	BaseURL = "https://" + internal.AmizoneDomain
 
-	loginRequestEndpoint             = "/"
-	attendancePageEndpoint           = "/Home"
-	scheduleEndpointTemplate         = "/Calendar/home/GetDiaryEvents?start=%s&end=%s"
-	examScheduleEndpoint             = "/Examination/ExamSchedule"
-	currentCoursesEndpoint           = "/Academics/MyCourses"
-	coursesEndpoint                  = currentCoursesEndpoint + "/CourseListSemWise"
-	profileEndpoint                  = "/IDCard"
-	macBaseEndpoint                  = "/RegisterForWifi/mac"
-	currentExaminationResultEndpoint = "/Examination/Examination"
-	examinationResultEndpoint        = currentExaminationResultEndpoint + "/ExaminationListSemWise"
-	getWifiMacsEndpoint              = macBaseEndpoint + "/MacRegistration"
-	registerWifiMacsEndpoint         = macBaseEndpoint + "/MacRegistrationSave"
+	loginRequestEndpoint     = "/"
+	attendancePageEndpoint   = "/Home"
+	scheduleEndpointTemplate = "/Calendar/home/GetDiaryEvents?start=%s&end=%s"
+	examScheduleEndpoint     = "/Examination/ExamSchedule"
+	currentCoursesEndpoint   = "/Academics/MyCourses"
+	coursesEndpoint          = currentCoursesEndpoint + "/CourseListSemWise"
+	profileEndpoint          = "/IDCard"
+	macBaseEndpoint          = "/RegisterForWifi/mac"
+	getWifiMacsEndpoint      = macBaseEndpoint + "/MacRegistration"
+	registerWifiMacsEndpoint = macBaseEndpoint + "/MacRegistrationSave"
 
 	// deleteWifiMacEndpoint is peculiar in that it requires the user's ID as a parameter.
 	// This _might_ open doors for an exploit (spoiler: indeed it does)
@@ -44,6 +41,8 @@ const (
 
 	facultyBaseEndpoint           = "/FacultyFeeback/FacultyFeedback"
 	facultyEndpointSubmitEndpoint = facultyBaseEndpoint + "/SaveFeedbackRating"
+
+	atpcPlacementEndpoint = "/Placement/PlacementDetails?X-Requested-With=XMLHttpRequest"
 )
 
 // Miscellaneous
@@ -75,7 +74,7 @@ type Credentials struct {
 }
 
 // Client is the main struct for the amizone package, exposing the entire API surface
-// for the portal as implemented here. The struct must always be initialized through a public
+// for the portal as implemented here. The struct must always be initialised through a public
 // constructor like NewClient()
 type Client struct {
 	httpClient  *http.Client
@@ -162,12 +161,7 @@ func (a *Client) login() error {
 		return
 	}()
 
-	loginResponse, err := a.doRequest(
-		false,
-		http.MethodPost,
-		loginRequestEndpoint,
-		strings.NewReader(loginRequestData.Encode()),
-	)
+	loginResponse, err := a.doRequest(false, http.MethodPost, loginRequestEndpoint, strings.NewReader(loginRequestData.Encode()))
 	if err != nil {
 		klog.Warningf("error while making HTTP request to the amizone login page: %s", err.Error())
 		return fmt.Errorf("%s: %w", ErrFailedLogin, err)
@@ -180,18 +174,14 @@ func (a *Client) login() error {
 	}
 
 	if loggedIn := parse.IsLoggedIn(loginResponse.Body); !loggedIn {
-		klog.Error(
-			"login attempt failed as indicated by parsing the page returned after the login request, while the redirect indicated that it passed." +
-				" this failure indicates that something broke between Amizone and go-amizone.",
-		)
+		klog.Error("login attempt failed as indicated by parsing the page returned after the login request, while the redirect indicated that it passed." +
+			" this failure indicates that something broke between Amizone and go-amizone.")
 		return errors.New(ErrFailedLogin)
 	}
 
 	if !internal.IsLoggedIn(a.httpClient) {
-		klog.Error(
-			"login attempt failed as indicated by checking the cookies in the http client's cookie jar. this failure indicates that something has broken between" +
-				" Amizone and go-amizone, possibly the cookies used by amizone for authentication.",
-		)
+		klog.Error("login attempt failed as indicated by checking the cookies in the http client's cookie jar. this failure indicates that something has broken between" +
+			" Amizone and go-amizone, possibly the cookies used by amizone for authentication.")
 		return errors.New(ErrFailedLogin)
 	}
 
@@ -217,47 +207,6 @@ func (a *Client) GetAttendance() (models.AttendanceRecords, error) {
 	return models.AttendanceRecords(attendanceRecord), nil
 }
 
-// GetExaminationResult retrieves, parses and returns a ExaminationResultRecords from Amizone for their latest semester
-// for which the result is available
-func (a *Client) GetCurrentExaminationResult() (*models.ExamResultRecords, error) {
-	response, err := a.doRequest(true, http.MethodGet, currentExaminationResultEndpoint, nil)
-	if err != nil {
-		klog.Warningf("request (examination-result): %s", err.Error())
-		return nil, fmt.Errorf("%s: %s", ErrFailedToFetchPage, err.Error())
-	}
-
-	examinationResultRecords, err := parse.ExaminationResult(response.Body)
-	if err != nil {
-		klog.Errorf("parse (examination-result): %s", err.Error())
-		return nil, fmt.Errorf("%s: %w", ErrInternalFailure, err)
-	}
-
-	return examinationResultRecords, nil
-}
-
-// GetExaminationResult retrieves, parses and returns a ExaminationResultRecords from Amizone for the semester referred by
-// semesterRef. Semester references should be retrieved through GetSemesters, which returns a list of valid
-// semesters with names and references.
-func (a *Client) GetExaminationResult(semesterRef string) (*models.ExamResultRecords, error) {
-	payload := url.Values{
-		"sem": []string{semesterRef},
-	}.Encode()
-
-	response, err := a.doRequest(true, http.MethodPost, examinationResultEndpoint, strings.NewReader(payload))
-	if err != nil {
-		klog.Warningf("request (examination-result): %s", err.Error())
-		return nil, fmt.Errorf("%s: %s", ErrFailedToFetchPage, err.Error())
-	}
-
-	examinationResultRecords, err := parse.ExaminationResult(response.Body)
-	if err != nil {
-		klog.Errorf("parse (examination-result): %s", err.Error())
-		return nil, fmt.Errorf("%s: %w", ErrInternalFailure, err)
-	}
-
-	return examinationResultRecords, nil
-}
-
 // GetClassSchedule retrieves, parses and returns class schedule data from Amizone.
 // The date parameter is used to determine which schedule to retrieve, however as Amizone imposes arbitrary limits on the
 // date range, as in scheduled for dates older than some months are not stored by Amizone, we have no way of knowing if a request will succeed.
@@ -265,11 +214,7 @@ func (a *Client) GetClassSchedule(year int, month time.Month, date int) (models.
 	timeFrom := time.Date(year, month, date, 0, 0, 0, 0, time.UTC)
 	timeTo := timeFrom.Add(time.Hour * 24)
 
-	endpoint := fmt.Sprintf(
-		scheduleEndpointTemplate,
-		timeFrom.Format(classScheduleEndpointDateFormat),
-		timeTo.Format(classScheduleEndpointDateFormat),
-	)
+	endpoint := fmt.Sprintf(scheduleEndpointTemplate, timeFrom.Format(classScheduleEndpointDateFormat), timeTo.Format(classScheduleEndpointDateFormat))
 
 	response, err := a.doRequest(true, http.MethodGet, endpoint, nil)
 	if err != nil {
@@ -475,12 +420,7 @@ func (a *Client) RemoveWifiMac(addr net.HardwareAddr) error {
 	}
 
 	// ! VULN: remove mac addresses registered by anyone if you know the mac/username pair.
-	response, err := a.doRequest(
-		true,
-		http.MethodGet,
-		fmt.Sprintf(removeWifiMacEndpoint, a.credentials.Username, marshaller.Mac(addr)),
-		nil,
-	)
+	response, err := a.doRequest(true, http.MethodGet, fmt.Sprintf(removeWifiMacEndpoint, a.credentials.Username, marshaller.Mac(addr)), nil)
 	if err != nil {
 		klog.Errorf("request (remove wifi mac): %s", err.Error())
 		return fmt.Errorf("%s: %s", ErrFailedToFetchPage, err.Error())
@@ -517,10 +457,9 @@ func (a *Client) SubmitFacultyFeedbackHack(rating int32, queryRating int32, comm
 	}
 
 	// Transform queryRating for "higher number is higher rating" semantics (it's the opposite in the form 😭)
-	switch queryRating {
-	case 1:
+	if queryRating == 1 {
 		queryRating = 3
-	case 3:
+	} else if queryRating == 3 {
 		queryRating = 1
 	}
 
@@ -570,4 +509,21 @@ func (a *Client) SubmitFacultyFeedbackHack(rating int32, queryRating int32, comm
 
 	wg.Wait()
 	return int32(len(feedbackSpecs)), nil
+}
+
+// GetAtpcPlacementDetails retrieves, parses and returns the ATPC placement details from Amizone.
+func (a *Client) GetAtpcPlacementDetails() (models.AtpcPlacementDetails, error) {
+	response, err := a.doRequest(true, http.MethodGet, atpcPlacementEndpoint, nil)
+	if err != nil {
+		klog.Warningf("request (atpc placement): %s", err.Error())
+		return nil, errors.New(ErrFailedToVisitPage)
+	}
+
+	details, err := parse.AtpcPlacementDetails(response.Body)
+	if err != nil {
+		klog.Errorf("parse (atpc placement): %s", err.Error())
+		return nil, fmt.Errorf("%s: %w", ErrInternalFailure, err)
+	}
+
+	return (models.AtpcPlacementDetails)(details), nil
 }
