@@ -37,38 +37,6 @@ func (a *serviceServer) GetAttendance(ctx context.Context, _ *v1.EmptyMessage) (
 	return toproto.AttendanceRecords(attendance), nil
 }
 
-func (a *serviceServer) GetCurrentExamResult(ctx context.Context, _ *v1.EmptyMessage) (*v1.ExamResultRecords, error) {
-	amizoneClient, ok := ctx.Value(ContextAmizoneClientKey).(*amizone.Client)
-	if !ok {
-		return nil, status.Errorf(codes.Unauthenticated, "failed to authenticate")
-	}
-
-	examResult, err := amizoneClient.GetCurrentExaminationResult()
-	if err != nil {
-		return nil, errors.New("failed to retrieve attendance")
-	}
-
-	return toproto.ExaminationResultRecords(*examResult), nil
-}
-
-func (a *serviceServer) GetExamResult(ctx context.Context, in *v1.SemesterRef) (*v1.ExamResultRecords, error) {
-	amizoneClient, ok := ctx.Value(ContextAmizoneClientKey).(*amizone.Client)
-	if !ok {
-		return nil, status.Errorf(codes.Unauthenticated, "failed to authenticate")
-	}
-
-	if in.GetSemesterRef() == "" {
-		return nil, status.Errorf(codes.InvalidArgument, "semester ref is required")
-	}
-
-	examResult, err := amizoneClient.GetExaminationResult(in.GetSemesterRef())
-	if err != nil {
-		return nil, errors.New("failed to retrieve attendance")
-	}
-
-	return toproto.ExaminationResultRecords(*examResult), nil
-}
-
 func (a serviceServer) GetClassSchedule(ctx context.Context, in *v1.ClassScheduleRequest) (*v1.ScheduledClasses, error) {
 	amizoneClient, ok := ctx.Value(ContextAmizoneClientKey).(*amizone.Client)
 	if !ok {
@@ -223,4 +191,18 @@ func (serviceServer) FillFacultyFeedback(ctx context.Context, req *v1.FillFacult
 	}
 
 	return &v1.FillFacultyFeedbackResponse{FilledFor: filledFor}, nil
+}
+
+func (serviceServer) GetAtpcPlacementDetails(ctx context.Context, _ *v1.EmptyMessage) (*v1.AtpcPlacementDetails, error) {
+	amizoneClient, ok := ctx.Value(ContextAmizoneClientKey).(*amizone.Client)
+	if !ok {
+		return nil, errors.New("failed to authenticate")
+	}
+
+	placementDetails, err := amizoneClient.GetAtpcPlacementDetails()
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to retrieve placement details: %v", err)
+	}
+
+	return toproto.AtpcPlacementDetails(placementDetails), nil
 }

@@ -3,11 +3,9 @@ package toproto
 import (
 	"time"
 
-	"google.golang.org/genproto/googleapis/type/date"
-	"google.golang.org/protobuf/types/known/timestamppb"
-
 	"github.com/ditsuke/go-amizone/amizone/models"
 	v1 "github.com/ditsuke/go-amizone/server/gen/go/v1"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func TimeToProtoTS(t time.Time) *timestamppb.Timestamp {
@@ -82,14 +80,6 @@ func ExamSchedule(a models.ExaminationSchedule) *v1.ExaminationSchedule {
 			Course: CourseRef(models.CourseRef(c.Course)),
 			Time:   TimeToProtoTS(c.Time),
 			Mode:   c.Mode,
-			Location: func() *string {
-				if c.Location != "" {
-					copy := c.Location
-					return &copy
-				} else {
-					return nil
-				}
-			}(),
 		}
 	}
 
@@ -166,47 +156,16 @@ func WifiInfo(i models.WifiMacInfo) *v1.WifiMacInfo {
 	}
 }
 
-func ExaminationResultRecords(e models.ExamResultRecords) *v1.ExamResultRecords {
-	return &v1.ExamResultRecords{
-		Overall: func() []*v1.OverallResult {
-			result := make([]*v1.OverallResult, 0)
-			for _, a := range e.Overall {
-				result = append(result, &v1.OverallResult{
-					Semester: &v1.SemesterRef{
-						SemesterRef: a.Semester.Ref,
-					},
-					SemesterGradePointAverage:   a.SemesterGradePointAverage,
-					CumulativeGradePointAverage: a.CumulativeGradePointAverage,
-				})
-			}
-			return result
-		}(),
-		CourseWise: func() []*v1.ExamResultRecord {
-			result := make([]*v1.ExamResultRecord, 0)
-			for _, a := range e.CourseWise {
-				result = append(result, &v1.ExamResultRecord{
-					Course: &v1.CourseRef{
-						Name: a.Course.Name,
-						Code: a.Course.Code,
-					},
-					Score: &v1.Score{
-						Max:        int32(a.Score.Max),
-						Grade:      a.Score.Grade,
-						GradePoint: int32(a.Score.GradePoint),
-					},
-					Credits: &v1.Credits{
-						Acquired:  int32(a.Credits.Acquired),
-						Points:    int32(a.Credits.Points),
-						Effective: int32(a.Credits.Effective),
-					},
-					PublishDate: &date.Date{
-						Day:   int32(a.PublishDate.Day()),
-						Month: int32(a.PublishDate.Month()),
-						Year:  int32(a.PublishDate.Year()),
-					},
-				})
-			}
-			return result
-		}(),
+func AtpcPlacementDetails(a models.AtpcPlacementDetails) *v1.AtpcPlacementDetails {
+	arr := make([]*v1.AtpcPlacementEntry, len(a))
+	for i, c := range a {
+		arr[i] = &v1.AtpcPlacementEntry{
+			Company: c.Company,
+			RegStartDate: TimeToProtoTS(c.RegStartDate),
+			RegEndDate: TimeToProtoTS(c.RegEndDate),
+		}
+	}
+	return &v1.AtpcPlacementDetails{
+		Details: arr,
 	}
 }
