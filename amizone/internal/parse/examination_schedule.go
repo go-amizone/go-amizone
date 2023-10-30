@@ -50,7 +50,7 @@ func ExaminationSchedule(body io.Reader) (*models.ExaminationSchedule, error) {
 	if !IsLoggedInDOM(dom) {
 		return nil, errors.New(ErrNotLoggedIn)
 	}
-
+	
 	// Try to find the "Examination Schedule" breadcrumb to determine if we're on the right page.
 	if scheduleBreadcrumb := dom.Find(breadcrumbsSelector).
 		Filter(fmt.Sprintf(":contains('%s')", scheduleBreadcrumbText)); scheduleBreadcrumb.Length() == 0 {

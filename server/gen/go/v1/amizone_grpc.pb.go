@@ -25,6 +25,8 @@ const (
 	AmizoneService_GetSemesters_FullMethodName            = "/go_amizone.server.proto.v1.AmizoneService/GetSemesters"
 	AmizoneService_GetCourses_FullMethodName              = "/go_amizone.server.proto.v1.AmizoneService/GetCourses"
 	AmizoneService_GetCurrentCourses_FullMethodName       = "/go_amizone.server.proto.v1.AmizoneService/GetCurrentCourses"
+	AmizoneService_GetExamResult_FullMethodName           = "/go_amizone.server.proto.v1.AmizoneService/GetExamResult"
+	AmizoneService_GetCurrentExamResult_FullMethodName    = "/go_amizone.server.proto.v1.AmizoneService/GetCurrentExamResult"
 	AmizoneService_GetUserProfile_FullMethodName          = "/go_amizone.server.proto.v1.AmizoneService/GetUserProfile"
 	AmizoneService_GetWifiMacInfo_FullMethodName          = "/go_amizone.server.proto.v1.AmizoneService/GetWifiMacInfo"
 	AmizoneService_RegisterWifiMac_FullMethodName         = "/go_amizone.server.proto.v1.AmizoneService/RegisterWifiMac"
@@ -49,6 +51,10 @@ type AmizoneServiceClient interface {
 	GetCourses(ctx context.Context, in *SemesterRef, opts ...grpc.CallOption) (*Courses, error)
 	// GetCurrentCourses returns a list of courses for the "current" semester.
 	GetCurrentCourses(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*Courses, error)
+	// GetExamResult returns the exam result for the given semester.
+	GetExamResult(ctx context.Context, in *SemesterRef, opts ...grpc.CallOption) (*ExamResultRecords, error)
+	// GetCurrentExamResult returns the exam result for the "current" semester.
+	GetCurrentExamResult(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*ExamResultRecords, error)
 	// GetUserProfile returns the user's profile.
 	GetUserProfile(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*Profile, error)
 	GetWifiMacInfo(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*WifiMacInfo, error)
@@ -114,6 +120,24 @@ func (c *amizoneServiceClient) GetCourses(ctx context.Context, in *SemesterRef, 
 func (c *amizoneServiceClient) GetCurrentCourses(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*Courses, error) {
 	out := new(Courses)
 	err := c.cc.Invoke(ctx, AmizoneService_GetCurrentCourses_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *amizoneServiceClient) GetExamResult(ctx context.Context, in *SemesterRef, opts ...grpc.CallOption) (*ExamResultRecords, error) {
+	out := new(ExamResultRecords)
+	err := c.cc.Invoke(ctx, AmizoneService_GetExamResult_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *amizoneServiceClient) GetCurrentExamResult(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*ExamResultRecords, error) {
+	out := new(ExamResultRecords)
+	err := c.cc.Invoke(ctx, AmizoneService_GetCurrentExamResult_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -190,6 +214,10 @@ type AmizoneServiceServer interface {
 	GetCourses(context.Context, *SemesterRef) (*Courses, error)
 	// GetCurrentCourses returns a list of courses for the "current" semester.
 	GetCurrentCourses(context.Context, *EmptyMessage) (*Courses, error)
+	// GetExamResult returns the exam result for the given semester.
+	GetExamResult(context.Context, *SemesterRef) (*ExamResultRecords, error)
+	// GetCurrentExamResult returns the exam result for the "current" semester.
+	GetCurrentExamResult(context.Context, *EmptyMessage) (*ExamResultRecords, error)
 	// GetUserProfile returns the user's profile.
 	GetUserProfile(context.Context, *EmptyMessage) (*Profile, error)
 	GetWifiMacInfo(context.Context, *EmptyMessage) (*WifiMacInfo, error)
@@ -221,6 +249,12 @@ func (UnimplementedAmizoneServiceServer) GetCourses(context.Context, *SemesterRe
 }
 func (UnimplementedAmizoneServiceServer) GetCurrentCourses(context.Context, *EmptyMessage) (*Courses, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCurrentCourses not implemented")
+}
+func (UnimplementedAmizoneServiceServer) GetExamResult(context.Context, *SemesterRef) (*ExamResultRecords, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetExamResult not implemented")
+}
+func (UnimplementedAmizoneServiceServer) GetCurrentExamResult(context.Context, *EmptyMessage) (*ExamResultRecords, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCurrentExamResult not implemented")
 }
 func (UnimplementedAmizoneServiceServer) GetUserProfile(context.Context, *EmptyMessage) (*Profile, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserProfile not implemented")
@@ -357,6 +391,42 @@ func _AmizoneService_GetCurrentCourses_Handler(srv interface{}, ctx context.Cont
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AmizoneServiceServer).GetCurrentCourses(ctx, req.(*EmptyMessage))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AmizoneService_GetExamResult_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SemesterRef)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AmizoneServiceServer).GetExamResult(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AmizoneService_GetExamResult_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AmizoneServiceServer).GetExamResult(ctx, req.(*SemesterRef))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AmizoneService_GetCurrentExamResult_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EmptyMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AmizoneServiceServer).GetCurrentExamResult(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AmizoneService_GetCurrentExamResult_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AmizoneServiceServer).GetCurrentExamResult(ctx, req.(*EmptyMessage))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -499,6 +569,14 @@ var AmizoneService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetCurrentCourses",
 			Handler:    _AmizoneService_GetCurrentCourses_Handler,
+		},
+		{
+			MethodName: "GetExamResult",
+			Handler:    _AmizoneService_GetExamResult_Handler,
+		},
+		{
+			MethodName: "GetCurrentExamResult",
+			Handler:    _AmizoneService_GetCurrentExamResult_Handler,
 		},
 		{
 			MethodName: "GetUserProfile",
