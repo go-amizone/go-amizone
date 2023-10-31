@@ -138,6 +138,44 @@ func Courses(a models.Courses) *v1.Courses {
 	}
 }
 
+func AtpcListings(a models.AtpcListings) *v1.AtpcListings {
+	return &v1.AtpcListings{
+		Placement: func() []*v1.AtpcEntry {
+			arr := make([]*v1.AtpcEntry, len(a.Placement))
+			for i, c := range a.Placement {
+				arr[i] = &v1.AtpcEntry{
+					Company:      c.Company,
+					RegStartDate: TimeToProtoTS(c.RegStartDate),
+					RegEndDate:   TimeToProtoTS(c.RegEndDate),
+				}
+			}
+			return arr
+		}(),
+		Internship: func() []*v1.AtpcEntry {
+			arr := make([]*v1.AtpcEntry, len(a.Internship))
+			for i, c := range a.Internship {
+				arr[i] = &v1.AtpcEntry{
+					Company:      c.Company,
+					RegStartDate: TimeToProtoTS(c.RegStartDate),
+					RegEndDate:   TimeToProtoTS(c.RegEndDate),
+				}
+			}
+			return arr
+		}(),
+		CorporateEvent: func() []*v1.AtpcEntry {
+			arr := make([]*v1.AtpcEntry, len(a.CorporateEvent))
+			for i, c := range a.CorporateEvent {
+				arr[i] = &v1.AtpcEntry{
+					Company:      c.Company,
+					RegStartDate: TimeToProtoTS(c.RegStartDate),
+					RegEndDate:   TimeToProtoTS(c.RegEndDate),
+				}
+			}
+			return arr
+		}(),
+	}
+}
+
 func Profile(a models.Profile) *v1.Profile {
 	return &v1.Profile{
 		Name:               a.Name,
@@ -208,19 +246,5 @@ func ExaminationResultRecords(e models.ExamResultRecords) *v1.ExamResultRecords 
 			}
 			return result
 		}(),
-	}
-}
-
-func AtpcPlacementDetails(a models.AtpcPlacementDetails) *v1.AtpcPlacementDetails {
-	arr := make([]*v1.AtpcPlacementEntry, len(a))
-	for i, c := range a {
-		arr[i] = &v1.AtpcPlacementEntry{
-			Company: c.Company,
-			RegStartDate: TimeToProtoTS(c.RegStartDate),
-			RegEndDate: TimeToProtoTS(c.RegEndDate),
-		}
-	}
-	return &v1.AtpcPlacementDetails{
-		Details: arr,
 	}
 }

@@ -148,6 +148,20 @@ func (serviceServer) GetCurrentCourses(ctx context.Context, _ *v1.EmptyMessage) 
 	return toproto.Courses(courses), nil
 }
 
+func (serviceServer) GetAtpcListings(ctx context.Context, _ *v1.EmptyMessage) (*v1.AtpcListings, error) {
+	amizoneClient, ok := ctx.Value(ContextAmizoneClientKey).(*amizone.Client)
+	if !ok {
+		return nil, errors.New("failed to authenticate")
+	}
+
+	atpcListings, err := amizoneClient.GetAtpcListings()
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to retrieve placement details: %v", err)
+	}
+
+	return toproto.AtpcListings(*atpcListings), nil
+}
+
 func (serviceServer) GetUserProfile(ctx context.Context, _ *v1.EmptyMessage) (*v1.Profile, error) {
 	amizoneClient, ok := ctx.Value(ContextAmizoneClientKey).(*amizone.Client)
 	if !ok {
@@ -223,18 +237,4 @@ func (serviceServer) FillFacultyFeedback(ctx context.Context, req *v1.FillFacult
 	}
 
 	return &v1.FillFacultyFeedbackResponse{FilledFor: filledFor}, nil
-}
-
-func (serviceServer) GetAtpcPlacementDetails(ctx context.Context, _ *v1.EmptyMessage) (*v1.AtpcPlacementDetails, error) {
-	amizoneClient, ok := ctx.Value(ContextAmizoneClientKey).(*amizone.Client)
-	if !ok {
-		return nil, errors.New("failed to authenticate")
-	}
-
-	placementDetails, err := amizoneClient.GetAtpcPlacementDetails()
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to retrieve placement details: %v", err)
-	}
-
-	return toproto.AtpcPlacementDetails(placementDetails), nil
 }

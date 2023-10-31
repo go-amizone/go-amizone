@@ -2,11 +2,17 @@ package models
 
 import "time"
 
-// AtpcPlacementDetails is a model for representing ATPC placement details.
-type AtpcPlacementEntry struct {
-	Company     string
-	RegStartDate time.Time
-	RegEndDate   time.Time
+// AtpcDetails is a model for representing ATPC details.
+type AtpcEntry struct {
+	Company      	string
+	RegStartDate 	time.Time
+	RegEndDate   	time.Time
 }
 
-type AtpcPlacementDetails []AtpcPlacementEntry
+type AtpcDetails []AtpcEntry
+
+type AtpcListings struct {
+	Placement 			AtpcDetails
+	Internship 			AtpcDetails
+	CorporateEvent 		AtpcDetails
+}

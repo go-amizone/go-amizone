@@ -94,6 +94,11 @@ service AmizoneService {
     option (google.api.http) = {get: "/api/v1/exam_result"};
   }
 
+  // GetAtpcListings returns the placement, internship, and corporate event opportunities available under the ATPC section in amizone.
+  rpc GetAtpcListings(EmptyMessage) returns (AtpcListings) {
+    option (google.api.http) = {get: "/api/v1/atpc_listings"};
+  }
+
   // GetUserProfile returns the user's profile.
   rpc GetUserProfile(EmptyMessage) returns (Profile) {
     option (google.api.http) = {get: "/api/v1/user_profile"};
@@ -115,10 +120,6 @@ service AmizoneService {
       post: "/api/v1/faculty/feedback/submit",
       body: "*"
     };
-  }
-
-  rpc GetAtpcPlacementDetails(EmptyMessage) returns (AtpcPlacementDetails) {
-    option (google.api.http) = {get: "/api/v1/atpc/placement"};
   }
 }
 
@@ -261,6 +262,18 @@ message ExaminationSchedule {
   repeated ScheduledExam exams = 2;
 }
 
+message AtpcEntry {
+  string company = 1;
+  google.protobuf.Timestamp reg_start_date = 2;
+  google.protobuf.Timestamp reg_end_date = 3;
+}
+
+message AtpcListings {
+  repeated AtpcEntry placement = 1;
+  repeated AtpcEntry internship = 2;
+  repeated AtpcEntry corporate_event = 3;
+}
+
 // Profile models information exposed by the Amizone ID card page
 message Profile {
   string name = 1;
@@ -309,14 +322,4 @@ message FillFacultyFeedbackRequest {
 
 message FillFacultyFeedbackResponse {
   int32 filled_for = 1;
-}
-
-message AtpcPlacementEntry {
-  string company = 1;
-  google.protobuf.Timestamp reg_start_date = 2;
-  google.protobuf.Timestamp reg_end_date = 3;
-}
-
-message AtpcPlacementDetails {
-  repeated AtpcPlacementEntry details = 1;
 }

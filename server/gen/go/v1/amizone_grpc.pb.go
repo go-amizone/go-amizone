@@ -19,20 +19,20 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	AmizoneService_GetAttendance_FullMethodName           = "/go_amizone.server.proto.v1.AmizoneService/GetAttendance"
-	AmizoneService_GetClassSchedule_FullMethodName        = "/go_amizone.server.proto.v1.AmizoneService/GetClassSchedule"
-	AmizoneService_GetExamSchedule_FullMethodName         = "/go_amizone.server.proto.v1.AmizoneService/GetExamSchedule"
-	AmizoneService_GetSemesters_FullMethodName            = "/go_amizone.server.proto.v1.AmizoneService/GetSemesters"
-	AmizoneService_GetCourses_FullMethodName              = "/go_amizone.server.proto.v1.AmizoneService/GetCourses"
-	AmizoneService_GetCurrentCourses_FullMethodName       = "/go_amizone.server.proto.v1.AmizoneService/GetCurrentCourses"
-	AmizoneService_GetExamResult_FullMethodName           = "/go_amizone.server.proto.v1.AmizoneService/GetExamResult"
-	AmizoneService_GetCurrentExamResult_FullMethodName    = "/go_amizone.server.proto.v1.AmizoneService/GetCurrentExamResult"
-	AmizoneService_GetUserProfile_FullMethodName          = "/go_amizone.server.proto.v1.AmizoneService/GetUserProfile"
-	AmizoneService_GetWifiMacInfo_FullMethodName          = "/go_amizone.server.proto.v1.AmizoneService/GetWifiMacInfo"
-	AmizoneService_RegisterWifiMac_FullMethodName         = "/go_amizone.server.proto.v1.AmizoneService/RegisterWifiMac"
-	AmizoneService_DeregisterWifiMac_FullMethodName       = "/go_amizone.server.proto.v1.AmizoneService/DeregisterWifiMac"
-	AmizoneService_FillFacultyFeedback_FullMethodName     = "/go_amizone.server.proto.v1.AmizoneService/FillFacultyFeedback"
-	AmizoneService_GetAtpcPlacementDetails_FullMethodName = "/go_amizone.server.proto.v1.AmizoneService/GetAtpcPlacementDetails"
+	AmizoneService_GetAttendance_FullMethodName        = "/go_amizone.server.proto.v1.AmizoneService/GetAttendance"
+	AmizoneService_GetClassSchedule_FullMethodName     = "/go_amizone.server.proto.v1.AmizoneService/GetClassSchedule"
+	AmizoneService_GetExamSchedule_FullMethodName      = "/go_amizone.server.proto.v1.AmizoneService/GetExamSchedule"
+	AmizoneService_GetSemesters_FullMethodName         = "/go_amizone.server.proto.v1.AmizoneService/GetSemesters"
+	AmizoneService_GetCourses_FullMethodName           = "/go_amizone.server.proto.v1.AmizoneService/GetCourses"
+	AmizoneService_GetCurrentCourses_FullMethodName    = "/go_amizone.server.proto.v1.AmizoneService/GetCurrentCourses"
+	AmizoneService_GetExamResult_FullMethodName        = "/go_amizone.server.proto.v1.AmizoneService/GetExamResult"
+	AmizoneService_GetCurrentExamResult_FullMethodName = "/go_amizone.server.proto.v1.AmizoneService/GetCurrentExamResult"
+	AmizoneService_GetAtpcListings_FullMethodName      = "/go_amizone.server.proto.v1.AmizoneService/GetAtpcListings"
+	AmizoneService_GetUserProfile_FullMethodName       = "/go_amizone.server.proto.v1.AmizoneService/GetUserProfile"
+	AmizoneService_GetWifiMacInfo_FullMethodName       = "/go_amizone.server.proto.v1.AmizoneService/GetWifiMacInfo"
+	AmizoneService_RegisterWifiMac_FullMethodName      = "/go_amizone.server.proto.v1.AmizoneService/RegisterWifiMac"
+	AmizoneService_DeregisterWifiMac_FullMethodName    = "/go_amizone.server.proto.v1.AmizoneService/DeregisterWifiMac"
+	AmizoneService_FillFacultyFeedback_FullMethodName  = "/go_amizone.server.proto.v1.AmizoneService/FillFacultyFeedback"
 )
 
 // AmizoneServiceClient is the client API for AmizoneService service.
@@ -55,13 +55,14 @@ type AmizoneServiceClient interface {
 	GetExamResult(ctx context.Context, in *SemesterRef, opts ...grpc.CallOption) (*ExamResultRecords, error)
 	// GetCurrentExamResult returns the exam result for the "current" semester.
 	GetCurrentExamResult(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*ExamResultRecords, error)
+	// GetAtpcListings returns the placement, internship, and corporate event opportunities available under the ATPC section in amizone.
+	GetAtpcListings(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*AtpcListings, error)
 	// GetUserProfile returns the user's profile.
 	GetUserProfile(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*Profile, error)
 	GetWifiMacInfo(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*WifiMacInfo, error)
 	RegisterWifiMac(ctx context.Context, in *RegisterWifiMacRequest, opts ...grpc.CallOption) (*EmptyMessage, error)
 	DeregisterWifiMac(ctx context.Context, in *DeregisterWifiMacRequest, opts ...grpc.CallOption) (*EmptyMessage, error)
 	FillFacultyFeedback(ctx context.Context, in *FillFacultyFeedbackRequest, opts ...grpc.CallOption) (*FillFacultyFeedbackResponse, error)
-	GetAtpcPlacementDetails(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*AtpcPlacementDetails, error)
 }
 
 type amizoneServiceClient struct {
@@ -144,6 +145,15 @@ func (c *amizoneServiceClient) GetCurrentExamResult(ctx context.Context, in *Emp
 	return out, nil
 }
 
+func (c *amizoneServiceClient) GetAtpcListings(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*AtpcListings, error) {
+	out := new(AtpcListings)
+	err := c.cc.Invoke(ctx, AmizoneService_GetAtpcListings_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *amizoneServiceClient) GetUserProfile(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*Profile, error) {
 	out := new(Profile)
 	err := c.cc.Invoke(ctx, AmizoneService_GetUserProfile_FullMethodName, in, out, opts...)
@@ -189,15 +199,6 @@ func (c *amizoneServiceClient) FillFacultyFeedback(ctx context.Context, in *Fill
 	return out, nil
 }
 
-func (c *amizoneServiceClient) GetAtpcPlacementDetails(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*AtpcPlacementDetails, error) {
-	out := new(AtpcPlacementDetails)
-	err := c.cc.Invoke(ctx, AmizoneService_GetAtpcPlacementDetails_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // AmizoneServiceServer is the server API for AmizoneService service.
 // All implementations must embed UnimplementedAmizoneServiceServer
 // for forward compatibility
@@ -218,13 +219,14 @@ type AmizoneServiceServer interface {
 	GetExamResult(context.Context, *SemesterRef) (*ExamResultRecords, error)
 	// GetCurrentExamResult returns the exam result for the "current" semester.
 	GetCurrentExamResult(context.Context, *EmptyMessage) (*ExamResultRecords, error)
+	// GetAtpcListings returns the placement, internship, and corporate event opportunities available under the ATPC section in amizone.
+	GetAtpcListings(context.Context, *EmptyMessage) (*AtpcListings, error)
 	// GetUserProfile returns the user's profile.
 	GetUserProfile(context.Context, *EmptyMessage) (*Profile, error)
 	GetWifiMacInfo(context.Context, *EmptyMessage) (*WifiMacInfo, error)
 	RegisterWifiMac(context.Context, *RegisterWifiMacRequest) (*EmptyMessage, error)
 	DeregisterWifiMac(context.Context, *DeregisterWifiMacRequest) (*EmptyMessage, error)
 	FillFacultyFeedback(context.Context, *FillFacultyFeedbackRequest) (*FillFacultyFeedbackResponse, error)
-	GetAtpcPlacementDetails(context.Context, *EmptyMessage) (*AtpcPlacementDetails, error)
 	mustEmbedUnimplementedAmizoneServiceServer()
 }
 
@@ -256,6 +258,9 @@ func (UnimplementedAmizoneServiceServer) GetExamResult(context.Context, *Semeste
 func (UnimplementedAmizoneServiceServer) GetCurrentExamResult(context.Context, *EmptyMessage) (*ExamResultRecords, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCurrentExamResult not implemented")
 }
+func (UnimplementedAmizoneServiceServer) GetAtpcListings(context.Context, *EmptyMessage) (*AtpcListings, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAtpcListings not implemented")
+}
 func (UnimplementedAmizoneServiceServer) GetUserProfile(context.Context, *EmptyMessage) (*Profile, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserProfile not implemented")
 }
@@ -270,9 +275,6 @@ func (UnimplementedAmizoneServiceServer) DeregisterWifiMac(context.Context, *Der
 }
 func (UnimplementedAmizoneServiceServer) FillFacultyFeedback(context.Context, *FillFacultyFeedbackRequest) (*FillFacultyFeedbackResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FillFacultyFeedback not implemented")
-}
-func (UnimplementedAmizoneServiceServer) GetAtpcPlacementDetails(context.Context, *EmptyMessage) (*AtpcPlacementDetails, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAtpcPlacementDetails not implemented")
 }
 func (UnimplementedAmizoneServiceServer) mustEmbedUnimplementedAmizoneServiceServer() {}
 
@@ -431,6 +433,24 @@ func _AmizoneService_GetCurrentExamResult_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AmizoneService_GetAtpcListings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EmptyMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AmizoneServiceServer).GetAtpcListings(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AmizoneService_GetAtpcListings_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AmizoneServiceServer).GetAtpcListings(ctx, req.(*EmptyMessage))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _AmizoneService_GetUserProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(EmptyMessage)
 	if err := dec(in); err != nil {
@@ -521,24 +541,6 @@ func _AmizoneService_FillFacultyFeedback_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AmizoneService_GetAtpcPlacementDetails_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(EmptyMessage)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AmizoneServiceServer).GetAtpcPlacementDetails(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: AmizoneService_GetAtpcPlacementDetails_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AmizoneServiceServer).GetAtpcPlacementDetails(ctx, req.(*EmptyMessage))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // AmizoneService_ServiceDesc is the grpc.ServiceDesc for AmizoneService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -579,6 +581,10 @@ var AmizoneService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AmizoneService_GetCurrentExamResult_Handler,
 		},
 		{
+			MethodName: "GetAtpcListings",
+			Handler:    _AmizoneService_GetAtpcListings_Handler,
+		},
+		{
 			MethodName: "GetUserProfile",
 			Handler:    _AmizoneService_GetUserProfile_Handler,
 		},
@@ -597,10 +603,6 @@ var AmizoneService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "FillFacultyFeedback",
 			Handler:    _AmizoneService_FillFacultyFeedback_Handler,
-		},
-		{
-			MethodName: "GetAtpcPlacementDetails",
-			Handler:    _AmizoneService_GetAtpcPlacementDetails_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
