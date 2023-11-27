@@ -98,18 +98,30 @@ service AmizoneService {
   rpc GetUserProfile(EmptyMessage) returns (Profile) {
     option (google.api.http) = {get: "/api/v1/user_profile"};
   }
+  // GetWifiMacInfo returns the user's registered MAC addresses.
   rpc GetWifiMacInfo(EmptyMessage) returns (WifiMacInfo) {
     option (google.api.http) = {get: "/api/v1/wifi_mac"};
   }
+  // RegisterWifiMac registers a MAC address to the user's account.
   rpc RegisterWifiMac(RegisterWifiMacRequest) returns (EmptyMessage) {
     option (google.api.http) = {
       post: "/api/v1/wifi_mac"
       body: "*"
     };
   }
+  // DeregsiterWifiMac removes a registered MAC address from the user's account.
   rpc DeregisterWifiMac(DeregisterWifiMacRequest) returns (EmptyMessage) {
     option (google.api.http) = {delete: "/api/v1/wifi_mac/{address}"};
   }
+  // FillFacultyFeedback submits faculty feedback.
+  //
+  // It does so by making a tradeoffs -- all faculty feedback is submitted at
+  // once and its identical for all of them.
+  //
+  // Parameters:
+  // - rating: The rating to submit for all faculty. These are ratings on a scale of 1-5.
+  // - query_rating: The rating to "query" type questions at the bottom of the feedback form.
+  //   These are ratings on a scale of 1-3.
   rpc FillFacultyFeedback(FillFacultyFeedbackRequest) returns (FillFacultyFeedbackResponse) {
     option (google.api.http) = {
       post: "/api/v1/faculty/feedback/submit",

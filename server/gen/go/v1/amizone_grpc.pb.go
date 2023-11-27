@@ -40,9 +40,21 @@ type AmizoneServiceClient interface {
 	GetCurrentExamResult(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*ExamResultRecords, error)
 	// GetUserProfile returns the user's profile.
 	GetUserProfile(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*Profile, error)
+	// GetWifiMacInfo returns the user's registered MAC addresses.
 	GetWifiMacInfo(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*WifiMacInfo, error)
+	// RegisterWifiMac registers a MAC address to the user's account.
 	RegisterWifiMac(ctx context.Context, in *RegisterWifiMacRequest, opts ...grpc.CallOption) (*EmptyMessage, error)
+	// DeregsiterWifiMac removes a registered MAC address from the user's account.
 	DeregisterWifiMac(ctx context.Context, in *DeregisterWifiMacRequest, opts ...grpc.CallOption) (*EmptyMessage, error)
+	// FillFacultyFeedback submits faculty feedback.
+	//
+	// It does so by making a tradeoffs -- all faculty feedback is submitted at
+	// once and its identical for all of them.
+	//
+	// Parameters:
+	//   - rating: The rating to submit for all faculty. These are ratings on a scale of 1-5.
+	//   - query_rating: The rating to "query" type questions at the bottom of the feedback form.
+	//     These are ratings on a scale of 1-3.
 	FillFacultyFeedback(ctx context.Context, in *FillFacultyFeedbackRequest, opts ...grpc.CallOption) (*FillFacultyFeedbackResponse, error)
 }
 
@@ -193,9 +205,21 @@ type AmizoneServiceServer interface {
 	GetCurrentExamResult(context.Context, *EmptyMessage) (*ExamResultRecords, error)
 	// GetUserProfile returns the user's profile.
 	GetUserProfile(context.Context, *EmptyMessage) (*Profile, error)
+	// GetWifiMacInfo returns the user's registered MAC addresses.
 	GetWifiMacInfo(context.Context, *EmptyMessage) (*WifiMacInfo, error)
+	// RegisterWifiMac registers a MAC address to the user's account.
 	RegisterWifiMac(context.Context, *RegisterWifiMacRequest) (*EmptyMessage, error)
+	// DeregsiterWifiMac removes a registered MAC address from the user's account.
 	DeregisterWifiMac(context.Context, *DeregisterWifiMacRequest) (*EmptyMessage, error)
+	// FillFacultyFeedback submits faculty feedback.
+	//
+	// It does so by making a tradeoffs -- all faculty feedback is submitted at
+	// once and its identical for all of them.
+	//
+	// Parameters:
+	//   - rating: The rating to submit for all faculty. These are ratings on a scale of 1-5.
+	//   - query_rating: The rating to "query" type questions at the bottom of the feedback form.
+	//     These are ratings on a scale of 1-3.
 	FillFacultyFeedback(context.Context, *FillFacultyFeedbackRequest) (*FillFacultyFeedbackResponse, error)
 	mustEmbedUnimplementedAmizoneServiceServer()
 }
