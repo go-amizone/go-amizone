@@ -1,5 +1,7 @@
 # go-amizone
 
+<img src="./assets/logo.png" width="200" height="200" align="right" alt="go-amizone logo" />
+
 ![Tests](https://img.shields.io/github/workflow/status/ditsuke/go-amizone/tests?label=tests&logo=github)
 [![Coverage Status](https://img.shields.io/coveralls/github/ditsuke/go-amizone?logo=coveralls)][coveralls]
 [![Go Report Card](https://goreportcard.com/badge/github.com/ditsuke/go-amizone?style=flat)][go-report-card]
@@ -65,19 +67,11 @@ about the language, reverse-engineering, and other cool stuff.
 Please read the [contribution guide](./CONTRIBUTING.md) for more information on how to get started.
 
 [monday-api]: https://github.com/0xSaurabh/monday-api
-
 [0xSaurabh]: https://github.com/0xSaurabh/
-
 [github]: https://github.com/ditsuke/amizone-go
-
 [issues]: https://github.com/ditsuke/amizone-go/issues
-
 [go-reference]: https://pkg.go.dev/github.com/ditsuke/go-amizone
-
 [coveralls]: https://coveralls.io/github/ditsuke/go-amizone?branch=main
-
 [go-report-card]: https://goreportcard.com/report/github.com/ditsuke/go-amizone
-
 [heroku]: https://www.heroku.com/
-
 [godocs.io]: https://godocs.io/github.com/ditsuke/go-amizone
