@@ -44,6 +44,10 @@ const (
 
 	facultyBaseEndpoint           = "/FacultyFeeback/FacultyFeedback"
 	facultyEndpointSubmitEndpoint = facultyBaseEndpoint + "/SaveFeedbackRating"
+
+	atpcPlacementEndpoint = "/Placement/PlacementDetails"
+	atpcInternshipEndpoint = atpcPlacementEndpoint + "/IntrenshipIndex";
+	atpcCorporateEventEndpoint = "/Placement/CorporatEvent"
 )
 
 // Miscellaneous
@@ -363,6 +367,54 @@ func (a *Client) GetCurrentCourses() (models.Courses, error) {
 	}
 
 	return models.Courses(courses), nil
+}
+
+// GetAtpcListings retrieves, parses and returns the ATPC placement, internship, and corporate event details from Amizone.
+func (a *Client) GetAtpcListings() (*models.AtpcListings, error) {
+	
+	corporateEventResponse, err := a.doRequest(true, http.MethodGet, atpcCorporateEventEndpoint, nil)
+	if err != nil {
+		klog.Warningf("request (atpc corporate event): %s", err.Error())
+		return nil, errors.New(ErrFailedToVisitPage)
+	}
+
+	corporateEventDetails, err := parse.AtpcDetails(corporateEventResponse.Body)
+	if err != nil {
+		klog.Errorf("parse (atpc corporate event): %s", err.Error())
+		return nil, fmt.Errorf("%s: %w", ErrInternalFailure, err)
+	}
+	placementResponse, err := a.doRequest(true, http.MethodGet, atpcPlacementEndpoint, nil)
+	if err != nil {
+		klog.Warningf("request (atpc placement): %s", err.Error())
+		return nil, errors.New(ErrFailedToVisitPage)
+	}
+
+	placementDetails, err := parse.AtpcDetails(placementResponse.Body)
+	if err != nil {
+		klog.Errorf("parse (atpc placement): %s", err.Error())
+		return nil, fmt.Errorf("%s: %w", ErrInternalFailure, err)
+	}
+
+	internshipResponse, err := a.doRequest(true, http.MethodGet, atpcInternshipEndpoint, nil)
+	if err != nil {
+		klog.Warningf("request (atpc internship): %s", err.Error())
+		return nil, errors.New(ErrFailedToVisitPage)
+	}
+
+	internshipDetails, err := parse.AtpcDetails(internshipResponse.Body)
+	if err != nil {
+		klog.Errorf("parse (atpc internship): %s", err.Error())
+		return nil, fmt.Errorf("%s: %w", ErrInternalFailure, err)
+	}
+	
+
+	details := models.AtpcListings{
+		Placement: placementDetails,
+		Internship: internshipDetails,
+		CorporateEvent: corporateEventDetails,
+	}
+
+	return &details, nil
 }
 
 // GetUserProfile retrieves, parsed and returns the current user's profile from Amizone.

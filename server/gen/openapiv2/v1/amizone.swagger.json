@@ -30,6 +30,33 @@
     "application/json"
   ],
   "paths": {
+    "/api/v1/atpc_listings": {
+      "get": {
+        "summary": "GetAtpcListings returns the placement, internship, and corporate event opportunities available under the ATPC section in amizone.",
+        "operationId": "AmizoneService_GetAtpcListings",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1AtpcListings"
+            }
+          },
+          "403": {
+            "description": "Returned when the user does not have permission to access the resource.",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "AmizoneService"
+        ]
+      }
+    },
     "/api/v1/attendance": {
       "get": {
         "operationId": "AmizoneService_GetAttendance",
@@ -498,6 +525,45 @@
       },
       "description": "* A full date, with non-zero year, month, and day values\n* A month and day value, with a zero year, such as an anniversary\n* A year on its own, with zero month and day values\n* A year and month value, with a zero day, such as a credit card expiration\ndate\n\nRelated types are [google.type.TimeOfDay][google.type.TimeOfDay] and\n`google.protobuf.Timestamp`.",
       "title": "Represents a whole or partial calendar date, such as a birthday. The time of\nday and time zone are either specified elsewhere or are insignificant. The\ndate is relative to the Gregorian Calendar. This can represent one of the\nfollowing:"
+    },
+    "v1AtpcEntry": {
+      "type": "object",
+      "properties": {
+        "company": {
+          "type": "string"
+        },
+        "regStartDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "regEndDate": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "v1AtpcListings": {
+      "type": "object",
+      "properties": {
+        "placement": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1AtpcEntry"
+          }
+        },
+        "internship": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1AtpcEntry"
+          }
+        },
+        "corporateEvent": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1AtpcEntry"
+          }
+        }
+      }
     },
     "v1Attendance": {
       "type": "object",
