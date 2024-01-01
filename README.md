@@ -2,7 +2,7 @@
 
 <img src="./assets/logo.png" width="200" height="200" align="right" alt="go-amizone logo" />
 
-![Tests](https://img.shields.io/github/workflow/status/ditsuke/go-amizone/tests?label=tests&logo=github)
+![Tests](https://img.shields.io/github/actions/workflow/status/ditsuke/go-amizone/ci.yml?label=tests&logo=github)
 [![Coverage Status](https://img.shields.io/coveralls/github/ditsuke/go-amizone?logo=coveralls)][coveralls]
 [![Go Report Card](https://goreportcard.com/badge/github.com/ditsuke/go-amizone?style=flat)][go-report-card]
 [![Go Reference](https://pkg.go.dev/badge/github.com/ditsuke/go-amizone.svg)][go-reference]
